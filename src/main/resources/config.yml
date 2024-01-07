@@ -1,0 +1,25 @@
+# LuckyItem
+# Developer: sieadev
+# Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
+
+database:
+  ip: ""
+  name: ""
+
+  user: ""
+  password: ""
+
+forceLink: false
+
+discord:
+    token: ""
+    guild: ""
+    channel: "" #
+    linkedRole: "" # Leave empty for non
+
+messages:
+  verifyJoin:
+    text: "Someone logged into your Account from a new Location(%ip%) at %time%"
+    footer: "If this wasn't you, change your Password immediately!"
+    VerifyButton: "Verify"
+    DenyButton: "Deny"
