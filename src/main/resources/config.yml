@@ -14,12 +14,24 @@ forceLink: false
 discord:
     token: ""
     guild: ""
-    channel: "" #
+    channel: "" # Link Message Channel
     linkedRole: "" # Leave empty for non
 
 messages:
-  verifyJoin:
+  verify:
     text: "Someone logged into your Account from a new Location(%ip%) at %time%"
     footer: "If this wasn't you, change your Password immediately!"
     VerifyButton: "Verify"
     DenyButton: "Deny"
+  verifyDenied: "Verification denied!"
+  verifySuccess: "You successfully verified your Account!"
+  alreadyLinked: "Your Account is already linked!"
+  link:
+    title: "Link your Account!"
+    text: "Want to make your Minecraft Account more secure? Link it with your Discord!"
+    footer: "Click the Button below to link your Account!"
+    linkButton: "Link"
+  codeMessage: "Your Verification Code is: %code%"
+  invalidCode: "§cInvalid Code!"
+  linkSuccess: "§aYou successfully linked your Account to %user%!"
+  noCode: "§cYou must provide a Code!"

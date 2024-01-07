@@ -2,6 +2,7 @@ package dev.siea.discord2fa.database;
 
 import dev.siea.discord2fa.database.models.Account;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.*;
@@ -32,38 +33,53 @@ public class Database {
     }
 
     public static Account findAccountByUUID(String uuid) throws SQLException{
-        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM PlayerFundData WHERE uuid = ?");
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM Accounts WHERE uuid = ?");
         statement.setString(1, uuid);
 
         ResultSet results = statement.executeQuery();
 
         if (results.next()){
-            int unlocked = results.getInt("amount");
-            PlayerFundData titleData = new PlayerFundData(uuid, unlocked);
+            String discordTag = results.getString("discordTag");
+            Account titleData = new Account(uuid, discordTag);
             statement.close();
             return titleData;
         }else{
             statement.close();
-            PlayerFundData afa = new PlayerFundData(uuid, 0);
-            createPlayerFundData(afa);
-            return afa;
+            return null;
         }
     }
 
-    public static void createAccount(Account data) throws SQLException{
+    public static Account findAccountByDiscordID(String id) throws SQLException {
+        PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM Accounts WHERE discordTag = ?");
+        statement.setString(1, id);
+
+        ResultSet results = statement.executeQuery();
+
+        if (results.next()){
+            String uuid = results.getString("uuid");
+            Account titleData = new Account(uuid, id);
+            statement.close();
+            return titleData;
+        }else{
+            statement.close();
+            return null;
+        }
+    }
+
+    public static void createAccount(String UUID, String discordID) throws SQLException{
         PreparedStatement statement = getConnection()
-                .prepareStatement("INSERT INTO PlayerFundData (uuid,amount) VALUES (?, ?)");
-        statement.setString(1, data.getPlayer().getUniqueId().toString());
-        statement.setInt(2, data.getAmount());
+                .prepareStatement("INSERT INTO Accounts (uuid,discordTag) VALUES (?, ?)");
+        statement.setString(1, UUID);
+        statement.setString(2, discordID);
         statement.executeUpdate();
         statement.close();
     }
 
     public static void updateAccountByUUID(Account data) throws SQLException{
         PreparedStatement statement = getConnection()
-                .prepareStatement("UPDATE PlayerFundData SET amount = ? WHERE uuid = ?");
-        statement.setInt(1, data.getAmount());
-        statement.setString(2, data.getPlayer().getUniqueId().toString());
+                .prepareStatement("UPDATE Accounts SET discordTag = ? WHERE uuid = ?");
+        statement.setString(1, data.getDiscordID());
+        statement.setString(2, data.getMinecraftUUID());
         statement.executeUpdate();
         statement.close();
     }
@@ -103,7 +119,7 @@ public class Database {
         Connection connection = getConnection();
         // CREATE && LOAD Accounts-TABLE
         Statement statementTitleTable = connection.createStatement();
-        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, amount int(255))";
+        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, discordTag varchar(18))";
         statementTitleTable.execute(sqlPlayerFundDataTable);
         statementTitleTable.close();
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts table was loaded successfully");

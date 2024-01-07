@@ -2,10 +2,12 @@ package dev.siea.discord2fa;
 
 import dev.siea.discord2fa.database.Database;
 import dev.siea.discord2fa.discord.DiscordBot;
+import dev.siea.discord2fa.manager.VerifyManager;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.security.auth.login.LoginException;
+import java.sql.SQLException;
 
 public final class Discord2FA extends JavaPlugin {
 
@@ -30,12 +32,16 @@ public final class Discord2FA extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        getServer().getPluginManager().registerEvents(new VerifyManager(), this);
         
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        try {
+            Database.onDisable();
+        } catch (SQLException ignore) {
+        }
     }
     
     public static DiscordBot getDiscordBot() {
