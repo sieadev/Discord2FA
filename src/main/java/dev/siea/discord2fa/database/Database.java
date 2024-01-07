@@ -1,5 +1,6 @@
 package dev.siea.discord2fa.database;
 
+import dev.siea.discord2fa.database.models.Account;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 
@@ -30,7 +31,7 @@ public class Database {
         return connection;
     }
 
-    public static PlayerFundData findPlayerFundDataByUUID(String uuid) throws SQLException{
+    public static Account findAccountByUUID(String uuid) throws SQLException{
         PreparedStatement statement = getConnection().prepareStatement("SELECT * FROM PlayerFundData WHERE uuid = ?");
         statement.setString(1, uuid);
 
@@ -49,7 +50,7 @@ public class Database {
         }
     }
 
-    public static void createPlayerFundData(PlayerFundData data) throws SQLException{
+    public static void createAccount(Account data) throws SQLException{
         PreparedStatement statement = getConnection()
                 .prepareStatement("INSERT INTO PlayerFundData (uuid,amount) VALUES (?, ?)");
         statement.setString(1, data.getPlayer().getUniqueId().toString());
@@ -58,7 +59,7 @@ public class Database {
         statement.close();
     }
 
-    public static void updatePlayerFundData(PlayerFundData data) throws SQLException{
+    public static void updateAccountByUUID(Account data) throws SQLException{
         PreparedStatement statement = getConnection()
                 .prepareStatement("UPDATE PlayerFundData SET amount = ? WHERE uuid = ?");
         statement.setInt(1, data.getAmount());
@@ -79,7 +80,6 @@ public class Database {
             if (connection != null && (currentTime - lastConnectionTime) > IDLE_TIMEOUT) {
                 try {
                     destroyConnection();
-                    getServer().getPluginManager().disablePlugin(CosmicFundsRemake.getPlugin());
                     getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Connection to the Database is being stopped.");
                     establishConnection();
                 } catch (SQLException e) {
@@ -96,38 +96,21 @@ public class Database {
 
     private static void establishConnection ()throws SQLException{
         connection = DriverManager.getConnection(url, user, psw);
-        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Successfully connected to Database");
+        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts connected to Database");
     }
 
     private static void createTables() throws SQLException{
         Connection connection = getConnection();
-        // CREATE && LOAD FUND-TABLE
+        // CREATE && LOAD Accounts-TABLE
         Statement statementTitleTable = connection.createStatement();
-        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS PlayerFundData(uuid varchar(36) primary key, amount int(255))";
+        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, amount int(255))";
         statementTitleTable.execute(sqlPlayerFundDataTable);
         statementTitleTable.close();
-        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] PlayerFundData table was loaded successfully");
+        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts table was loaded successfully");
     }
 
     private static void destroyConnection() throws SQLException{
         connection.close();
-    }
-
-    public static int getPlanetFundAmount() {
-        try {
-            PreparedStatement statement = getConnection().prepareStatement("SELECT SUM(amount) AS totalAmount FROM PlayerFundData");
-            ResultSet results = statement.executeQuery();
-            if (results.next()) {
-                int totalAmount = results.getInt("totalAmount");
-                statement.close();
-                return totalAmount;
-            } else {
-                statement.close();
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
 
