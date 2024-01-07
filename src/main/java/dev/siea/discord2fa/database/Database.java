@@ -2,7 +2,6 @@ package dev.siea.discord2fa.database;
 
 import dev.siea.discord2fa.database.models.Account;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.*;
@@ -40,7 +39,7 @@ public class Database {
 
         if (results.next()){
             String discordTag = results.getString("discordTag");
-            Account titleData = new Account(uuid, discordTag);
+            Account titleData = new Account(discordTag, uuid);
             statement.close();
             return titleData;
         }else{
@@ -57,7 +56,7 @@ public class Database {
 
         if (results.next()){
             String uuid = results.getString("uuid");
-            Account titleData = new Account(uuid, id);
+            Account titleData = new Account(id, uuid);
             statement.close();
             return titleData;
         }else{
@@ -85,11 +84,11 @@ public class Database {
     }
 
     public static void onEnable(Plugin p) throws SQLException{
-        String ip = p.getConfig().getString("ip");
-        name = p.getConfig().getString("name");
+        String ip = p.getConfig().getString("database.ip");
+        name = p.getConfig().getString("database.name");
         url = "jdbc:mysql://" + ip + "/" + name;
-        user = p.getConfig().getString("user");
-        psw = p.getConfig().getString("password");
+        user = p.getConfig().getString("database.user");
+        psw = p.getConfig().getString("database.password");
         createTables();
         executorService.scheduleWithFixedDelay(() -> {
             long currentTime = System.currentTimeMillis();
@@ -119,7 +118,7 @@ public class Database {
         Connection connection = getConnection();
         // CREATE && LOAD Accounts-TABLE
         Statement statementTitleTable = connection.createStatement();
-        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, discordTag varchar(18))";
+        String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, discordTag varchar(25))";
         statementTitleTable.execute(sqlPlayerFundDataTable);
         statementTitleTable.close();
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts table was loaded successfully");

@@ -1,5 +1,6 @@
 package dev.siea.discord2fa;
 
+import dev.siea.discord2fa.commands.LinkCommand;
 import dev.siea.discord2fa.database.Database;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
@@ -33,11 +34,13 @@ public final class Discord2FA extends JavaPlugin {
             return;
         }
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
+        getCommand("link").setExecutor(new LinkCommand());
         
     }
 
     @Override
     public void onDisable() {
+        DiscordBot.shutdown();
         try {
             Database.onDisable();
         } catch (SQLException ignore) {

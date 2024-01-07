@@ -9,17 +9,15 @@ database:
   user: ""
   password: ""
 
-forceLink: false
-
 discord:
     token: ""
     guild: ""
     channel: "" # Link Message Channel
-    linkedRole: "" # Leave empty for non
 
 messages:
   verify:
-    text: "Someone logged into your Account from a new Location(%ip%) at %time%"
+    title: "Verify Login"
+    text: "Someone logged into your Account from a new Location(%ip%)"
     footer: "If this wasn't you, change your Password immediately!"
     VerifyButton: "Verify"
     DenyButton: "Deny"
@@ -32,6 +30,8 @@ messages:
     footer: "Click the Button below to link your Account!"
     linkButton: "Link"
   codeMessage: "Your Verification Code is: %code%"
-  invalidCode: "§cInvalid Code!"
-  linkSuccess: "§aYou successfully linked your Account to %user%!"
-  noCode: "§cYou must provide a Code!"
+  invalidCode: "&cInvalid Code!"
+  linkSuccess: "&aYou successfully linked your Account"
+  noCode: "&cYou must provide a Code!"
+  verifyTitle: "Verify your Account!"
+  alreadyLinking: "You already been send a Verification Code!"

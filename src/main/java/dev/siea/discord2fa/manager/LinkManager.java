@@ -24,10 +24,14 @@ public class LinkManager {
                 AccountUtil.linkAccount(player, member.getId());
                 player.sendMessage(linkSuccess.replace("%member%", member.getEffectiveName()));
             } catch (SQLException e) {
-                player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!");
+                player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage());
             }
         } else {
            player.sendMessage(invalidCode);
         }
+    }
+
+    public static HashMap<String, Member> getLinking() {
+        return linking;
     }
 }

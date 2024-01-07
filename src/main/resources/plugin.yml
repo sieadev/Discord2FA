@@ -3,3 +3,8 @@ version: '${project.version}'
 main: dev.siea.discord2fa.Discord2FA
 api-version: '1.19'
 load: STARTUP
+commands:
+    link:
+        description: Link your Account with Discord
+        usage: §c/link <code>
+        aliases: [2fa]

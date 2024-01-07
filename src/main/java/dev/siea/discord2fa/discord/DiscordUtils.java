@@ -2,11 +2,12 @@ package dev.siea.discord2fa.discord;
 
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.database.AccountUtil;
+import dev.siea.discord2fa.database.Database;
 import dev.siea.discord2fa.database.models.Account;
 import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,52 +17,63 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.security.SecureRandom;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class DiscordUtils extends ListenerAdapter {
-    private static final ShardManager shardManager = Discord2FA.getDiscordBot().getShardManager();
+    private static final ShardManager shardManager = DiscordBot.getShardManager();
     private static final TextChannel channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
     private static final String codeMessage = Discord2FA.getPlugin().getConfig().getString("messages.codeMessage");
+    private static final String alreadyLinking = Discord2FA.getPlugin().getConfig().getString("messages.alreadyLinking");
+
     public DiscordUtils() {
     }
 
     public static void init() {
         Plugin plugin = Discord2FA.getPlugin();
-        String title = plugin.getConfig().getString("Messages.link.title");
-        String text = plugin.getConfig().getString("Messages.link.text");
-        String footer = plugin.getConfig().getString("Messages.link.footer");
-        String button = plugin.getConfig().getString("Messages.link.linkButton");
-        sendVerifyMessage(title, text, footer, button);
+        String title = plugin.getConfig().getString("messages.link.title");
+        String text = plugin.getConfig().getString("messages.link.text");
+        String footer = plugin.getConfig().getString("messages.link.footer");
+        String button = plugin.getConfig().getString("messages.link.linkButton");
+        sendLinkMessage(title, text, footer, button);
     }
 
-    private static void sendVerifyMessage(String title, String text, String footer, String button) {
+    private static void sendLinkMessage(String title, String text, String footer, String button) {
+        assert channel != null;
+        channel.purgeMessages(channel.getHistory().retrievePast(100).complete());
         if (title == null) {
-            title = "Verify";
+            title = "Link your account!";
         }
         if (text == null) {
-            text = "Click the button below to verify your account!";
+            text = "Click the button below to Link your account!";
         }
         if (footer == null) {
             footer = "Discord2FA";
         }
         if (button == null) {
-            button = "Verify";
+            button = "Link";
         }
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(text);
         embedBuilder.setFooter(footer);
-        assert channel != null;
         channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                Button.success("verify", button))
+                Button.success("link", button))
                 .queue();
         ;
     }
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (event.getComponentId().equals("verify")) {
+        if (event.getComponentId().equals("link")) {
             event.deferEdit().queue();
+            if (LinkManager.getLinking().containsValue(event.getMember())) {
+                event.getUser().openPrivateChannel().queue(privateChannel -> {
+                    assert alreadyLinking != null;
+                    privateChannel.sendMessage(alreadyLinking).queue();
+                });
+                return;
+            }
             Objects.requireNonNull(event.getMember()).getUser().openPrivateChannel().queue(privateChannel -> {
                 if (AccountUtil.isLinkedByDiscord(event.getMember())) {
                     privateChannel.sendMessage("You are already linked!").queue();
@@ -73,6 +85,31 @@ public class DiscordUtils extends ListenerAdapter {
                 privateChannel.sendMessage(message).queue();
                 LinkManager.queLink(event.getMember(), code);
             });
+        }
+        if (event.getComponentId().equals("accept")) {
+            event.deferEdit().queue();
+            try {
+                Account account = Database.findAccountByDiscordID(event.getUser().getId());
+                if (account == null) {
+                    event.getUser().openPrivateChannel().queue(privateChannel -> {
+                        privateChannel.sendMessage("Unable to find Account Information...").queue();
+                    });
+                    return;
+                }
+                VerifyManager.verifying((Player) account.getPlayer(), true);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (event.getComponentId().equals("deny")) {
+            event.deferEdit().queue();
+            try {
+                Account account = Database.findAccountByDiscordID(event.getUser().getId());
+                assert account != null;
+                VerifyManager.verifying((Player) account.getPlayer(), false);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -90,25 +127,34 @@ public class DiscordUtils extends ListenerAdapter {
         return code.toString();
     }
 
-    public static void sendVerify(Account account){
-        String title = Discord2FA.getPlugin().getConfig().getString("Messages.verify.title");
-        String text = Discord2FA.getPlugin().getConfig().getString("Messages.verify.text");
-        String footer = Discord2FA.getPlugin().getConfig().getString("Messages.verify.footer");
-        String button1 = Discord2FA.getPlugin().getConfig().getString("Messages.verify.button1");
-        String button2 = Discord2FA.getPlugin().getConfig().getString("Messages.verify.button2");
-        Member member = (Member) account.getUser();
-        assert member != null;
-        member.getUser().openPrivateChannel().queue(privateChannel -> {
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle(title);
-            embedBuilder.setDescription(text);
-            embedBuilder.setFooter(footer);
-            privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                    Button.success("verify", button1),
-                    Button.danger("deny", button2))
-                    .queue();
-            ;
-        });
+    public static void sendVerify(Account account, String ip){
+        String title = Discord2FA.getPlugin().getConfig().getString("messages.verify.title").replace("%ip%", ip);
+        String text = Discord2FA.getPlugin().getConfig().getString("messages.verify.text").replace("%ip%", ip);
+        String footer = Discord2FA.getPlugin().getConfig().getString("messages.verify.footer").replace("%ip%", ip);
+        String button1 = Discord2FA.getPlugin().getConfig().getString("messages.verify.VerifyButton").replace("%ip%", ip);
+        String button2 = Discord2FA.getPlugin().getConfig().getString("messages.verify.DenyButton").replace("%ip%", ip);
+
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle(title);
+        embedBuilder.setDescription(text);
+        embedBuilder.setFooter(footer);
+
+        User user = account.getUser();
+
+        if (user != null) {
+            user.openPrivateChannel().queue(privateChannel -> {
+                privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                                Button.success("accept", button1),
+                                Button.danger("deny", button2))
+                        .queue();
+            });
+        }
+
+        else {
+            System.out.println("User is null");
+            System.out.println("ID: \"" + account.getDiscordID() + "\"");
+        }
     }
 
 

@@ -12,21 +12,27 @@ import org.bukkit.plugin.Plugin;
 import javax.security.auth.login.LoginException;
 
 public class DiscordBot extends ListenerAdapter {
-    private final ShardManager shardManager;
+    private static ShardManager shardManager;
     public DiscordBot(Plugin plugin) throws LoginException {
-        String token = plugin.getConfig().getString("Discord.token");
+        String token = plugin.getConfig().getString("discord.token");
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT).enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.setStatus(OnlineStatus.ONLINE);
         shardManager = builder.build();
-        shardManager.addEventListener(new DiscordUtils());
+        shardManager.addEventListener(this);
     }
 
     @Override
     public void onGuildReady(GuildReadyEvent event) {
+        shardManager.addEventListener(new DiscordUtils());
         DiscordUtils.init();
         Discord2FA.getPlugin().getLogger().info("Discord Bot is ready!");
     }
-    public ShardManager getShardManager() {
+
+    public static ShardManager getShardManager() {
         return shardManager;
+    }
+
+    public static void shutdown() {
+        shardManager.shutdown();
     }
 }
