@@ -1,0 +1,5 @@
+name: Discord2FA
+version: '${project.version}'
+main: dev.siea.discord2fa.Discord2FA
+api-version: '1.19'
+load: STARTUP
