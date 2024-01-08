@@ -8,3 +8,6 @@ commands:
         description: Link your Account with Discord
         usage: §c/link <code>
         aliases: [2fa]
+    unlink:
+        description: Unlink your Account from Discord
+        usage: §c/unlink

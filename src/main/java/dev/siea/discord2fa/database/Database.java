@@ -1,5 +1,6 @@
 package dev.siea.discord2fa.database;
 
+import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.database.models.Account;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
@@ -79,6 +80,14 @@ public class Database {
                 .prepareStatement("UPDATE Accounts SET discordTag = ? WHERE uuid = ?");
         statement.setString(1, data.getDiscordID());
         statement.setString(2, data.getMinecraftUUID());
+        statement.executeUpdate();
+        statement.close();
+    }
+
+    public static void deleteAccount(String toString) throws SQLException {
+        PreparedStatement statement = getConnection()
+                .prepareStatement("DELETE FROM Accounts WHERE uuid = ?");
+        statement.setString(1, toString);
         statement.executeUpdate();
         statement.close();
     }

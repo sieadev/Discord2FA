@@ -35,7 +35,7 @@ public class VerifyManager implements Listener {
     public static void onPlayerJoin(PlayerJoinEvent e){
         if(AccountUtil.isLinked(e.getPlayer())){
             verifyingPlayers.add(e.getPlayer());
-            e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+            e.getPlayer().sendTitle(verifyTitle,"", 0, 70, 20);
             try {
                 Account account = Database.findAccountByUUID(e.getPlayer().getUniqueId().toString());
                 assert account != null;
@@ -97,5 +97,7 @@ public class VerifyManager implements Listener {
         });
     }
 
-
+    public static boolean isVerifying(Player player){
+        return verifyingPlayers.contains(player);
+    }
 }

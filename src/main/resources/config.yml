@@ -2,6 +2,8 @@
 # Developer: sieadev
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
+license: ""
+
 database:
   ip: ""
   name: ""
@@ -35,3 +37,5 @@ messages:
   noCode: "&cYou must provide a Code!"
   verifyTitle: "Verify your Account!"
   alreadyLinking: "You already been send a Verification Code!"
+  notLinked: "You are not linked!"
+  unlinkSuccess: "You successfully unlinked your Account!"

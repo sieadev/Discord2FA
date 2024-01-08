@@ -34,4 +34,8 @@ public class LinkManager {
     public static HashMap<String, Member> getLinking() {
         return linking;
     }
+
+    public static void unlink(Player player) {
+        AccountUtil.unlinkAccount(player);
+    }
 }

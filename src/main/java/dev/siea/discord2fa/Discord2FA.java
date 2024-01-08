@@ -1,6 +1,7 @@
 package dev.siea.discord2fa;
 
 import dev.siea.discord2fa.commands.LinkCommand;
+import dev.siea.discord2fa.commands.UnlinkCommand;
 import dev.siea.discord2fa.database.Database;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
@@ -14,11 +15,13 @@ public final class Discord2FA extends JavaPlugin {
 
     private static DiscordBot discordBot;
     private static Plugin plugin;
+    private static boolean validLicense = false;
 
     @Override
     public void onEnable() {
         plugin = this;
         saveDefaultConfig();
+        loadConfig();
         try {
             discordBot = new DiscordBot(this);
         } catch (LoginException e) {
@@ -35,7 +38,7 @@ public final class Discord2FA extends JavaPlugin {
         }
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
         getCommand("link").setExecutor(new LinkCommand());
-        
+        getCommand("unlink").setExecutor(new UnlinkCommand());
     }
 
     @Override
@@ -53,5 +56,13 @@ public final class Discord2FA extends JavaPlugin {
     
     public static Plugin getPlugin() {
         return plugin;
+    }
+
+    private void loadConfig() {
+        if (!validLicense) {
+            getLogger().severe(String.format("[%s] - Disabled due to invalid license!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
     }
 }

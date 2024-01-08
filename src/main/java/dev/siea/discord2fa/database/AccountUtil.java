@@ -25,4 +25,12 @@ public class AccountUtil {
             return false;
         }
     }
+
+    public static void unlinkAccount(Player player) {
+        try {
+            Database.deleteAccount(player.getUniqueId().toString());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
