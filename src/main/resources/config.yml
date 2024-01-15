@@ -1,8 +1,8 @@
-# LuckyItem
+# Discord2FA - A Minecraft Plugin to secure your Account with Discord!
 # Developer: sieadev
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
-license: ""
+license: "5b5c6549-4507-462d-a557-242a2d97eb01"
 
 database:
   ip: ""

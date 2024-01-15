@@ -104,7 +104,6 @@ public class Database {
             if (connection != null && (currentTime - lastConnectionTime) > IDLE_TIMEOUT) {
                 try {
                     destroyConnection();
-                    getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Connection to the Database is being stopped.");
                     establishConnection();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -120,7 +119,6 @@ public class Database {
 
     private static void establishConnection ()throws SQLException{
         connection = DriverManager.getConnection(url, user, psw);
-        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts connected to Database");
     }
 
     private static void createTables() throws SQLException{
@@ -130,7 +128,8 @@ public class Database {
         String sqlPlayerFundDataTable = "CREATE TABLE IF NOT EXISTS Accounts(uuid varchar(36) primary key, discordTag varchar(25))";
         statementTitleTable.execute(sqlPlayerFundDataTable);
         statementTitleTable.close();
-        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts table was loaded successfully");
+
+        getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "[DB] Accounts loaded");
     }
 
     private static void destroyConnection() throws SQLException{
