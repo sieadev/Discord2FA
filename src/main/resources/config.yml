@@ -39,3 +39,5 @@ messages:
   alreadyLinking: "You already been send a Verification Code!"
   notLinked: "You are not linked!"
   unlinkSuccess: "You successfully unlinked your Account!"
+  acceptMessage: "You accepted the Verification!"
+  denyMessage: "You denied the Verification!"

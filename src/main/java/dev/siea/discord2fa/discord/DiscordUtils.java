@@ -25,6 +25,8 @@ public class DiscordUtils extends ListenerAdapter {
     private static final TextChannel channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
     private static final String codeMessage = Discord2FA.getPlugin().getConfig().getString("messages.codeMessage");
     private static final String alreadyLinking = Discord2FA.getPlugin().getConfig().getString("messages.alreadyLinking");
+    private static final String acceptMessage = Discord2FA.getPlugin().getConfig().getString("messages.acceptMessage");
+    private static final String denyMessage = Discord2FA.getPlugin().getConfig().getString("messages.denyMessage");
 
     public DiscordUtils() {
     }
@@ -87,29 +89,39 @@ public class DiscordUtils extends ListenerAdapter {
             });
         }
         if (event.getComponentId().equals("accept")) {
-            event.deferEdit().queue();
             try {
                 Account account = Database.findAccountByDiscordID(event.getUser().getId());
                 if (account == null) {
                     event.getUser().openPrivateChannel().queue(privateChannel -> {
-                        privateChannel.sendMessage("Unable to find Account Information...").queue();
+                        event.reply("Unable to find Account Information...").queue();
                     });
                     return;
                 }
+                assert acceptMessage != null;
+                event.reply(acceptMessage).queue();
                 VerifyManager.verifying((Player) account.getPlayer(), true);
+
             } catch (SQLException e) {
+                event.reply("Unable to find Account Information...").queue();
                 throw new RuntimeException(e);
             }
         }
         if (event.getComponentId().equals("deny")) {
-            event.deferEdit().queue();
             try {
                 Account account = Database.findAccountByDiscordID(event.getUser().getId());
-                assert account != null;
+                if (account == null) {
+                    event.getUser().openPrivateChannel().queue(privateChannel -> {
+                        event.reply("Unable to find Account Information...").queue();
+                    });
+                    return;
+                }
                 VerifyManager.verifying((Player) account.getPlayer(), false);
             } catch (SQLException e) {
+                event.reply("Unable to find Account Information...").queue();
                 throw new RuntimeException(e);
             }
+            assert denyMessage != null;
+            event.reply(denyMessage).queue();
         }
     }
 
@@ -128,11 +140,11 @@ public class DiscordUtils extends ListenerAdapter {
     }
 
     public static void sendVerify(Account account, String ip){
-        String title = Discord2FA.getPlugin().getConfig().getString("messages.verify.title").replace("%ip%", ip);
-        String text = Discord2FA.getPlugin().getConfig().getString("messages.verify.text").replace("%ip%", ip);
-        String footer = Discord2FA.getPlugin().getConfig().getString("messages.verify.footer").replace("%ip%", ip);
-        String button1 = Discord2FA.getPlugin().getConfig().getString("messages.verify.VerifyButton").replace("%ip%", ip);
-        String button2 = Discord2FA.getPlugin().getConfig().getString("messages.verify.DenyButton").replace("%ip%", ip);
+        String title = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verify.title")).replace("%ip%", ip);
+        String text = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verify.text")).replace("%ip%", ip);
+        String footer = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verify.footer")).replace("%ip%", ip);
+        String button1 = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verify.VerifyButton")).replace("%ip%", ip);
+        String button2 = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verify.DenyButton")).replace("%ip%", ip);
 
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
