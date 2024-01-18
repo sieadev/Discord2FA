@@ -3,9 +3,11 @@
 ## Overview
 Discord 2FA is a powerful Minecraft plugin designed to enhance the security of your Minecraft server by integrating two-factor authentication (2FA) with Discord accounts. This plugin adds an additional layer of protection to your server, ensuring that only authorized users can access it.
 
+![Verification Prompt](https://storage.ko-fi.com/cdn/useruploads/display/020df259-29b7-42f7-af78-1da95d49e4c8_verify.png)
+
 ## Support the Project
 
-If you find Discord 2FA helpful and would like to support its development, consider buying us a coffee on Ko-fi!
+If you find Discord 2FA helpful and would like to support its development, consider buying me a coffee on Ko-fi!
 
 [![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-Donate%20now-orange.svg)](https://ko-fi.com/sieadev)
 
@@ -52,5 +54,11 @@ discord:
 - Telegram [@sieadev](t.me/sieadev)
 
 Project Link: https://github.com/sieadev/Discord2FA
+
+
+### Fun fact
+Md approved this plugin!
+
+![MD_Approved](https://storage.ko-fi.com/cdn/useruploads/display/cf23a2d8-9690-4742-ad1a-b56627b46cd6_hhgpkrp.png)
 
 
