@@ -56,3 +56,8 @@ discord:
 Project Link: https://github.com/sieadev/Discord2FA
 
 
+### Fun fact
+Md approved this plugin!
+![MD_Approved](https://imgur.com/HhGPKrP)
+
+
