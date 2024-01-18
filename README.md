@@ -5,7 +5,7 @@ Discord 2FA is a powerful Minecraft plugin designed to enhance the security of y
 
 ## Support the Project
 
-If you find Discord 2FA helpful and would like to support its development, consider buying us a coffee on Ko-fi!
+If you find Discord 2FA helpful and would like to support its development, consider buying me a coffee on Ko-fi!
 
 [![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-Donate%20now-orange.svg)](https://ko-fi.com/sieadev)
 
