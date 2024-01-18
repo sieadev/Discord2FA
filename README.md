@@ -1,8 +1,14 @@
 # Discord 2FA 
 <html>
 <section id="kofiframe" > 
-		<br>
-		<br>
-		<iframe src='https://ko-fi.com/sieadev/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:4px;background:#f9f9f900;' height='712' title='sieadev'></iframe>
+		<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+		<script>
+		kofiWidgetOverlay.draw('sieadev', {
+			'type': 'floating-chat',
+			'floating-chat.donateButton.text': 'Support me',
+			'floating-chat.donateButton.background-color': '#794bc4',
+			'floating-chat.donateButton.text-color': '#fff'
+		});
+		</script>
 	</section>
 </html>
