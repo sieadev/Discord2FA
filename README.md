@@ -25,6 +25,21 @@ Your support helps me continue to improve and maintain this plugin. Thank you fo
 ```Tailor the 2FA settings to suit your server's specific needs. Adjust verification, customize messages, and more.```
 
 
+## Config
+```
+database:
+  IP: "1.1.1.1" <- Your databases IP
+  name: "exampleBase" <- Your database name
+
+  user: "exampleUser" <- Your Database user
+  password: "examplePassword" <- Your Database password
+
+discord:
+    token: "1233456789" <- Your Discord Bots token
+    guild: "98765421" <- Your Guild ID
+    channel: "1233456789" # <- This Channel will hold the 'Link' Embed
+```
+
 ## Author
 
 - [@sieadev](https://www.github.com/sieadev)
