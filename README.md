@@ -37,15 +37,19 @@ database:
 discord:
     token: "1233456789" <- Your Discord Bots token
     guild: "98765421" <- Your Guild ID
-    channel: "1233456789" # <- This Channel will hold the 'Link' Embed
+    channel: "1233456789" <- This Channel will hold the 'Link' Embed
 ```
 
-## Author
+## Additional Info
 
-- [@sieadev](https://www.github.com/sieadev)
+#### Author : [@sieadev](https://www.github.com/sieadev)
 
-## Contact
-- Discord [@siea](dsc.gg/siea)
+#### Version : 1.2
 
-Feel free to contact me through Discord if you have any questions, suggestions, or feedback
+#### Contact
+- Discord [@sieadev](dsc.gg/siea)
+- E-Mail contact@siea.dev
+- Telegram [@sieadev](t.me/sieadev)
+Project Link: https://github.com/sieadev/Discord2FA
+
 
