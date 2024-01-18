@@ -7,11 +7,12 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class LinkManager {
-    private static String invalidCode = Discord2FA.getPlugin().getConfig().getString("messages.invalidCode").replace("&", "§");
-    private static String linkSuccess = Discord2FA.getPlugin().getConfig().getString("messages.linkSuccess").replace("&", "§");
-    private static HashMap<String, Member> linking = new HashMap<>();
+    private static final String invalidCode = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.invalidCode")).replace("&", "§");
+    private static final String linkSuccess = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.linkSuccess")).replace("&", "§");
+    private static final HashMap<String, Member> linking = new HashMap<>();
     public static void queLink(Member member, String code) {
         linking.put(code, member);
     }

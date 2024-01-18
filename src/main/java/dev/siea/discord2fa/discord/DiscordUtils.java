@@ -62,7 +62,6 @@ public class DiscordUtils extends ListenerAdapter {
         channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
                 Button.success("link", button))
                 .queue();
-        ;
     }
 
     @Override
@@ -92,9 +91,7 @@ public class DiscordUtils extends ListenerAdapter {
             try {
                 Account account = Database.findAccountByDiscordID(event.getUser().getId());
                 if (account == null) {
-                    event.getUser().openPrivateChannel().queue(privateChannel -> {
-                        event.reply("Unable to find Account Information...").queue();
-                    });
+                    event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
                     return;
                 }
                 assert acceptMessage != null;
@@ -110,9 +107,7 @@ public class DiscordUtils extends ListenerAdapter {
             try {
                 Account account = Database.findAccountByDiscordID(event.getUser().getId());
                 if (account == null) {
-                    event.getUser().openPrivateChannel().queue(privateChannel -> {
-                        event.reply("Unable to find Account Information...").queue();
-                    });
+                    event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
                     return;
                 }
                 VerifyManager.verifying((Player) account.getPlayer(), false);
@@ -155,12 +150,10 @@ public class DiscordUtils extends ListenerAdapter {
         User user = account.getUser();
 
         if (user != null) {
-            user.openPrivateChannel().queue(privateChannel -> {
-                privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                                Button.success("accept", button1),
-                                Button.danger("deny", button2))
-                        .queue();
-            });
+            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                            Button.success("accept", button1),
+                            Button.danger("deny", button2))
+                    .queue());
         }
 
         else {

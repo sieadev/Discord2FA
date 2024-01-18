@@ -1,6 +1,5 @@
 package dev.siea.discord2fa.database;
 
-import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.database.models.Account;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
@@ -16,11 +15,10 @@ public class Database {
     private static String url;
     private static String user;
     private static String psw;
-    private static String name;
     private static Connection connection;
     private static final long IDLE_TIMEOUT = 1800000; // 1 minute in milliseconds
     private static long lastConnectionTime = System.currentTimeMillis();
-    private static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     public static Connection getConnection() throws SQLException {
         long currentTime = System.currentTimeMillis();
@@ -75,15 +73,6 @@ public class Database {
         statement.close();
     }
 
-    public static void updateAccountByUUID(Account data) throws SQLException{
-        PreparedStatement statement = getConnection()
-                .prepareStatement("UPDATE Accounts SET discordTag = ? WHERE uuid = ?");
-        statement.setString(1, data.getDiscordID());
-        statement.setString(2, data.getMinecraftUUID());
-        statement.executeUpdate();
-        statement.close();
-    }
-
     public static void deleteAccount(String toString) throws SQLException {
         PreparedStatement statement = getConnection()
                 .prepareStatement("DELETE FROM Accounts WHERE uuid = ?");
@@ -94,7 +83,7 @@ public class Database {
 
     public static void onEnable(Plugin p) throws SQLException{
         String ip = p.getConfig().getString("database.ip");
-        name = p.getConfig().getString("database.name");
+        String name = p.getConfig().getString("database.name");
         url = "jdbc:mysql://" + ip + "/" + name;
         user = p.getConfig().getString("database.user");
         psw = p.getConfig().getString("database.password");

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class Account {
     private final String discordID;
-    private User user;
+    private final User user;
     private final OfflinePlayer player;
     public Account(String discordID, String minecraftUUID) {
         this.user = DiscordBot.getShardManager().retrieveUserById(discordID).complete();
@@ -22,10 +22,6 @@ public class Account {
 
     public User getUser() {
         return user;
-    }
-
-    public String getMinecraftUUID() {
-        return player.getUniqueId().toString();
     }
 
     public OfflinePlayer getPlayer() {

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 
@@ -22,7 +23,7 @@ public class DiscordBot extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildReady(GuildReadyEvent event) {
+    public void onGuildReady(@NotNull GuildReadyEvent event) {
         shardManager.addEventListener(new DiscordUtils());
         DiscordUtils.init();
         Discord2FA.getPlugin().getLogger().info("Discord Bot is ready!");

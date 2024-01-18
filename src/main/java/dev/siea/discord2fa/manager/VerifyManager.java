@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class VerifyManager implements Listener {
-    private static List<Player> verifyingPlayers = new ArrayList<>();
+    private static final List<Player> verifyingPlayers = new ArrayList<>();
     private static String verifyDenied;
     private static String verifySuccess;
     private static final String verifyTitle = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifyTitle")).replace("&", "§");
@@ -39,7 +39,7 @@ public class VerifyManager implements Listener {
             try {
                 Account account = Database.findAccountByUUID(e.getPlayer().getUniqueId().toString());
                 assert account != null;
-                DiscordUtils.sendVerify(account, e.getPlayer().getAddress().getAddress().getHostAddress());
+                DiscordUtils.sendVerify(account, Objects.requireNonNull(e.getPlayer().getAddress()).getAddress().getHostAddress());
             } catch (SQLException ignore) {
             }
         }
@@ -90,11 +90,7 @@ public class VerifyManager implements Listener {
     }
 
     private static void kickPlayerAsync(Player player, String kickMessage) {
-        Bukkit.getScheduler().runTask(Discord2FA.getPlugin(), new Runnable() {
-            public void run() {
-                player.kickPlayer(kickMessage);
-            }
-        });
+        Bukkit.getScheduler().runTask(Discord2FA.getPlugin(), () -> player.kickPlayer(kickMessage));
     }
 
     public static boolean isVerifying(Player player){

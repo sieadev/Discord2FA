@@ -2,8 +2,6 @@
 # Developer: sieadev
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
-license: ""
-
 database:
   ip: ""
   name: ""

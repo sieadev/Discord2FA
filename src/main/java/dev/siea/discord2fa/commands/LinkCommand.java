@@ -12,8 +12,8 @@ import org.bukkit.plugin.Plugin;
 import java.util.Objects;
 
 public class LinkCommand implements CommandExecutor {
-    private String alreadyLinked;
-    private String noCode;
+    private final String alreadyLinked;
+    private final String noCode;
 
     public LinkCommand(){
         Plugin plugin = Discord2FA.getPlugin();
