@@ -9,6 +9,7 @@ import dev.siea.discord2fa.manager.VerifyManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.awt.*;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -59,6 +61,7 @@ public class DiscordUtils extends ListenerAdapter {
         embedBuilder.setTitle(title);
         embedBuilder.setDescription(text);
         embedBuilder.setFooter(footer);
+        embedBuilder.setColor(Color.GREEN);
         channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
                 Button.success("link", button))
                 .queue();
@@ -151,8 +154,8 @@ public class DiscordUtils extends ListenerAdapter {
 
         if (user != null) {
             user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                            Button.success("accept", button1),
-                            Button.danger("deny", button2))
+                            Button.success("accept", button1).withEmoji(Emoji.fromUnicode("✅")),
+                            Button.danger("deny", button2).withEmoji((Emoji.fromUnicode("❌"))))
                     .queue());
         }
 
