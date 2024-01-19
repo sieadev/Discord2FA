@@ -14,6 +14,8 @@ discord:
     guild: ""
     channel: "" # Link Message Channel
 
+allowedCommands: ["/login"]    # Commands allowed before the Player is verified
+
 messages:
   # Discord Messages
   verify:
@@ -41,5 +43,3 @@ messages:
   verifyDenied: "&cVerification denied!"
   verifySuccess: "&aYou successfully verified your Account!"
   alreadyLinked: "&cYour Account is already linked!"
-
-allowedCommands: ["/login"]

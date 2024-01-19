@@ -53,7 +53,7 @@ public class VerifyManager implements Listener {
     public static void onPlayerMove(PlayerMoveEvent e){
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
-        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+        e.getPlayer().sendTitle(verifyTitle,"", 0, 70, 20);
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -61,21 +61,21 @@ public class VerifyManager implements Listener {
         if (allowedCommands.contains(e.getMessage())) return;
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
-        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+        e.getPlayer().sendTitle(verifyTitle,"", 0, 70, 20);
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onPlayerDropItem(PlayerDropItemEvent e){
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
-        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+        e.getPlayer().sendTitle(verifyTitle,"", 0, 70, 20);
     }
 
     @EventHandler  (priority = EventPriority.HIGHEST)
     public static void onPlayerInteract(PlayerInteractEvent e){
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
-        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+        e.getPlayer().sendTitle(verifyTitle,"", 0, 70, 20);
     }
 
     public static void verifying(Player player, boolean allowed){
