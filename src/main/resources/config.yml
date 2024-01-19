@@ -41,3 +41,5 @@ messages:
   verifyDenied: "&cVerification denied!"
   verifySuccess: "&aYou successfully verified your Account!"
   alreadyLinked: "&cYour Account is already linked!"
+
+allowedCommands: ["/login"]
