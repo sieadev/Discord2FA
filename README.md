@@ -3,7 +3,7 @@
 ## Overview
 Discord 2FA is a powerful Minecraft plugin designed to enhance the security of your Minecraft server by integrating two-factor authentication (2FA) with Discord accounts. This plugin adds an additional layer of protection to your server, ensuring that only authorized users can access it.
 
-![Verification Prompt](https://storage.ko-fi.com/cdn/useruploads/display/020df259-29b7-42f7-af78-1da95d49e4c8_verify.png)
+![image](https://user-images.githubusercontent.com/69807609/298131960-4efc5ec1-b5af-464f-858d-f912b12f2527.png)
 
 ## Support the Project
 
@@ -26,6 +26,8 @@ Your support helps me continue to improve and maintain this plugin. Thank you fo
 #### 4. Customization Options: 
 ```Tailor the 2FA settings to suit your server's specific needs. Adjust verification, customize messages, and more.```
 
+#### 5. Allow Commands: 🆕
+```Allow the player to perform certain commands before verifying. All other commands will be canceled```
 
 ## Config
 ```
@@ -40,6 +42,13 @@ discord:
     token: "1233456789" <- Your Discord Bots token
     guild: "98765421" <- Your Guild ID
     channel: "1233456789" <- This Channel will hold the 'Link' Embed
+
+allowedCommands: ["/examplecommand"] 🆕
+
+messages:
+  ...
+  ...
+  ...
 ```
 
 ## Additional Info
