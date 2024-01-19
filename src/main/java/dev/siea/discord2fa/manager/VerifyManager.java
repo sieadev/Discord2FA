@@ -10,10 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,10 +22,12 @@ public class VerifyManager implements Listener {
     private static String verifyDenied;
     private static String verifySuccess;
     private static final String verifyTitle = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifyTitle")).replace("&", "§");
+    private static List<String> allowedCommands;
 
     public VerifyManager(){
         verifyDenied = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifyDenied")).replace("&", "§");
         verifySuccess = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifySuccess")).replace("&", "§");
+        allowedCommands = Discord2FA.getPlugin().getConfig().getStringList("allowedCommands");
     }
 
     @EventHandler
@@ -57,8 +56,16 @@ public class VerifyManager implements Listener {
         e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
     }
 
-    @EventHandler (priority = EventPriority.LOWEST)
-    public static void onPlayerMove2(PlayerMoveEvent e){
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public static void onCommandEntered(PlayerCommandPreprocessEvent e){
+        if (allowedCommands.contains(e.getMessage())) return;
+        if (!verifyingPlayers.contains(e.getPlayer())) return;
+        e.setCancelled(true);
+        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public static void onPlayerDropItem(PlayerDropItemEvent e){
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
         e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
@@ -66,13 +73,6 @@ public class VerifyManager implements Listener {
 
     @EventHandler  (priority = EventPriority.HIGHEST)
     public static void onPlayerInteract(PlayerInteractEvent e){
-        if (!verifyingPlayers.contains(e.getPlayer())) return;
-        e.setCancelled(true);
-        e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
-    }
-
-    @EventHandler  (priority = EventPriority.LOWEST)
-    public static void onPlayerInteract2(PlayerInteractEvent e){
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
         e.getPlayer().sendTitle(verifyTitle,"", 10, 70, 20);
