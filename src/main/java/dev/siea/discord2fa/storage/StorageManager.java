@@ -15,8 +15,38 @@ public class StorageManager {
 
 
     public static void init(Plugin plugin) {
-        storageType = StorageType.valueOf(plugin.getConfig().getString("storage"));
-        fileUtil = new FileUtil();
+        try{
+            storageType = StorageType.valueOf(plugin.getConfig().getString("storage"));
+        } catch (Exception e){
+            if (plugin.getConfig().getBoolean("fileAsFallback")){
+                storageType = StorageType.FILE;
+                plugin.getLogger().severe("Switching to File Storage(fileAsFallback) due to invalid Storage Type!");
+            }
+            else{
+                plugin.getLogger().severe(String.format("[%s] - Disabled due to invalid Storage Type! [THIS IS NOT A BUG DO NOT REPORT IT]", plugin.getDescription().getName()));
+                plugin.getServer().getPluginManager().disablePlugin(plugin);
+                return;
+            }
+        }
+
+        if (storageType == StorageType.MYSQL){
+            try {
+                Database.onEnable(plugin);
+            } catch (Exception e) {
+                if (plugin.getConfig().getBoolean("fileAsFallback")){
+                    storageType = StorageType.FILE;
+                    plugin.getLogger().severe("Switching to File Storage(fileAsFallback) due to being unable to connect to Database!");
+                }
+                else{
+                    plugin.getLogger().severe(String.format("[%s] - Disabled due to being unable to connect to Database! [THIS IS NOT A BUG DO NOT REPORT IT]", plugin.getDescription().getName()));
+                    plugin.getServer().getPluginManager().disablePlugin(plugin);
+                    return;
+                }
+            }
+        }
+        if (storageType == StorageType.FILE) {
+            fileUtil = new FileUtil();
+        }
     }
 
     public static boolean isLinked(Player player) {

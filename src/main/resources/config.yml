@@ -5,6 +5,7 @@
 
 # MYSQL || FILE
 storage: "FILE"
+fileAsFallback: true #This will use files if the database is not accessible
 
 database:
   ip: ""
@@ -17,6 +18,7 @@ discord:
     token: ""
     guild: ""
     channel: "" # Link Message Channel
+    role: "" # Null for non
 
 allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 
