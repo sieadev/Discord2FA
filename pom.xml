@@ -6,7 +6,7 @@
 
     <groupId>dev.siea</groupId>
     <artifactId>Discord2FA</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
     <packaging>jar</packaging>
 
     <name>Discord2FA</name>

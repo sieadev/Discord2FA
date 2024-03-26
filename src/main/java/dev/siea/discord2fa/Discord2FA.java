@@ -31,13 +31,6 @@ public final class Discord2FA extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        try {
-            Database.onEnable(this);
-        } catch (Exception e) {
-            getLogger().severe(String.format("[%s] - Disabled due to being unable to load Database!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
         getCommand("link").setExecutor(new LinkCommand());
         getCommand("unlink").setExecutor(new UnlinkCommand());
