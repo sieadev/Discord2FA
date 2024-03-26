@@ -1,9 +1,9 @@
 package dev.siea.discord2fa.manager;
 
 import dev.siea.discord2fa.Discord2FA;
-import dev.siea.discord2fa.database.AccountUtil;
-import dev.siea.discord2fa.database.Database;
-import dev.siea.discord2fa.database.models.Account;
+import dev.siea.discord2fa.storage.StorageManager;
+import dev.siea.discord2fa.storage.database.Database;
+import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.discord.DiscordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -43,7 +43,7 @@ public class VerifyManager implements Listener {
 
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent e){
-        if(AccountUtil.isLinked(e.getPlayer())){
+        if(StorageManager.isLinked(e.getPlayer())){
             verifyingPlayers.add(e.getPlayer());
             sendTitle(e.getPlayer());
             try {
