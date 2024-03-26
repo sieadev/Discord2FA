@@ -1,7 +1,7 @@
 package dev.siea.discord2fa.manager;
 
 import dev.siea.discord2fa.Discord2FA;
-import dev.siea.discord2fa.database.AccountUtil;
+import dev.siea.discord2fa.storage.StorageManager;
 import net.dv8tion.jda.api.entities.Member;
 import org.bukkit.entity.Player;
 
@@ -22,7 +22,7 @@ public class LinkManager {
             Member member = linking.get(code);
             linking.remove(code);
             try {
-                AccountUtil.linkAccount(player, member.getId());
+                StorageManager.linkAccount(player, member.getId());
                 player.sendMessage(linkSuccess.replace("%member%", member.getEffectiveName()));
             } catch (SQLException e) {
                 player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage());
@@ -37,6 +37,6 @@ public class LinkManager {
     }
 
     public static void unlink(Player player) {
-        AccountUtil.unlinkAccount(player);
+        StorageManager.unlinkAccount(player);
     }
 }

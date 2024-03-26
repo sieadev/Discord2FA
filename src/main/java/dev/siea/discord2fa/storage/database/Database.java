@@ -1,6 +1,6 @@
-package dev.siea.discord2fa.database;
+package dev.siea.discord2fa.storage.database;
 
-import dev.siea.discord2fa.database.models.Account;
+import dev.siea.discord2fa.storage.models.Account;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 

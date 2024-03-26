@@ -2,6 +2,10 @@
 # Developer: sieadev
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
+
+# MYSQL || FILE
+storage: "FILE"
+
 database:
   ip: ""
   name: ""

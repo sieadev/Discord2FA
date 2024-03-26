@@ -2,7 +2,8 @@ package dev.siea.discord2fa;
 
 import dev.siea.discord2fa.commands.LinkCommand;
 import dev.siea.discord2fa.commands.UnlinkCommand;
-import dev.siea.discord2fa.database.Database;
+import dev.siea.discord2fa.storage.StorageManager;
+import dev.siea.discord2fa.storage.database.Database;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
 import org.bukkit.plugin.Plugin;
@@ -22,6 +23,7 @@ public final class Discord2FA extends JavaPlugin {
     private void enablePlugin() {
         plugin = this;
         saveDefaultConfig();
+        StorageManager.init(this);
         try {
             new DiscordBot(this);
         } catch (LoginException e) {

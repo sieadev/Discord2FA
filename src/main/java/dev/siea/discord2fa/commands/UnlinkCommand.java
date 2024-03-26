@@ -1,9 +1,9 @@
 package dev.siea.discord2fa.commands;
 
 import dev.siea.discord2fa.Discord2FA;
-import dev.siea.discord2fa.database.AccountUtil;
 import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
+import dev.siea.discord2fa.storage.StorageManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +30,7 @@ public class UnlinkCommand  implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        if (!AccountUtil.isLinked(player)){
+        if (!StorageManager.isLinked(player)){
             player.sendMessage(notLinked);
             return true;
         }

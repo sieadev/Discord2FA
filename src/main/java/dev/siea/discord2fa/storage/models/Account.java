@@ -1,4 +1,4 @@
-package dev.siea.discord2fa.database.models;
+package dev.siea.discord2fa.storage.models;
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.discord.DiscordBot;
 import net.dv8tion.jda.api.entities.User;

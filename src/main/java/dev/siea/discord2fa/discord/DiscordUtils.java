@@ -1,9 +1,9 @@
 package dev.siea.discord2fa.discord;
 
 import dev.siea.discord2fa.Discord2FA;
-import dev.siea.discord2fa.database.AccountUtil;
-import dev.siea.discord2fa.database.Database;
-import dev.siea.discord2fa.database.models.Account;
+import dev.siea.discord2fa.storage.StorageManager;
+import dev.siea.discord2fa.storage.database.Database;
+import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -79,7 +79,7 @@ public class DiscordUtils extends ListenerAdapter {
                 return;
             }
             Objects.requireNonNull(event.getMember()).getUser().openPrivateChannel().queue(privateChannel -> {
-                if (AccountUtil.isLinkedByDiscord(event.getMember())) {
+                if (StorageManager.isLinkedByDiscord(event.getMember())) {
                     privateChannel.sendMessage("You are already linked!").queue();
                     return;
                 }
