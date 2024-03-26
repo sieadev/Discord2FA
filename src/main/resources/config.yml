@@ -2,8 +2,8 @@
 # Developer: sieadev
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
-
-# MYSQL || FILE
+# ----------------------------- Data -----------------------------
+# MYSQL or FILE
 storage: "FILE"
 fileAsFallback: true #This will use files if the database is not accessible
 
@@ -22,6 +22,7 @@ discord:
 
 allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 
+# --------------------------- Messages ---------------------------
 messages:
   # Discord Messages
   verify:
