@@ -3,6 +3,7 @@ package dev.siea.discord2fa.storage;
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.database.Database;
 import dev.siea.discord2fa.storage.file.FileUtil;
+import dev.siea.discord2fa.storage.models.Account;
 import net.dv8tion.jda.api.entities.Member;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -97,5 +98,33 @@ public class StorageManager {
         else if (storageType == StorageType.FILE){
             fileUtil.deleteAccount(player.getUniqueId().toString());
         }
+    }
+
+    public static Account findAccountByUUID(String uuid) {
+        if (storageType == StorageType.MYSQL){
+            try {
+                return Database.findAccountByUUID(uuid);
+            } catch (SQLException e) {
+                return null;
+            }
+        }
+        else if (storageType == StorageType.FILE){
+            return fileUtil.findAccountByUUID(uuid);
+        }
+        return null;
+    }
+
+    public static Account findAccountByDiscordID(String id) {
+        if (storageType == StorageType.MYSQL){
+            try {
+                return Database.findAccountByDiscordID(id);
+            } catch (SQLException e) {
+                return null;
+            }
+        }
+        else if (storageType == StorageType.FILE){
+            return fileUtil.findAccountByDiscordID(id);
+        }
+        return null;
     }
 }

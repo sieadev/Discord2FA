@@ -91,33 +91,23 @@ public class DiscordUtils extends ListenerAdapter {
             });
         }
         if (event.getComponentId().equals("accept")) {
-            try {
-                Account account = Database.findAccountByDiscordID(event.getUser().getId());
-                if (account == null) {
-                    event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
-                    return;
-                }
-                assert acceptMessage != null;
-                event.reply(acceptMessage).queue();
-                VerifyManager.verifying((Player) account.getPlayer(), true);
-
-            } catch (SQLException e) {
-                event.reply("Unable to find Account Information...").queue();
-                throw new RuntimeException(e);
+            Account account = StorageManager.findAccountByDiscordID(event.getUser().getId());
+            if (account == null) {
+                event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
+                return;
             }
+            assert acceptMessage != null;
+            event.reply(acceptMessage).queue();
+            VerifyManager.verifying((Player) account.getPlayer(), true);
+
         }
         if (event.getComponentId().equals("deny")) {
-            try {
-                Account account = Database.findAccountByDiscordID(event.getUser().getId());
-                if (account == null) {
-                    event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
-                    return;
-                }
-                VerifyManager.verifying((Player) account.getPlayer(), false);
-            } catch (SQLException e) {
-                event.reply("Unable to find Account Information...").queue();
-                throw new RuntimeException(e);
+            Account account = StorageManager.findAccountByDiscordID(event.getUser().getId());
+            if (account == null) {
+                event.getUser().openPrivateChannel().queue(privateChannel -> event.reply("Unable to find Account Information...").queue());
+                return;
             }
+            VerifyManager.verifying((Player) account.getPlayer(), false);
             assert denyMessage != null;
             event.reply(denyMessage).queue();
         }

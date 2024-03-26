@@ -46,12 +46,9 @@ public class VerifyManager implements Listener {
         if(StorageManager.isLinked(e.getPlayer())){
             verifyingPlayers.add(e.getPlayer());
             sendTitle(e.getPlayer());
-            try {
-                Account account = Database.findAccountByUUID(e.getPlayer().getUniqueId().toString());
-                assert account != null;
-                DiscordUtils.sendVerify(account, Objects.requireNonNull(e.getPlayer().getAddress()).getAddress().getHostAddress());
-            } catch (SQLException ignore) {
-            }
+            Account account = StorageManager.findAccountByUUID(e.getPlayer().getUniqueId().toString());
+            assert account != null;
+            DiscordUtils.sendVerify(account, Objects.requireNonNull(e.getPlayer().getAddress()).getAddress().getHostAddress());
         }
     }
 
