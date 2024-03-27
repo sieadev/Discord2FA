@@ -2,7 +2,6 @@ package dev.siea.discord2fa.manager;
 
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.StorageManager;
-import dev.siea.discord2fa.storage.database.Database;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.discord.DiscordUtils;
 import org.bukkit.Bukkit;
@@ -12,7 +11,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

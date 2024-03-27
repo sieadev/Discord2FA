@@ -2,7 +2,6 @@ package dev.siea.discord2fa.discord;
 
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.StorageManager;
-import dev.siea.discord2fa.storage.database.Database;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
@@ -19,7 +18,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.awt.*;
 import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.util.Objects;
 
 public class DiscordUtils extends ListenerAdapter {

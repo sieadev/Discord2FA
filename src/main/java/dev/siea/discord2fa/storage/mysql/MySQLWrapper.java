@@ -1,4 +1,4 @@
-package dev.siea.discord2fa.storage.database;
+package dev.siea.discord2fa.storage.mysql;
 
 import dev.siea.discord2fa.storage.models.Account;
 import org.bukkit.ChatColor;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.bukkit.Bukkit.getServer;
 
-public class Database {
+public class MySQLWrapper {
     private static String url;
     private static String user;
     private static String psw;
