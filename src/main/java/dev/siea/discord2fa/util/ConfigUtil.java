@@ -1,4 +1,4 @@
-package dev.siea.discord2fa.storage.file;
+package dev.siea.discord2fa.util;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;

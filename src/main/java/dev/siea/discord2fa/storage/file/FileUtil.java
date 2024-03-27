@@ -2,6 +2,7 @@ package dev.siea.discord2fa.storage.file;
 
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.models.Account;
+import dev.siea.discord2fa.util.ConfigUtil;
 
 import java.util.Set;
 
