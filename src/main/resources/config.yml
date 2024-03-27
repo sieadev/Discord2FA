@@ -18,7 +18,7 @@ discord:
     token: ""
     guild: ""
     channel: "" # Link Message Channel
-    role: "" # Empty for non
+    role: "" # The role people will receive when linking their accounts
 
 allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 
