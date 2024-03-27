@@ -5,11 +5,9 @@ import dev.siea.discord2fa.storage.models.Account;
 
 public class FileStorage implements Storage {
     private final FileUtil fileUtil;
-
     public FileStorage() {
         this.fileUtil = new FileUtil();
     }
-
     @Override
     public boolean isLinked(String uuid) {
         return fileUtil.findAccountByUUID(uuid) != null;
