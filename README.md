@@ -18,6 +18,8 @@ such as minimizing the presence of alt-accounts.
 
 ## Config
 ```
+storage: "FILE" 🆕
+fileAsFallback: true #This will use files if the database is not accessible 🆕
 
 database:
   IP: "1.1.1.1" <- Your databases IP
@@ -30,8 +32,9 @@ discord:
     token: "1233456789" <- Your Discord Bots token
     guild: "98765421" <- Your Guild ID
     channel: "1233456789" <- This Channel will hold the 'Link' Embed
+    role: "" # The role people will receive when linking their accounts 🆕
 
-allowedCommands: ["/examplecommand"] 🆕
+allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 ```
 
 ## Additional Info
