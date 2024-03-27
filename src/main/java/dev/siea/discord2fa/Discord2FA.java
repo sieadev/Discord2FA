@@ -7,8 +7,10 @@ import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
+import org.bstats.charts.SimplePie;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bstats.bukkit.Metrics;
 
 import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
@@ -37,6 +39,12 @@ public final class Discord2FA extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
         getCommand("link").setExecutor(new LinkCommand());
         getCommand("unlink").setExecutor(new UnlinkCommand());
+        enableBStats();
+    }
+
+    private void enableBStats(){
+        int pluginID = 21448;
+        new Metrics(this, pluginID);
     }
 
     @Override
