@@ -1,26 +1,14 @@
 package dev.siea.discord2fa.commands;
 
-import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.manager.LinkManager;
+import dev.siea.discord2fa.message.Messages;
 import dev.siea.discord2fa.storage.StorageManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.util.Objects;
 
 public class LinkCommand implements CommandExecutor {
-    private final String alreadyLinked;
-    private final String noCode;
-
-    public LinkCommand(){
-        Plugin plugin = Discord2FA.getPlugin();
-        alreadyLinked = Objects.requireNonNull(plugin.getConfig().getString("messages.alreadyLinked")).replace("&", "§");
-        noCode = Objects.requireNonNull(plugin.getConfig().getString("messages.noCode")).replace("&", "§");
-
-    }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
         if (!(sender instanceof Player)){
@@ -29,11 +17,11 @@ public class LinkCommand implements CommandExecutor {
         }
         Player player = (Player) sender;
         if (StorageManager.isLinked(player)){
-            player.sendMessage(alreadyLinked);
+            player.sendMessage(Messages.get("alreadyLinked"));
             return true;
         }
         if (args.length < 1){
-            player.sendMessage(noCode);
+            player.sendMessage(Messages.get("noCode"));
             return true;
         }
         String code = args[0];

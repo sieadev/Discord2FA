@@ -1,14 +1,19 @@
 package dev.siea.discord2fa.manager;
 
 import dev.siea.discord2fa.Discord2FA;
+import dev.siea.discord2fa.message.Messages;
 import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.discord.DiscordUtils;
+import dev.siea.discord2fa.util.ConfigUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 
 import java.util.ArrayList;
@@ -18,15 +23,10 @@ import java.util.Objects;
 
 public class VerifyManager implements Listener {
     private static final List<Player> verifyingPlayers = new ArrayList<>();
-    private static String verifyDenied;
-    private static String verifySuccess;
-    private static final String verifyTitle = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifyTitle")).replace("&", "§");
     private static List<String> allowedCommands;
     private static final HashMap<Player, Integer> titleCooldown = new HashMap<>();
 
     public VerifyManager(){
-        verifyDenied = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifyDenied")).replace("&", "§");
-        verifySuccess = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.verifySuccess")).replace("&", "§");
         allowedCommands = Discord2FA.getPlugin().getConfig().getStringList("allowedCommands");
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Discord2FA.getPlugin(), () -> {
             for (Player p : titleCooldown.keySet()) {
@@ -38,6 +38,8 @@ public class VerifyManager implements Listener {
             }
         }, 0, 20);
     }
+
+
 
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent e){
@@ -60,6 +62,13 @@ public class VerifyManager implements Listener {
         if (!verifyingPlayers.contains(e.getPlayer())) return;
         e.setCancelled(true);
         sendTitle(e.getPlayer());
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST)
+    public static void onInventoryOpen(InventoryOpenEvent e){
+        if (!verifyingPlayers.contains((Player) e.getPlayer())) return;
+        e.setCancelled(true);
+        sendTitle((Player) e.getPlayer());
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -88,10 +97,10 @@ public class VerifyManager implements Listener {
        if (!verifyingPlayers.contains(player)) return;
        if(allowed){
            verifyingPlayers.remove(player);
-           player.sendMessage(verifySuccess);
+           player.sendMessage(Messages.get("verifySuccess"));
         }else{
            verifyingPlayers.remove(player);
-           kickPlayerAsync(player, verifyDenied);
+           kickPlayerAsync(player, Messages.get("verifyDenied"));
        }
     }
 
@@ -105,7 +114,7 @@ public class VerifyManager implements Listener {
 
     private static void sendTitle(Player p){
         if (titleCooldown.containsKey(p)) return;
-        p.sendTitle(verifyTitle,"", 10, 70, 20);
+        p.sendTitle(Messages.get("verifyTitle"),"", 10, 70, 20);
         titleCooldown.put(p, 5);
     }
 }

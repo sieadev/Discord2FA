@@ -2,6 +2,7 @@ package dev.siea.discord2fa;
 
 import dev.siea.discord2fa.commands.LinkCommand;
 import dev.siea.discord2fa.commands.UnlinkCommand;
+import dev.siea.discord2fa.message.Messages;
 import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.discord.DiscordBot;
@@ -23,6 +24,8 @@ public final class Discord2FA extends JavaPlugin {
     private void enablePlugin() {
         plugin = this;
         saveDefaultConfig();
+        saveResource("messages.yml", false);
+        Messages.onEnable(this);
         StorageManager.init(this);
         try {
             new DiscordBot(this);
