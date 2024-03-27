@@ -8,6 +8,8 @@ import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
 import dev.siea.discord2fa.util.ConfigUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -26,6 +28,7 @@ import java.util.Objects;
 public class DiscordUtils extends ListenerAdapter {
     private static final ShardManager shardManager = DiscordBot.getShardManager();
     private static final TextChannel channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
+    private static final Role role = shardManager.getRoleById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.role")));
 
     public DiscordUtils() {
     }
@@ -37,6 +40,35 @@ public class DiscordUtils extends ListenerAdapter {
         String button = Messages.get("link.linkButton");
         sendLinkMessage(title, text, footer, button);
     }
+
+    public static void giveRole(String userId) {
+        if (role == null || channel == null){
+            return;
+        }
+        Member member = channel.getGuild().getMemberById(userId);
+        if (member == null){
+            return;
+        }
+        channel.getGuild().addRoleToMember(member, role).queue();
+    }
+
+
+    public static void giveRole(String userId, boolean action) {
+        if (action){
+            giveRole(userId);
+        }
+        else{
+            if (role == null || channel == null){
+                return;
+            }
+            Member member = channel.getGuild().getMemberById(userId);
+            if (member == null){
+                return;
+            }
+            channel.getGuild().removeRoleFromMember(member, role).queue();
+        }
+    }
+
 
     private static void sendLinkMessage(String title, String text, String footer, String button) {
         assert channel != null;
@@ -146,6 +178,4 @@ public class DiscordUtils extends ListenerAdapter {
             System.out.println("ID: \"" + account.getDiscordID() + "\"");
         }
     }
-
-
 }

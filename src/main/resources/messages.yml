@@ -1,7 +1,7 @@
 # --------------------------- Discord Messages ---------------------------
 verify:
   title: "Verify Login"
-  text: "Someone logged into your Account from a new Location(%ip%)"
+  text: "Someone logged into your Account from a new Location (%ip%)"
   footer: "If this wasn't you, change your Password immediately!"
   VerifyButton: "Verify"
   DenyButton: "Deny"

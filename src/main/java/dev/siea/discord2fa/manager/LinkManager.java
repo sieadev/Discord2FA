@@ -1,17 +1,15 @@
 package dev.siea.discord2fa.manager;
 
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.discord2fa.discord.DiscordUtils;
+import dev.siea.discord2fa.message.Messages;
 import dev.siea.discord2fa.storage.StorageManager;
+import dev.siea.discord2fa.storage.models.Account;
 import net.dv8tion.jda.api.entities.Member;
 import org.bukkit.entity.Player;
-
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class LinkManager {
-    private static final String invalidCode = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.invalidCode")).replace("&", "§");
-    private static final String linkSuccess = Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("messages.linkSuccess")).replace("&", "§");
     private static final HashMap<String, Member> linking = new HashMap<>();
     public static void queLink(Member member, String code) {
         linking.put(code, member);
@@ -23,12 +21,13 @@ public class LinkManager {
             linking.remove(code);
             try {
                 StorageManager.linkAccount(player, member.getId());
-                player.sendMessage(linkSuccess.replace("%member%", member.getEffectiveName()));
+                DiscordUtils.giveRole(member.getId());
+                player.sendMessage(Messages.get("linkSuccess").replace("%member%", member.getEffectiveName()));
             } catch (SQLException e) {
                 player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage());
             }
         } else {
-           player.sendMessage(invalidCode);
+           player.sendMessage(Messages.get("invalidCode"));
         }
     }
 
@@ -37,6 +36,8 @@ public class LinkManager {
     }
 
     public static void unlink(Player player) {
+        Account account = StorageManager.findAccountByUUID(player.getUniqueId().toString());
         StorageManager.unlinkAccount(player);
+        DiscordUtils.giveRole(account.getDiscordID(),false);
     }
 }
