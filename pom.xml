@@ -6,7 +6,7 @@
 
     <groupId>dev.siea</groupId>
     <artifactId>Discord2FA</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
 
     <name>Discord2FA</name>
@@ -43,6 +43,14 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>dev.siea.discord2fa.stats</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -81,6 +89,12 @@
                     <artifactId>opus-java</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
