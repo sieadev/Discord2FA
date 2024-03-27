@@ -25,3 +25,5 @@ unlinkSuccess: "&aYou successfully unlinked your Account!"
 verifyDenied: "&cVerification denied!"
 verifySuccess: "&aYou successfully verified your Account!"
 alreadyLinked: "&cYour Account is already linked!"
+
+forceLink: "§eHello §a%player%§e, before you proceed you will have to link your Minecraft to your Discord account. For that please join our discord server and follow the instructions in the instructions listed there."

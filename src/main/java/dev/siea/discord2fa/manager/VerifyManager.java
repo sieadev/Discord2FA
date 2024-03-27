@@ -23,8 +23,10 @@ import java.util.Objects;
 
 public class VerifyManager implements Listener {
     private static final List<Player> verifyingPlayers = new ArrayList<>();
+    private static final List<Player> forcedPlayers = new ArrayList<>();
     private static List<String> allowedCommands;
     private static final HashMap<Player, Integer> titleCooldown = new HashMap<>();
+    private static final boolean forceLink = Discord2FA.getPlugin().getConfig().getBoolean("force-link");
 
     public VerifyManager(){
         allowedCommands = Discord2FA.getPlugin().getConfig().getStringList("allowedCommands");
@@ -39,7 +41,9 @@ public class VerifyManager implements Listener {
         }, 0, 20);
     }
 
-
+    public static void linked(Player player){
+        forcedPlayers.remove(player);
+    }
 
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent e){
@@ -49,6 +53,9 @@ public class VerifyManager implements Listener {
             Account account = StorageManager.findAccountByUUID(e.getPlayer().getUniqueId().toString());
             assert account != null;
             DiscordUtils.sendVerify(account, Objects.requireNonNull(e.getPlayer().getAddress()).getAddress().getHostAddress());
+        } else if (forceLink) {
+            forcedPlayers.add(e.getPlayer());
+            e.getPlayer().sendMessage(Messages.get("forceLink"));
         }
     }
 
@@ -59,38 +66,63 @@ public class VerifyManager implements Listener {
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onPlayerMove(PlayerMoveEvent e){
-        if (!verifyingPlayers.contains(e.getPlayer())) return;
-        e.setCancelled(true);
-        sendTitle(e.getPlayer());
+        Player player = e.getPlayer();
+        if (verifyingPlayers.contains(player)) {
+            e.setCancelled(true);
+            sendTitle(player);
+        }
+        else if (forcedPlayers.contains(player)){
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onInventoryOpen(InventoryOpenEvent e){
-        if (!verifyingPlayers.contains((Player) e.getPlayer())) return;
-        e.setCancelled(true);
-        sendTitle((Player) e.getPlayer());
+        Player player = (Player) e.getPlayer();
+        if (verifyingPlayers.contains(player)) {
+            e.setCancelled(true);
+            sendTitle(player);
+        }
+        else if (forcedPlayers.contains(player)){
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onCommandEntered(PlayerCommandPreprocessEvent e){
         if (allowedCommands.contains(e.getMessage())) return;
-        if (!verifyingPlayers.contains(e.getPlayer())) return;
-        e.setCancelled(true);
-        sendTitle(e.getPlayer());
+        Player player = e.getPlayer();
+        if (verifyingPlayers.contains(player)) {
+            e.setCancelled(true);
+            sendTitle(player);
+        }
+        else if (forcedPlayers.contains(player)){
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onPlayerDropItem(PlayerDropItemEvent e){
-        if (!verifyingPlayers.contains(e.getPlayer())) return;
-        e.setCancelled(true);
-        sendTitle(e.getPlayer());
+        Player player = e.getPlayer();
+        if (verifyingPlayers.contains(player)) {
+            e.setCancelled(true);
+            sendTitle(player);
+        }
+        else if (forcedPlayers.contains(player)){
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler  (priority = EventPriority.HIGHEST)
     public static void onPlayerInteract(PlayerInteractEvent e){
-        if (!verifyingPlayers.contains(e.getPlayer())) return;
-        e.setCancelled(true);
-        sendTitle(e.getPlayer());
+        Player player = e.getPlayer();
+        if (verifyingPlayers.contains(player)) {
+            e.setCancelled(true);
+            sendTitle(player);
+        }
+        else if (forcedPlayers.contains(player)){
+            e.setCancelled(true);
+        }
     }
 
     public static void verifying(Player player, boolean allowed){

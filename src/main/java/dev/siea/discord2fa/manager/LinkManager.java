@@ -23,6 +23,7 @@ public class LinkManager {
                 StorageManager.linkAccount(player, member.getId());
                 DiscordUtils.giveRole(member.getId());
                 player.sendMessage(Messages.get("linkSuccess").replace("%member%", member.getEffectiveName()));
+                VerifyManager.linked(player);
             } catch (SQLException e) {
                 player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage());
             }

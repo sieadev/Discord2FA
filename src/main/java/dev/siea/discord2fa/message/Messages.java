@@ -24,7 +24,7 @@ public class Messages {
     private static String retrieveMessageFromConfig(String key) {
         String retrievedMessage = configUtil.getString(key);
         if (retrievedMessage == null) {
-            retrievedMessage = "§c§lThis is not a bug do not report it! §c[IMCSO-Insight >> Config.yml] The following message is either missing or not set: §e" + key;
+            retrievedMessage = "§c§lThis is not a bug do not report it! §c[Discord2FA >> Config.yml] The following message is either missing or not set: §e" + key;
         }
         return retrievedMessage.replace("&","§");
     }
