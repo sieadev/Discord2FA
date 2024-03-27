@@ -28,7 +28,7 @@ import java.util.Objects;
 public class DiscordUtils extends ListenerAdapter {
     private static final ShardManager shardManager = DiscordBot.getShardManager();
     private static final TextChannel channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
-    private static final Role role = shardManager.getRoleById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.role")));
+    private static Role role;
 
     public DiscordUtils() {
     }
@@ -39,6 +39,7 @@ public class DiscordUtils extends ListenerAdapter {
         String footer = Messages.get("link.footer");
         String button = Messages.get("link.linkButton");
         sendLinkMessage(title, text, footer, button);
+        try{role = shardManager.getRoleById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.role")));} catch (Exception ignore){}
     }
 
     public static void giveRole(String userId) {
