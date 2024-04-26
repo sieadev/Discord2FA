@@ -2,8 +2,6 @@ package dev.siea.discord2fa.storage;
 
 import dev.siea.discord2fa.storage.models.Account;
 
-import java.sql.SQLException;
-
 public interface Storage {
     boolean isLinked(String uuid);
     void linkAccount(String uuid, String discordID);
