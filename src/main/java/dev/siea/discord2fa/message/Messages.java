@@ -1,7 +1,5 @@
 package dev.siea.discord2fa.message;
 
-
-
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.util.ConfigUtil;
 import org.bukkit.configuration.ConfigurationSection;
