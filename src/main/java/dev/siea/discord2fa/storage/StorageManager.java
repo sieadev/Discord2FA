@@ -24,14 +24,15 @@ public class StorageManager {
                 case FILE:
                     accountStorage = new FileStorage();
                     break;
+                default:
+                    throw new Exception("Storage type not supported");
             }
         } catch (Exception e) {
             if (plugin.getConfig().getBoolean("fileAsFallback")) {
                 plugin.getLogger().severe("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
                 accountStorage = new FileStorage();
             } else {
-                plugin.getLogger().severe(String.format("[%s] - Disabled due to invalid Storage Type or connection failure! [THIS IS NOT A BUG DO NOT REPORT IT]", plugin.getDescription().getName()));
-                plugin.getServer().getPluginManager().disablePlugin(plugin);
+                throw new ExceptionInInitializerError(e);
             }
         }
     }
