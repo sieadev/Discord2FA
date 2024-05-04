@@ -25,5 +25,4 @@ discord:
 allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 force-link: false # Force Users to Link their accounts
 
-
 # ---------------------- Verification Server ---------------------
