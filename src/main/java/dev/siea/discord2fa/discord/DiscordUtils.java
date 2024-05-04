@@ -27,7 +27,7 @@ import java.util.Objects;
 
 public class DiscordUtils extends ListenerAdapter {
     private static final ShardManager shardManager = DiscordBot.getShardManager();
-    private static final TextChannel channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
+    private static TextChannel channel;
     private static Role role;
 
     public DiscordUtils() {
@@ -38,6 +38,17 @@ public class DiscordUtils extends ListenerAdapter {
         String text = Messages.get("link.text");
         String footer = Messages.get("link.footer");
         String button = Messages.get("link.linkButton");
+
+        try{
+            channel = shardManager.getTextChannelById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.channel")));
+        } catch (Exception e) {
+            channel = null;
+        }
+        if (channel == null) {
+            Discord2FA.disable("Disabling due being unable to locate channel");
+            return;
+        }
+
         sendLinkMessage(title, text, footer, button);
         try{role = shardManager.getRoleById(Objects.requireNonNull(Discord2FA.getPlugin().getConfig().getString("discord.role")));} catch (Exception ignore){}
     }
