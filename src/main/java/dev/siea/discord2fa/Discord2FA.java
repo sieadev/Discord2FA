@@ -7,12 +7,9 @@ import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
-import org.bstats.charts.SimplePie;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bstats.bukkit.Metrics;
-
-import javax.security.auth.login.LoginException;
 import java.sql.SQLException;
 
 public final class Discord2FA extends JavaPlugin {
@@ -28,12 +25,17 @@ public final class Discord2FA extends JavaPlugin {
         saveDefaultConfig();
         saveResource("messages.yml", false);
         Messages.onEnable(this);
-        StorageManager.init(this);
+        try{
+            StorageManager.init(this);
+        } catch (Exception e){
+            disable("Disabling due to invalid Storage Type or connection failure! [THIS IS NOT A BUG DO NOT REPORT IT]");
+            return;
+        }
+
         try {
             new DiscordBot(this);
-        } catch (LoginException e) {
-            getLogger().severe(String.format("[%s] - Disabled due to being unable to load Discord Bot!", getDescription().getName()));
-            getServer().getPluginManager().disablePlugin(this);
+        } catch (Exception e) {
+            disable("Disabling due to being unable to load Discord Bot! - " + e.getMessage());
             return;
         }
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
@@ -45,6 +47,23 @@ public final class Discord2FA extends JavaPlugin {
     private void enableBStats(){
         int pluginID = 21448;
         new Metrics(this, pluginID);
+    }
+
+    public static void disable(String reason){
+        plugin.getLogger().severe(reason);
+        try{
+            if (MySQLWrapper.getConnection() != null) {
+                MySQLWrapper.onDisable();
+                plugin.getLogger().severe("Disabled Database wrapper...");
+            }
+        } catch (SQLException ignore) {
+        }
+        try{
+            DiscordBot.shutdown();
+            plugin.getLogger().severe("Disabled Discord Bot...");
+        } catch (Exception ignore) {
+        }
+        plugin.getServer().getPluginManager().disablePlugin(plugin);
     }
 
     @Override
