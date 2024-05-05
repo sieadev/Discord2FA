@@ -1,5 +1,10 @@
-# Discord2FA - Easy Discord <-> Minecraft linking
-# Developer: sieadev
+#################################################################
+# +-----------------------------------------------------------+ #
+# |      Discord2FA - Easy Discord <-> Minecraft linking      | #
+# |                  Made with <3 by sieadev                  | #
+# +-----------------------------------------------------------+ #
+#################################################################
+
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
 # ----------------------------- Data -----------------------------
@@ -23,5 +28,3 @@ discord:
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 force-link: false # Force Users to Link their accounts
-
-# ---------------------- Verification Server ---------------------
