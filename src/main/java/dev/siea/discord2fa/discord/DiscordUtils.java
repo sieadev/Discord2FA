@@ -24,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import java.awt.*;
 import java.security.SecureRandom;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class DiscordUtils extends ListenerAdapter {
     private static final ShardManager shardManager = DiscordBot.getShardManager();
@@ -82,29 +83,46 @@ public class DiscordUtils extends ListenerAdapter {
     }
 
 
-    private static void sendLinkMessage(String title, String text, String footer, String button) {
+    private static void sendLinkMessage(final String title,final String text,final String footer,final String button) {
         assert channel != null;
-        channel.purgeMessages(channel.getHistory().retrievePast(100).complete());
-        if (title == null) {
-            title = "Link your account!";
-        }
-        if (text == null) {
-            text = "Click the button below to Link your account!";
-        }
-        if (footer == null) {
-            footer = "Discord2FA";
-        }
-        if (button == null) {
-            button = "Link";
-        }
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle(title);
-        embedBuilder.setDescription(text);
-        embedBuilder.setFooter(footer);
-        embedBuilder.setColor(Color.GREEN);
-        channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                Button.success("link", button))
-                .queue();
+        CompletableFuture.runAsync(() -> {
+            channel.purgeMessages(channel.getHistory().retrievePast(100).complete());
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+
+            if (title == null) {
+                embedBuilder.setTitle("Link your account!");
+            }
+            else{
+                embedBuilder.setTitle(title);
+            }
+
+            if (text == null) {
+                embedBuilder.setDescription("Click the button below to Link your account!");
+            }
+            else{
+                embedBuilder.setDescription(text);
+            }
+
+            if (footer == null) {
+                embedBuilder.setFooter("Discord2FA");
+            }
+            else{
+                embedBuilder.setFooter(footer);
+            }
+
+            embedBuilder.setColor(Color.GREEN);
+
+            if (button == null) {
+                channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                                Button.success("link", "Link"))
+                        .queue();
+            }
+            else{
+                channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                                Button.success("link", button))
+                        .queue();
+            }
+        });
     }
 
     @Override
@@ -176,18 +194,16 @@ public class DiscordUtils extends ListenerAdapter {
         embedBuilder.setDescription(text);
         embedBuilder.setFooter(footer);
 
-        User user = account.getUser();
-
-        if (user != null) {
-            user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
-                            Button.success("accept", button1).withEmoji(Emoji.fromUnicode("✅")),
-                            Button.danger("deny", button2).withEmoji((Emoji.fromUnicode("❌"))))
-                    .queue());
-        }
-
-        else {
-            System.out.println("User is null");
-            System.out.println("ID: \"" + account.getDiscordID() + "\"");
-        }
+        account.getUser().thenAccept(user -> {
+            if (user != null) {
+                user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
+                                Button.success("accept", button1).withEmoji(Emoji.fromUnicode("✅")),
+                                Button.danger("deny", button2).withEmoji((Emoji.fromUnicode("❌"))))
+                        .queue());
+            } else {
+                System.out.println("User is null");
+                System.out.println("ID: \"" + account.getDiscordID() + "\"");
+            }
+        });
     }
 }

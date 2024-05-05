@@ -5,13 +5,13 @@ import net.dv8tion.jda.api.entities.User;
 import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class Account {
     private final String discordID;
-    private final User user;
     private final OfflinePlayer player;
+
     public Account(String discordID, String minecraftUUID) {
-        this.user = DiscordBot.getShardManager().retrieveUserById(discordID).complete();
         this.discordID = discordID;
         this.player = Discord2FA.getPlugin().getServer().getOfflinePlayer(UUID.fromString(minecraftUUID));
     }
@@ -20,8 +20,13 @@ public class Account {
         return discordID;
     }
 
-    public User getUser() {
-        return user;
+    public CompletableFuture<User> getUser() {
+        CompletableFuture<User> future = new CompletableFuture<>();
+        DiscordBot.getShardManager().retrieveUserById(discordID).queue(
+                user -> future.complete(user),
+                future::completeExceptionally
+        );
+        return future;
     }
 
     public OfflinePlayer getPlayer() {
