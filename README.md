@@ -3,7 +3,7 @@
 ![subtitle](https://github.com/sieadev/Discord2FA/assets/69807609/f46dfa3d-a2ab-47f1-84e5-def0d005346f)
 
 
-### Ever felt the need to enable 2FA on your Server? No? Well,l I will tell you 2 reasons why it makes sense to do so:
+### Ever felt the need to enable 2FA on your Server? No? Well, I will tell you 2 reasons why it makes sense to do so:
 
 #### 1. Security:
 With Token-Grabbing becoming a big problem in the Minecraft community
