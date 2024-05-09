@@ -26,5 +26,5 @@ discord:
     channel: "" # Link Message Channel
 
 # --------------------------- Settings ---------------------------
-allowedCommands: ["/login"]    # Commands allowed before the Player is verified
+allowedCommands: ["/link"]    # Commands allowed before the Player is verified
 force-link: false # Force Users to Link their accounts

@@ -90,7 +90,7 @@ public class VerifyManager implements Listener {
 
     @EventHandler (priority = EventPriority.HIGHEST)
     public static void onCommandEntered(PlayerCommandPreprocessEvent e){
-        if (allowedCommands.contains(e.getMessage())) return;
+        if (allowedCommands.contains(e.getMessage().split(" ")[0])) return;
         Player player = e.getPlayer();
         if (verifyingPlayers.contains(player)) {
             e.setCancelled(true);
@@ -98,6 +98,7 @@ public class VerifyManager implements Listener {
         }
         else if (forcedPlayers.contains(player)){
             e.setCancelled(true);
+            sendTitle(player);
         }
     }
 
