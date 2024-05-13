@@ -41,7 +41,7 @@ allowedCommands: ["/login"]    # Commands allowed before the Player is verified
 
 #### Author : [@sieadev](https://www.github.com/sieadev)
 
-#### Version : 1.4
+#### Version : 1.5.2
 
 #### Contact
 - Discord [@sieadev](dsc.gg/siea)
