@@ -1,4 +1,9 @@
-# --------------------------- Discord Messages ---------------------------
+#################################################################
+# --------------------------- German -------------------------- #
+# ---------------------- By: Me, Sieadev ---------------------- #
+#################################################################
+
+# ----------------------- Discord Messages -----------------------
 verify:
   title: "Neuer Login"
   text: "Jemand hat sich auf dein Konto eingeloggt. (%ip%)"
@@ -15,7 +20,7 @@ acceptMessage: "Verifizierung angenommen!"
 denyMessage: "Verifizierung abgelehnt!"
 alreadyLinking: "Dir wurde bereits ein Verifizierungscode zugestellt."
 
-# --------------------------- In-game Messages ---------------------------
+# ----------------------- In-game Messages -----------------------
 invalidCode: "&cDieser Code ist ungültig!"
 linkSuccess: "&aDu hast erfolgreich deine Konten verbunden."
 noCode: "&cBitte gib einen Code an."
