@@ -11,6 +11,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bstats.bukkit.Metrics;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public final class Discord2FA extends JavaPlugin {
     private static Plugin plugin;
@@ -23,8 +24,10 @@ public final class Discord2FA extends JavaPlugin {
     private void enablePlugin() {
         plugin = this;
         saveDefaultConfig();
-        saveResource("messages.yml", false);
-        Messages.onEnable(this);
+        saveResource("lang/messages.yml", false);
+
+        try{Messages.setLanguage(Objects.requireNonNull(getConfig().getString("language")));} catch (Exception ignore){}
+
         try{
             StorageManager.init(this);
         } catch (Exception e){
