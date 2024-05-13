@@ -7,6 +7,11 @@
 
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
+# ----------------------------- Lang -----------------------------
+# Choose from EN,IT and DE | Something missing? You can always reach out to me and add your own!
+language: en
+playerSpecificTranslations: true
+
 # ----------------------------- Data -----------------------------
 # MYSQL or FILE
 storage: "FILE"
@@ -26,5 +31,5 @@ discord:
     channel: "" # Link Message Channel
 
 # --------------------------- Settings ---------------------------
-allowedCommands: ["/link"]    # Commands allowed before the Player is verified
+allowedCommands: ["/link"] # Commands allowed before the Player is verified
 force-link: false # Force Users to Link their accounts
