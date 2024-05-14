@@ -1,0 +1,34 @@
+##################################################################
+# --------------------------- Türkçe --------------------------- #
+# ----------------------- By: Tarafından ----------------------- #
+##################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Oturumu Doğrula"
+  text: "Birisi senin Hesabına farklı bir Konum (%ip%) üzerinden giriş yaptı"
+  footer: "Bu sen değilsen acilen şifreni değiştir!"
+  VerifyButton: "Doğrula"
+  DenyButton: "Reddet"
+link:
+  title: "Hesabını bağla!"
+  text: "Minecraft Hesabını daha güvenli hâle getirmek ister misin? Onu Discord hesabın ile eşleştir!"
+  footer: "Hesabını bağlamak için alttaki Butona tıkla!"
+  linkButton: "Bağlantı"
+codeMessage: "Doğrulama kodun: %code%"
+acceptMessage: "Doğrulamayı kabul ettin!"
+denyMessage: "Doğrulamayı reddettin!"
+alreadyLinking: "Sana zaten daha önce doğrulama kodun gönderildi!"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&cGeçersiz kod!"
+linkSuccess: "&aHesabını başarıyla eşleştirdin"
+noCode: "&cBir kod girmelisin!"
+verifyTitle: "&cHesabını doğrula!"
+notLinked: "&cSen eşleştirilmedin!"
+unlinkSuccess: "&aHesabını başarıyla kaldırdın!"
+verifyDenied: "&cDoğrulama reddedildi!"
+verifySuccess: "&aHesabını başarıyla doğruladın!"
+alreadyLinked: "&cHesabın zaten eşleştirilmiş!"
+
+forceLink: "§eMerhaba §a%player%§e, devam etmeden önce Minecraft hesabını Discord hesabın ile eşleştirmen gerekiyor. Bunun için lütfen Discord sunucumuza katıl ve orada belirtilen yönergeleri takip et."
