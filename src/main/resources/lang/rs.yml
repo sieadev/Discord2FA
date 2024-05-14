@@ -30,4 +30,5 @@ unlinkSuccess: "&aUspesno si odvezao svoj nalog !"
 verifyDenied: "&cVerifikacija odbijena !"
 verifySuccess: "&aUspesno si verifikovao svoj nalog !"
 alreadyLinked: "&cTvoj nalog je vec povezan !"
+
 forceLink: "§Cao §a%player%§e, pre nego sto nastavis, moraces da povezes svoj Minecraft nalog sa Discord-om. Za vise informacija udji na nas Discord server i prati instrukcije koje su date tamo."
