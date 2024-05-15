@@ -31,4 +31,4 @@ verifyDenied: "&cDoğrulama reddedildi!"
 verifySuccess: "&aHesabını başarıyla doğruladın!"
 alreadyLinked: "&cHesabın zaten eşleştirilmiş!"
 
-forceLink: "§eMerhaba §a%player%§e, devam etmeden önce Minecraft hesabını Discord hesabın ile eşleştirmen gerekiyor. Bunun için lütfen Discord sunucumuza katıl ve orada belirtilen yönergeleri takip et."
+forceLink: "&eMerhaba &a%player%&e, devam etmeden önce Minecraft hesabını Discord hesabın ile eşleştirmen gerekiyor. Bunun için lütfen Discord sunucumuza katıl ve orada belirtilen yönergeleri takip et."

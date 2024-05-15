@@ -31,4 +31,4 @@ verifyDenied: "&cVerifizierung fehlgeschlagen!"
 verifySuccess: "&aDu hast dich erfolgreich verifiziert!"
 alreadyLinked: "&cDu bist bereits mit einen Discord Konto verbunden!"
 
-forceLink: "§eHallo §a%player%§e, bevor du weiter machst, musst du dich mit einen Discord Konto verbinden. Tritt dafür bitte unserem Discord Server bei und folge den Anweisungen dort."
+forceLink: "&eHallo &a%player%&e, bevor du weiter machst, musst du dich mit einen Discord Konto verbinden. Tritt dafür bitte unserem Discord Server bei und folge den Anweisungen dort."
