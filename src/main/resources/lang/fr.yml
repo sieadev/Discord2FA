@@ -31,4 +31,4 @@ verifyDenied: "&cVérification refusée !"
 verifySuccess: "&aVous avez vérifié votre compte avec succès !"
 alreadyLinked: "&cVotre compte est déjà lié !"
 
-forceLink: "§eBonjour §a%player%§e, avant de commencer, vous allez devoir lier votre compte minecraft à votre compte discord. Pour cela, veuillez rejoindre notre serveur discord et suivez les instructions dans la liste des instructions"
+forceLink: "&eBonjour &a%player%&e, avant de commencer, vous allez devoir lier votre compte minecraft à votre compte discord. Pour cela, veuillez rejoindre notre serveur discord et suivez les instructions dans la liste des instructions"
