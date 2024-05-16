@@ -43,11 +43,15 @@ public class VerifyManager implements Listener {
 
     public static void linked(Player player){
         forcedPlayers.remove(player);
+        StorageManager.updateIPAddress(player);
     }
 
     @EventHandler
     public static void onPlayerJoin(PlayerJoinEvent e){
         if(StorageManager.isLinked(e.getPlayer())){
+            if (StorageManager.isRemembered(e.getPlayer())){
+                return;
+            }
             verifyingPlayers.add(e.getPlayer());
             sendTitle(e.getPlayer());
             Account account = StorageManager.findAccountByUUID(e.getPlayer().getUniqueId().toString());
@@ -131,6 +135,7 @@ public class VerifyManager implements Listener {
        if(allowed){
            verifyingPlayers.remove(player);
            player.sendMessage(Messages.get("verifySuccess"));
+           StorageManager.updateIPAddress(player);
         }else{
            verifyingPlayers.remove(player);
            kickPlayerAsync(player, Messages.get("verifyDenied"));

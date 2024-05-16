@@ -80,4 +80,13 @@ public class StorageManager {
     public static void updateIPAddress(Player player){
         userDataStorage.setIP(player.getUniqueId().toString(), Objects.requireNonNull(player.getAddress()).toString());
     }
+
+    public static boolean isRemembered(Player player) {
+        if (!rememberIPAddress()) return false;
+        return Objects.requireNonNull(player.getAddress()).toString().equals(userDataStorage.getLatestIP(player.getUniqueId().toString()));
+    }
+
+    public static boolean rememberIPAddress(){
+        return userDataStorage != null;
+    }
 }
