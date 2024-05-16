@@ -1,12 +1,12 @@
 package dev.siea.discord2fa.storage;
 
+import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.storage.file.FileStorage;
 import dev.siea.discord2fa.storage.mysql.MySQLStorage;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.storage.settings.UserDataStorage;
 import net.dv8tion.jda.api.entities.Member;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -18,6 +18,42 @@ public class StorageManager {
     private static UserDataStorage userDataStorage;
 
     public static void init(Plugin plugin) {
+        try {
+            StorageType storageType = StorageType.valueOf(plugin.getConfig().getString("storage"));
+            switch (storageType) {
+                case MYSQL:
+                    MySQLWrapper.onEnable(plugin);
+                    accountStorage = new MySQLStorage();
+                    break;
+                case FILE:
+                    accountStorage = new FileStorage();
+                    break;
+                default:
+                    throw new Exception("Storage type not supported");
+            }
+        } catch (Exception e) {
+            if (plugin.getConfig().getBoolean("fileAsFallback")) {
+                plugin.getLogger().severe("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
+                accountStorage = new FileStorage();
+            } else {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        if (plugin.getConfig().getBoolean("rememberIPAddresses")) {
+            userDataStorage = new UserDataStorage(plugin);
+        }
+    }
+
+    public static void reload(Plugin plugin) {
+        try{
+            if (MySQLWrapper.getConnection() != null) {
+                MySQLWrapper.onDisable();
+            }
+        } catch (SQLException ignore) {
+        }
+        userDataStorage = null;
+        accountStorage = null;
         try {
             StorageType storageType = StorageType.valueOf(plugin.getConfig().getString("storage"));
             switch (storageType) {
@@ -67,16 +103,6 @@ public class StorageManager {
 
     public static Account findAccountByDiscordID(String id) {
         return accountStorage.findAccountByDiscordID(id);
-    }
-
-    public static String getIpAddress(OfflinePlayer player){
-        if (!rememberIPAddress()) return null;
-        return userDataStorage.getLatestIP(player.getUniqueId().toString());
-    }
-
-    public static void setIPAddress(OfflinePlayer player, String ip){
-        if (!rememberIPAddress()) return;
-        userDataStorage.setIP(player.getUniqueId().toString(), ip);
     }
 
     public static void updateIPAddress(Player player){

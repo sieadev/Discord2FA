@@ -10,11 +10,9 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import javax.security.auth.login.LoginException;
-
 public class DiscordBot extends ListenerAdapter {
     private static ShardManager shardManager;
-    public DiscordBot(Plugin plugin) throws LoginException {
+    public DiscordBot(Plugin plugin) {
         String token = plugin.getConfig().getString("discord.token");
         DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT).enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.setStatus(OnlineStatus.ONLINE);

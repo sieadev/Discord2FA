@@ -29,8 +29,8 @@ public class FileWrapper {
         return null;
     }
 
-    public void createAccount(String uuid, String discordid){
-        config.getConfig().set(uuid, discordid);
+    public void createAccount(String uuid, String discordId){
+        config.getConfig().set(uuid, discordId);
         config.save();
     }
 

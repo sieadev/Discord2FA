@@ -6,20 +6,17 @@ import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.manager.LinkManager;
 import dev.siea.discord2fa.manager.VerifyManager;
-import dev.siea.discord2fa.util.ConfigUtil;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.security.SecureRandom;
@@ -87,30 +84,7 @@ public class DiscordUtils extends ListenerAdapter {
         assert channel != null;
         CompletableFuture.runAsync(() -> {
             channel.purgeMessages(channel.getHistory().retrievePast(100).complete());
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-
-            if (title == null) {
-                embedBuilder.setTitle("Link your account!");
-            }
-            else{
-                embedBuilder.setTitle(title);
-            }
-
-            if (text == null) {
-                embedBuilder.setDescription("Click the button below to Link your account!");
-            }
-            else{
-                embedBuilder.setDescription(text);
-            }
-
-            if (footer == null) {
-                embedBuilder.setFooter("Discord2FA");
-            }
-            else{
-                embedBuilder.setFooter(footer);
-            }
-
-            embedBuilder.setColor(Color.GREEN);
+            EmbedBuilder embedBuilder = generateEmbed(title, text, footer);
 
             if (button == null) {
                 channel.sendMessageEmbeds(embedBuilder.build()).addActionRow(
@@ -125,14 +99,40 @@ public class DiscordUtils extends ListenerAdapter {
         });
     }
 
+    private static @NotNull EmbedBuilder generateEmbed(String title, String text, String footer) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        if (title == null) {
+            embedBuilder.setTitle("Link your account!");
+        }
+        else{
+            embedBuilder.setTitle(title);
+        }
+
+        if (text == null) {
+            embedBuilder.setDescription("Click the button below to Link your account!");
+        }
+        else{
+            embedBuilder.setDescription(text);
+        }
+
+        if (footer == null) {
+            embedBuilder.setFooter("Discord2FA");
+        }
+        else{
+            embedBuilder.setFooter(footer);
+        }
+
+        embedBuilder.setColor(Color.GREEN);
+        return embedBuilder;
+    }
+
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
         if (event.getComponentId().equals("link")) {
             event.deferEdit().queue();
             if (LinkManager.getLinking().containsValue(event.getMember())) {
-                event.getUser().openPrivateChannel().queue(privateChannel -> {
-                    privateChannel.sendMessage(Messages.get("alreadyLinking")).queue();
-                });
+                event.getUser().openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(Messages.get("alreadyLinking")).queue());
                 return;
             }
             Objects.requireNonNull(event.getMember()).getUser().openPrivateChannel().queue(privateChannel -> {

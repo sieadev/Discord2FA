@@ -1,5 +1,6 @@
 package dev.siea.discord2fa;
 
+import dev.siea.discord2fa.commands.Discord2FACommand;
 import dev.siea.discord2fa.commands.LinkCommand;
 import dev.siea.discord2fa.commands.UnlinkCommand;
 import dev.siea.discord2fa.message.Messages;
@@ -46,8 +47,9 @@ public final class Discord2FA extends JavaPlugin {
             return;
         }
         getServer().getPluginManager().registerEvents(new VerifyManager(), this);
-        getCommand("link").setExecutor(new LinkCommand());
-        getCommand("unlink").setExecutor(new UnlinkCommand());
+        Objects.requireNonNull(getCommand("link")).setExecutor(new LinkCommand());
+        Objects.requireNonNull(getCommand("unlink")).setExecutor(new UnlinkCommand());
+        Objects.requireNonNull(getCommand("discord2fa")).setExecutor(new Discord2FACommand());
         enableBStats();
         new UpdateChecker(this);
     }
@@ -55,6 +57,12 @@ public final class Discord2FA extends JavaPlugin {
     private void enableBStats(){
         int pluginID = 21448;
         new Metrics(this, pluginID);
+    }
+
+    public static void reload(){
+        plugin.reloadConfig();
+        Messages.reload(plugin);
+        StorageManager.reload(plugin);
     }
 
     public static void disable(String reason){
