@@ -11,3 +11,6 @@ commands:
     unlink:
         description: Unlink your Account from Discord
         usage: §c/unlink
+    discord2fa:
+        description: Discord2FA Command
+        usage: §c/discord2fa §c<§7-§c/§7reload§c>

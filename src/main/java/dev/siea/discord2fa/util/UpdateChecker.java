@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import java.io.IOException;
 
@@ -17,6 +18,17 @@ public class UpdateChecker {
         int releasesBehind = getReleasesBehind(currentVersion);
         if (releasesBehind > 0) {
             plugin.getLogger().severe("You are " + releasesBehind + " release(s) behind! Download the newest release at https://modrinth.com/plugin/discord2fa");
+        }
+    }
+
+    public UpdateChecker(Plugin plugin, Player player) {
+        String currentVersion = "V" + plugin.getDescription().getVersion();
+        int releasesBehind = getReleasesBehind(currentVersion);
+        if (releasesBehind > 0) {
+            player.sendMessage("§cYou are §4" + releasesBehind + "§c release(s) behind! Download the newest release at https://modrinth.com/plugin/discord2fa");
+        }
+        else {
+            player.sendMessage("§eYou are running the latest release of Discord2FA! §e[" + currentVersion + "]");
         }
     }
 

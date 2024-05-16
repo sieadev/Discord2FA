@@ -1,5 +1,6 @@
 package dev.siea.discord2fa.storage.mysql;
 
+import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.models.Account;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
@@ -95,7 +96,7 @@ public class MySQLWrapper {
                     destroyConnection();
                     establishConnection();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Discord2FA.getPlugin().getLogger().warning("Failed to restart MYSQL connection...");
                 }
             }
         }, IDLE_TIMEOUT, IDLE_TIMEOUT, TimeUnit.MILLISECONDS);

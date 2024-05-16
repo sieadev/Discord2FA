@@ -19,19 +19,11 @@ public class ConfigUtil {
         this.config = YamlConfiguration.loadConfiguration(this.file);
     }
 
-    public boolean save() {
+    public void save() {
         try {
             this.config.save(this.file);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        } catch (Exception ignore) {
         }
-
-    }
-
-    public File getFile() {
-        return this.file;
     }
 
     public FileConfiguration getConfig() {

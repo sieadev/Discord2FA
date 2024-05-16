@@ -7,6 +7,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Messages {
     private static final HashMap<String, String> messages = new HashMap<>();
@@ -39,7 +40,8 @@ public class Messages {
         return retrievedMessage.replace("&","§");
     }
 
-    public static void reload() {
+    public static void reload(Plugin plugin) {
+        setLanguage(Objects.requireNonNull(plugin.getConfig().getString("language")));
         messages.clear();
     }
 }
