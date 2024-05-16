@@ -70,14 +70,17 @@ public class StorageManager {
     }
 
     public static String getIpAddress(OfflinePlayer player){
+        if (!rememberIPAddress()) return null;
         return userDataStorage.getLatestIP(player.getUniqueId().toString());
     }
 
     public static void setIPAddress(OfflinePlayer player, String ip){
+        if (!rememberIPAddress()) return;
         userDataStorage.setIP(player.getUniqueId().toString(), ip);
     }
 
     public static void updateIPAddress(Player player){
+        if (!rememberIPAddress()) return;
         userDataStorage.setIP(player.getUniqueId().toString(), Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress());
     }
 
