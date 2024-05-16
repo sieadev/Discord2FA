@@ -1,6 +1,7 @@
 package dev.siea.discord2fa.message;
 
 import dev.siea.discord2fa.Discord2FA;
+import dev.siea.discord2fa.storage.file.FileWrapper;
 import dev.siea.discord2fa.util.ConfigUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
@@ -16,7 +17,7 @@ public class Messages {
         Plugin plugin = Discord2FA.getPlugin();
         try{
             String path = "lang/" + lang.toLowerCase() + ".yml";
-            plugin.saveResource(path, false);
+            FileWrapper.saveFile(plugin,path);
             configUtil = new ConfigUtil(plugin, path).getConfig();
         } catch (Exception ignore){
 

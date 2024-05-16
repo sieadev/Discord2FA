@@ -3,7 +3,9 @@ package dev.siea.discord2fa.storage.file;
 import dev.siea.discord2fa.Discord2FA;
 import dev.siea.discord2fa.storage.models.Account;
 import dev.siea.discord2fa.util.ConfigUtil;
+import org.bukkit.plugin.Plugin;
 
+import java.io.File;
 import java.util.Set;
 
 public class FileWrapper {
@@ -35,5 +37,12 @@ public class FileWrapper {
     public void deleteAccount(String uuid){
         config.getConfig().set(uuid, null);
         config.save();
+    }
+
+    public static void saveFile(Plugin plugin, String fileName) {
+        File file = new File(plugin.getDataFolder(), fileName);
+        if (!file.exists()) {
+            plugin.saveResource(fileName, false);
+        }
     }
 }

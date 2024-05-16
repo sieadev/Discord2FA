@@ -4,6 +4,7 @@ import dev.siea.discord2fa.commands.LinkCommand;
 import dev.siea.discord2fa.commands.UnlinkCommand;
 import dev.siea.discord2fa.message.Messages;
 import dev.siea.discord2fa.storage.StorageManager;
+import dev.siea.discord2fa.storage.file.FileWrapper;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
@@ -25,9 +26,11 @@ public final class Discord2FA extends JavaPlugin {
     private void enablePlugin() {
         plugin = this;
         saveDefaultConfig();
-        saveResource("lang/messages.yml", false);
 
-        try{Messages.setLanguage(Objects.requireNonNull(getConfig().getString("language")));} catch (Exception ignore){}
+        try{
+            FileWrapper.saveFile(this,"lang/messages.yml");
+            Messages.setLanguage(Objects.requireNonNull(getConfig().getString("language")));
+        } catch (Exception ignore){}
 
         try{
             StorageManager.init(this);
