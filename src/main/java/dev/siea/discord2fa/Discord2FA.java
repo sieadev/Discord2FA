@@ -7,6 +7,7 @@ import dev.siea.discord2fa.storage.StorageManager;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.discord.DiscordBot;
 import dev.siea.discord2fa.manager.VerifyManager;
+import dev.siea.discord2fa.util.UpdateChecker;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bstats.bukkit.Metrics;
@@ -45,6 +46,7 @@ public final class Discord2FA extends JavaPlugin {
         getCommand("link").setExecutor(new LinkCommand());
         getCommand("unlink").setExecutor(new UnlinkCommand());
         enableBStats();
+        new UpdateChecker(this);
     }
 
     private void enableBStats(){
