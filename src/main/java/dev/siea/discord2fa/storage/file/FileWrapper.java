@@ -6,7 +6,7 @@ import dev.siea.discord2fa.util.ConfigUtil;
 
 import java.util.Set;
 
-public class FileUtil {
+public class FileWrapper {
     private final ConfigUtil config = new ConfigUtil(Discord2FA.getPlugin(), "Accounts.yml");
     public Account findAccountByUUID(String uuid){
         String discordID = config.getConfig().getString(uuid);
