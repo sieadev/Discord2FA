@@ -27,7 +27,7 @@ database:
 discord:
     token: ""
     guild: ""
-    channel: "" # Link Message Channel
+    channel: ""
 
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/link"] # Commands allowed before the Player is verified

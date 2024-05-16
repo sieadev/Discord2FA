@@ -18,24 +18,32 @@ such as minimizing the presence of alt-accounts.
 
 ## Config
 ```
-language: en 🆕
+# ----------------------------- Lang -----------------------------
+# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
+language: en
 
-storage: "FILE" 
+# ----------------------------- Data -----------------------------
+# MYSQL or FILE
+storage: "FILE"
 fileAsFallback: true #This will use files if the database is not accessible
 
 database:
-  IP: "1.1.1.1" <- Your databases IP
-  name: "exampleBase" <- Your database name
+  ip: ""
+  name: ""
 
-  user: "exampleUser" <- Your Database user
-  password: "examplePassword" <- Your Database password
+  user: ""
+  password: ""
 
+# -------------------------- DiscordBot --------------------------
 discord:
-    token: "1233456789" <- Your Discord Bots token
-    guild: "98765421" <- Your Guild ID
-    channel: "1233456789" <- This Channel will hold the 'Link' Embed
+    token: ""
+    guild: ""
+    channel: ""
 
-allowedCommands: ["/login"]    # Commands allowed before the Player is verified
+# --------------------------- Settings ---------------------------
+allowedCommands: ["/link"] # Commands allowed before the Player is verified
+force-link: false # Force Users to Link their accounts
+rememberIPAddresses: true # Remember IP addresses; only request verification on new ones
 ```
 
 ## Additional Info
