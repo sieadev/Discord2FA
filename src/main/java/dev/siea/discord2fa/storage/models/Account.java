@@ -16,7 +16,7 @@ public class Account {
         this.discordID = discordID;
         this.player = Discord2FA.getPlugin().getServer().getOfflinePlayer(UUID.fromString(minecraftUUID));
         String ipAddress= "";
-        try{ ipAddress = Discord2FA.getPlugin().getServer().getPlayer(UUID.fromString(minecraftUUID)).getAddress().toString();} catch(NullPointerException ignore){}
+        try{ ipAddress = Discord2FA.getPlugin().getServer().getPlayer(UUID.fromString(minecraftUUID)).getAddress().getAddress().getHostAddress();} catch(NullPointerException ignore){}
         this.ipAddress = ipAddress;
     }
 

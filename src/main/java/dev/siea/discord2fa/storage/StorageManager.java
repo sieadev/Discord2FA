@@ -78,12 +78,12 @@ public class StorageManager {
     }
 
     public static void updateIPAddress(Player player){
-        userDataStorage.setIP(player.getUniqueId().toString(), Objects.requireNonNull(player.getAddress()).toString());
+        userDataStorage.setIP(player.getUniqueId().toString(), Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress());
     }
 
     public static boolean isRemembered(Player player) {
         if (!rememberIPAddress()) return false;
-        return Objects.requireNonNull(player.getAddress()).toString().equals(userDataStorage.getLatestIP(player.getUniqueId().toString()));
+        return Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress().equals(userDataStorage.getLatestIP(player.getUniqueId().toString()));
     }
 
     public static boolean rememberIPAddress(){
