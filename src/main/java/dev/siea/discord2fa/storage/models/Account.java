@@ -10,10 +10,14 @@ import java.util.concurrent.CompletableFuture;
 public class Account {
     private final String discordID;
     private final OfflinePlayer player;
+    private final String ipAddress;
 
     public Account(String discordID, String minecraftUUID) {
         this.discordID = discordID;
         this.player = Discord2FA.getPlugin().getServer().getOfflinePlayer(UUID.fromString(minecraftUUID));
+        String ipAddress= "";
+        try{ ipAddress = Discord2FA.getPlugin().getServer().getPlayer(UUID.fromString(minecraftUUID)).getAddress().toString();} catch(NullPointerException ignore){}
+        this.ipAddress = ipAddress;
     }
 
     public String getDiscordID() {
@@ -31,5 +35,9 @@ public class Account {
 
     public OfflinePlayer getPlayer() {
         return player;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
     }
 }

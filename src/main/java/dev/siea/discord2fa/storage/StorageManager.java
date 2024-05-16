@@ -4,14 +4,18 @@ import dev.siea.discord2fa.storage.file.FileStorage;
 import dev.siea.discord2fa.storage.mysql.MySQLStorage;
 import dev.siea.discord2fa.storage.mysql.MySQLWrapper;
 import dev.siea.discord2fa.storage.models.Account;
+import dev.siea.discord2fa.storage.settings.UserDataStorage;
 import net.dv8tion.jda.api.entities.Member;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class StorageManager {
     private static Storage accountStorage;
+    private static UserDataStorage userDataStorage;
 
     public static void init(Plugin plugin) {
         try {
@@ -34,6 +38,10 @@ public class StorageManager {
             } else {
                 throw new ExceptionInInitializerError(e);
             }
+        }
+
+        if (plugin.getConfig().getBoolean("rememberIPAddresses")) {
+            userDataStorage = new UserDataStorage(plugin);
         }
     }
 
@@ -59,5 +67,17 @@ public class StorageManager {
 
     public static Account findAccountByDiscordID(String id) {
         return accountStorage.findAccountByDiscordID(id);
+    }
+
+    public static String getIpAddress(OfflinePlayer player){
+        return userDataStorage.getLatestIP(player.getUniqueId().toString());
+    }
+
+    public static void setIPAddress(OfflinePlayer player, String ip){
+        userDataStorage.setIP(player.getUniqueId().toString(), ip);
+    }
+
+    public static void updateIPAddress(Player player){
+        userDataStorage.setIP(player.getUniqueId().toString(), Objects.requireNonNull(player.getAddress()).toString());
     }
 }

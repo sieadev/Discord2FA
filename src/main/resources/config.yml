@@ -8,9 +8,8 @@
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
 # ----------------------------- Lang -----------------------------
-# Choose from EN,IT and DE | Something missing? You can always reach out to me and add your own!
+# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
 language: en
-playerSpecificTranslations: true
 
 # ----------------------------- Data -----------------------------
 # MYSQL or FILE
@@ -33,3 +32,4 @@ discord:
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/link"] # Commands allowed before the Player is verified
 force-link: false # Force Users to Link their accounts
+rememberIPAddresses: true # Remember IP addresses; only request verification on new ones
