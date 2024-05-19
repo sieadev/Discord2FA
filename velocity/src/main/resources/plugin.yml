@@ -1,0 +1,16 @@
+name: Discord2FA
+version: '${project.version}'
+main: dev.siea.discord2fa.Discord2FA
+api-version: '1.16'
+load: STARTUP
+commands:
+    link:
+        description: Link your Account with Discord
+        usage: §c/link <code>
+        aliases: [2fa]
+    unlink:
+        description: Unlink your Account from Discord
+        usage: §c/unlink
+    discord2fa:
+        description: Discord2FA Command
+        usage: §c/discord2fa §c<§7-§c/§7reload§c>

@@ -1,0 +1,34 @@
+##################################################################
+# --------------------------- Serbian -------------------------- #
+# -------------------------- By: Goksi ------------------------- #
+##################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Verifikuj Logovanje"
+  text: "Neko se ulogovao na tvoj nalog sa nove lokacije ! (%ip%)"
+  footer: "Ako ovo nisi bio ti, promeni sifru istog trenutka !"
+  VerifyButton: "Verifikuj"
+  DenyButton: "Odbij"
+link:
+  title: "Povezi svoj Nalog !"
+  text: "Zelis da zastitis svoj Minecraft nalog ? Povezi ga sa svojim Discord-om !"
+  footer: "Pritisni dugme ispod da povezes svoj nalog !"
+  linkButton: "Povezi"
+codeMessage: "Tvoj kod za verifikaciju je: %code%"
+acceptMessage: "Prihvatio si verifikaciju!"
+denyMessage: "Odbio si verifikaciju!"
+alreadyLinking: "Vec ti je poslat kod za verifikaciju !"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&cNevazeci kod !"
+linkSuccess: "&aUspesno si povezao svoj nalog !"
+noCode: "&cMoras uneti kod !"
+verifyTitle: "&cVerifikuj svoj nalog !"
+notLinked: "&cNalozi nisu povezani !"
+unlinkSuccess: "&aUspesno si odvezao svoj nalog !"
+verifyDenied: "&cVerifikacija odbijena !"
+verifySuccess: "&aUspesno si verifikovao svoj nalog !"
+alreadyLinked: "&cTvoj nalog je vec povezan !"
+
+forceLink: "&Cao &a%player%&e, pre nego sto nastavis, moraces da povezes svoj Minecraft nalog sa Discord-om. Za vise informacija udji na nas Discord server i prati instrukcije koje su date tamo."

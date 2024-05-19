@@ -24,7 +24,7 @@ language: en
 
 # ----------------------------- Data -----------------------------
 # MYSQL or FILE
-storage: "FILE"
+dev.siea.discord2fa.storage: "FILE"
 fileAsFallback: true #This will use files if the database is not accessible
 
 database:
@@ -35,7 +35,7 @@ database:
   password: ""
 
 # -------------------------- DiscordBot --------------------------
-discord:
+dev.siea.discord2fa.discord:
     token: ""
     guild: ""
     channel: ""
@@ -63,6 +63,6 @@ Project Link: https://github.com/sieadev/Discord2FA
 ### Fun fact
 Md approved this plugin!
 
-![MD_Approved](https://storage.ko-fi.com/cdn/useruploads/display/cf23a2d8-9690-4742-ad1a-b56627b46cd6_hhgpkrp.png)
+![MD_Approved](https://dev.siea.discord2fa.storage.ko-fi.com/cdn/useruploads/display/cf23a2d8-9690-4742-ad1a-b56627b46cd6_hhgpkrp.png)
 
 

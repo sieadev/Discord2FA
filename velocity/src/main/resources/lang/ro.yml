@@ -1,0 +1,34 @@
+##################################################################
+# ------------------------- Romanian --------------------------- #
+# ------ By: Discord[@xellonn] & GitHub[@davidcostache] -------  #
+##################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Verificare Autentificare"
+  text: "Cineva s-a autentificat în contul tău de la o nouă locație (%ip%)"
+  footer: "Dacă nu ai fost tu, schimbă-ți parola imediat!"
+  VerifyButton: "Verifică"
+  DenyButton: "Refuză"
+link:
+  title: "Conectează-ți contul!"
+  text: "Vrei să îți faci contul de Minecraft mai sigur? Conectează-l cu Discord-ul tău!"
+  footer: "Apasă butonul de mai jos pentru a-ți conecta contul!"
+  linkButton: "Conectează"
+codeMessage: "Codul tău de verificare este: %code%"
+acceptMessage: "Ai acceptat verificarea!"
+denyMessage: "Ai refuzat verificarea!"
+alreadyLinking: "Ți-a fost deja trimis un cod de verificare!"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&cCod invalid!"
+linkSuccess: "&aȚi-ai conectat cu succes contul"
+noCode: "&cTrebuie să furnizezi un cod!"
+verifyTitle: "&cVerifică-ți contul!"
+notLinked: "&cNu ești conectat!"
+unlinkSuccess: "&aȚi-ai deconectat cu succes contul"
+verifyDenied: "&cVerificare refuzată!"
+verifySuccess: "&aȚi-ai verificat cu succes contul!"
+alreadyLinked: "&cContul tău este deja conectat!"
+
+forceLink: "&eBună &a%player%&e, înainte de a continua va trebui să îți conectezi contul de Minecraft cu cel de Discord. Pentru asta, te rog să te alături serverului nostru de Discord și să urmezi instrucțiunile listate acolo."

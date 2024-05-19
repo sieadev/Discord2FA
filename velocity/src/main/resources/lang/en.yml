@@ -1,0 +1,34 @@
+#################################################################
+# -------------------------- English -------------------------- #
+# ---------------------- By: Me, Sieadev ---------------------- #
+#################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Verify Login"
+  text: "Someone logged into your Account from a new Location (%ip%)"
+  footer: "If this wasn't you, change your Password immediately!"
+  VerifyButton: "Verify"
+  DenyButton: "Deny"
+link:
+  title: "Link your Account!"
+  text: "Want to make your Minecraft Account more secure? Link it with your Discord!"
+  footer: "Click the Button below to link your Account!"
+  linkButton: "Link"
+codeMessage: "Your Verification Code is: %code%"
+acceptMessage: "You accepted the Verification!"
+denyMessage: "You denied the Verification!"
+alreadyLinking: "You already been send a Verification Code!"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&cInvalid Code!"
+linkSuccess: "&aYou successfully linked your Account"
+noCode: "&cYou must provide a Code!"
+verifyTitle: "&cVerify your Account!"
+notLinked: "&cYou are not linked!"
+unlinkSuccess: "&aYou successfully unlinked your Account!"
+verifyDenied: "&cVerification denied!"
+verifySuccess: "&aYou successfully verified your Account!"
+alreadyLinked: "&cYour Account is already linked!"
+
+forceLink: "&eHello &a%player%&e, before you proceed you will have to link your Minecraft to your Discord account. For that please join our dev.siea.discord2fa.discord server and follow the instructions in the instructions listed there."

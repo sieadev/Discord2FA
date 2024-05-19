@@ -1,0 +1,35 @@
+#################################################################
+# +-----------------------------------------------------------+ #
+# |      Discord2FA - Easy Discord <-> Minecraft linking      | #
+# |                  Made with <3 by sieadev                  | #
+# +-----------------------------------------------------------+ #
+#################################################################
+
+# Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
+
+# ----------------------------- Lang -----------------------------
+# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
+language: en
+
+# ----------------------------- Data -----------------------------
+# MYSQL or FILE
+storage: "FILE"
+fileAsFallback: true #This will use files if the database is not accessible
+
+database:
+  ip: ""
+  name: ""
+
+  user: ""
+  password: ""
+
+# -------------------------- DiscordBot --------------------------
+discord:
+    token: ""
+    guild: ""
+    channel: ""
+
+# --------------------------- Settings ---------------------------
+allowedCommands: ["/link"] # Commands allowed before the Player is verified
+force-link: false # Force Users to Link their accounts
+rememberIPAddresses: true # Remember IP addresses; only request verification on new ones
