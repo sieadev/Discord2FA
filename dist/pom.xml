@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>dev.siea</groupId>
+        <artifactId>discord2fa</artifactId>
+        <version>1.5.3</version>
+    </parent>
+
+    <artifactId>Discord2FA-dist</artifactId>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>dev.siea</groupId>
+            <artifactId>common</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.siea</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.siea</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+    </dependencies>
+</project>
