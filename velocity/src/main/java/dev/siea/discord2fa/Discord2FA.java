@@ -17,7 +17,7 @@ import java.nio.file.Path;
 @Plugin(
         id = "discord2fa",
         name = "Discord2FA",
-        version = "1.0-SNAPSHOT",
+        version = "1.5.3",
         description = "Proxy Plugin for Vitacraft",
         authors = {"Vitacraft"}
 )
