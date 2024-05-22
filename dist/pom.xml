@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>Discord2FA-dist</artifactId>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
