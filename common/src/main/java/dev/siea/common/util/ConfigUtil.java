@@ -1,48 +1,71 @@
 package dev.siea.common.util;
-
-import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
-import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
-import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
-import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
-import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.siea.common.Common;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public class ConfigUtil {
-    private final File file;
-    private YamlDocument config;
+    private CommentedConfigurationNode node;
+    private Path configPath;
 
     public ConfigUtil(Path dir, String path) {
-        System.out.println("Test");
         try {
-            config = YamlDocument.create(new File(dir.toFile(), path),
-                    Objects.requireNonNull(getClass().getResourceAsStream("/" + path)),
-                    GeneralSettings.DEFAULT,
-                    LoaderSettings.builder().setAutoUpdate(true).build(),
-                    DumperSettings.DEFAULT,
-                    UpdaterSettings.builder().setVersioning(new BasicVersioning("file-version"))
-                            .setOptionSorting(UpdaterSettings.OptionSorting.SORT_BY_DEFAULTS).build());
+            configPath = dir.resolve(path);
+            // Load the configuration
+            ConfigurationLoader<CommentedConfigurationNode> loader = YamlConfigurationLoader.builder()
+                    .path(configPath)
+                    .build();
+            if (Files.exists(configPath)) {
+                this.node = loader.load();
+            } else {
+                // If the file doesn't exist, create a new empty configuration
+                this.node = loader.createNode();
+                saveConfig(loader);
+            }
 
-            config.update();
-            config.save();
-        } catch (Exception ignore) {
-            Common.getInstance().log("Failed to load config file: " + path);
+            // If the file exists but is empty, save the default configuration
+            if (this.node.empty()) {
+                saveConfig(loader);
+            }
+        } catch (IOException e) {
+            Common.getInstance().log("An exception occurred while loading " + e.getMessage());
         }
-        this.file = new File(path);
+    }
+
+    private void saveConfig(ConfigurationLoader<CommentedConfigurationNode> loader) {
+        try {
+            loader.save(this.node);
+        } catch (IOException e) {
+            Common.getInstance().log("An exception occurred while loading " + e.getMessage());
+        }
+    }
+
+    private void copyFromResources(Path dir, String path, Class<?> anchorClass) throws IOException {
+        try (InputStream is = anchorClass.getResourceAsStream("/" + path)) {
+            if (is != null) {
+                Files.createDirectories(dir);
+                Files.copy(is, dir.resolve(path));
+            }
+        }
+    }
+
+    public CommentedConfigurationNode getNode() {
+        return node;
     }
 
     public void save() {
         try {
-            this.config.save(this.file);
-        } catch (Exception ignore) {
+            ConfigurationLoader<CommentedConfigurationNode> loader = YamlConfigurationLoader.builder()
+                    .path(configPath)
+                    .build();
+            loader.save(node);
+        } catch (IOException e) {
+            Common.getInstance().log("An exception occurred while saving " + e.getMessage());
         }
-    }
-
-    public YamlDocument getConfig() {
-        return this.config;
     }
 }

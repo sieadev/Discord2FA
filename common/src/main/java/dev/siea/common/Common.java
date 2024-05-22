@@ -1,5 +1,4 @@
 package dev.siea.common;
-import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.siea.common.base.BaseLinkManager;
 import dev.siea.common.base.BaseVerifyManager;
 import dev.siea.common.discord.DiscordUtils;
@@ -13,6 +12,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+
 import java.nio.file.Path;
 
 public class Common extends ListenerAdapter {
@@ -22,7 +23,7 @@ public class Common extends ListenerAdapter {
     private final BaseLinkManager lm;
     private final BaseVerifyManager vm;
     private final CommonStorageManager sm;
-    private final YamlDocument config;
+    private final CommentedConfigurationNode config;
     private final Path dir;
     private DiscordUtils discordUtils;
 
@@ -31,14 +32,15 @@ public class Common extends ListenerAdapter {
     }
 
     public void disable(String s) {
+        log(s);
         shutdown();
     }
 
     public String getConfigString(String s) {
-        return config.getString(s);
+        return config.node(s).getString();
     }
 
-    public YamlDocument getConfig() {
+    public CommentedConfigurationNode getConfig() {
         return config;
     }
 
@@ -67,7 +69,7 @@ public class Common extends ListenerAdapter {
         common = this;
         this.dir = dir;
 
-        config = new ConfigUtil(dir, "config.yml").getConfig();
+        config = new ConfigUtil(dir, "config.yml").getNode();
         messages = new Messages(config.getString("language"), dir);
         this.lm = lm;
         this.vm = vm;
