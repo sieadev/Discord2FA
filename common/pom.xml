@@ -14,10 +14,11 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
@@ -29,21 +30,25 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>2.2</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-yaml</artifactId>
             <version>4.1.2</version>
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
 </project>

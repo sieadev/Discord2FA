@@ -14,7 +14,7 @@ public class CommonStorageManager {
     private Storage accountStorage;
     private UserDataStorage userDataStorage;
     private MySQLWrapper mySQLWrapper;
-    private Common common;
+    private final Common common;
 
     public CommonStorageManager(Common common, Path dir) {
         this.common = common;
@@ -32,7 +32,7 @@ public class CommonStorageManager {
                     throw new Exception("Storage type not supported");
             }
         } catch (Exception e) {
-            if (common.getConfig().getBoolean("fileAsFallback")) {
+            if (common.getConfig().node("fileAsFallback").getBoolean()) {
                 common.log("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
                 accountStorage = new FileStorage(dir);
             } else {
@@ -40,7 +40,7 @@ public class CommonStorageManager {
             }
         }
 
-        if (common.getConfig().getBoolean("rememberIPAddresses")) {
+        if (common.getConfig().node("rememberIPAddresses").getBoolean()) {
             userDataStorage = new UserDataStorage(dir);
         }
     }
@@ -60,7 +60,7 @@ public class CommonStorageManager {
                     throw new Exception("Storage type not supported");
             }
         } catch (Exception e) {
-            if (common.getConfig().getBoolean("fileAsFallback")) {
+            if (common.getConfig().node("fileAsFallback").getBoolean()) {
                 common.log("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
                 accountStorage = new FileStorage(dir);
             } else {
@@ -68,7 +68,7 @@ public class CommonStorageManager {
             }
         }
 
-        if (common.getConfig().getBoolean("rememberIPAddresses")) {
+        if (common.getConfig().node("rememberIPAddresses").getBoolean()) {
             userDataStorage = new UserDataStorage(dir);
         }
     }
