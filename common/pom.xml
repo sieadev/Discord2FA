@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>dev.siea</groupId>
-        <artifactId>Discord2FA</artifactId>
+        <artifactId>discord2fa</artifactId>
         <version>1.5.3</version>
     </parent>
 
