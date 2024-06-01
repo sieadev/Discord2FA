@@ -23,6 +23,7 @@
         <module>spigot</module>
         <module>velocity</module>
         <module>dist</module>
+        <module>fabric</module>
     </modules>
 
     <repositories>
