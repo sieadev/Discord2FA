@@ -14,8 +14,6 @@ import dev.siea.discord2fa.managers.VerifyManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.Objects;
 
 public final class Discord2FA extends JavaPlugin {
@@ -44,15 +42,10 @@ public final class Discord2FA extends JavaPlugin {
         Objects.requireNonNull(getCommand("link")).setExecutor(new LinkCommand());
         Objects.requireNonNull(getCommand("unlink")).setExecutor(new UnlinkCommand());
         Objects.requireNonNull(getCommand("discord2fa")).setExecutor(new Discord2FACommand(this));
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                String versionMessage = UpdateChecker.generateUpdateMessage(getDescription().getVersion());
-                if (versionMessage != null) {
-                    plugin.getLogger().severe(versionMessage);
-                }
-            }
-        }.runTask(plugin);
+        String versionMessage = UpdateChecker.generateUpdateMessage(getDescription().getVersion());
+        if (versionMessage != null) {
+            plugin.getLogger().severe(versionMessage);
+        }
         enableBStats();
     }
 
