@@ -14,10 +14,10 @@ public class Messages {
     public Messages(String lang, Path dir){
         Messages.dir = dir;
         try{
-            configUtil = new ConfigUtil(dir, "lang/" + lang);
+            configUtil = new ConfigUtil(dir, "lang/" + lang + ".yml");
             if (configUtil.getConfig() == null) throw new NullPointerException("Config Util is null");
         } catch (Exception ignore){
-            backup = new ConfigUtil(dir, "lang/english.yml");
+            backup = new ConfigUtil(dir, "lang/en.yml");
         }
     }
 
@@ -25,7 +25,7 @@ public class Messages {
         try{
             configUtil = new ConfigUtil(dir, lang);
         } catch (Exception ignore){
-            backup = new ConfigUtil(dir, "/english.yml");
+            backup = new ConfigUtil(dir, "/en.yml");
         }
     }
 
@@ -35,7 +35,10 @@ public class Messages {
 
 
     private String retrieveMessageFromConfig(String key) {
-        String retrievedMessage = configUtil.getConfig().getString(key);
+        String retrievedMessage = "";
+        if (configUtil != null) {
+            retrievedMessage = configUtil.getConfig().getString(key);
+        }
         if (retrievedMessage == null) {
             retrievedMessage = backup.getConfig().getString(key);
         }

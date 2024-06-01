@@ -45,8 +45,6 @@ public final class Discord2FA extends JavaPlugin {
         Objects.requireNonNull(getCommand("link")).setExecutor(new LinkCommand());
         Objects.requireNonNull(getCommand("unlink")).setExecutor(new UnlinkCommand());
         Objects.requireNonNull(getCommand("discord2fa")).setExecutor(new Discord2FACommand(this));
-        enableBStats();
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -56,6 +54,7 @@ public final class Discord2FA extends JavaPlugin {
                 }
             }
         }.runTask(plugin);
+        enableBStats();
     }
 
     private void enableBStats(){
