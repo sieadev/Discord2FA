@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 
 import java.nio.file.Path;
 
@@ -23,7 +22,7 @@ public class Common extends ListenerAdapter {
     private final BaseLinkManager lm;
     private final BaseVerifyManager vm;
     private final CommonStorageManager sm;
-    private final CommentedConfigurationNode config;
+    private final ConfigUtil config;
     private final Path dir;
     private DiscordUtils discordUtils;
 
@@ -37,10 +36,10 @@ public class Common extends ListenerAdapter {
     }
 
     public String getConfigString(String s) {
-        return config.node(s).getString();
+        return config.getConfig().getString(s);
     }
 
-    public CommentedConfigurationNode getConfig() {
+    public ConfigUtil getConfig() {
         return config;
     }
 
@@ -57,7 +56,7 @@ public class Common extends ListenerAdapter {
     }
 
     public void log(String s) {
-
+        System.out.println(s);
     }
 
     public void reload() {
@@ -69,8 +68,8 @@ public class Common extends ListenerAdapter {
         common = this;
         this.dir = dir;
 
-        config = new ConfigUtil(dir, "config.yml").getNode();
-        messages = new Messages(config.getString("language"), dir);
+        config = new ConfigUtil(dir, "config.yml");
+        messages = new Messages(getConfigString("language"), dir);
         this.lm = lm;
         this.vm = vm;
 
@@ -81,7 +80,7 @@ public class Common extends ListenerAdapter {
         }
 
         try{
-            String token = config.getString("discord.token");
+            String token = getConfigString("discord.token");
             DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(token).enableIntents(GatewayIntent.MESSAGE_CONTENT).enableIntents(GatewayIntent.GUILD_MEMBERS);
             builder.setStatus(OnlineStatus.ONLINE);
             shardManager = builder.build();

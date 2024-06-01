@@ -14,10 +14,10 @@ public class Messages {
     public Messages(String lang, Path dir){
         Messages.dir = dir;
         try{
-            configUtil = new ConfigUtil(dir, lang);
-            if (configUtil.getNode() == null) throw new NullPointerException("Config Util is null");
+            configUtil = new ConfigUtil(dir, "lang/" + lang);
+            if (configUtil.getConfig() == null) throw new NullPointerException("Config Util is null");
         } catch (Exception ignore){
-            backup = new ConfigUtil(dir, "/english.yml");
+            backup = new ConfigUtil(dir, "lang/english.yml");
         }
     }
 
@@ -35,9 +35,9 @@ public class Messages {
 
 
     private String retrieveMessageFromConfig(String key) {
-        String retrievedMessage = configUtil.getNode().node(key).getString();
+        String retrievedMessage = configUtil.getConfig().getString(key);
         if (retrievedMessage == null) {
-            retrievedMessage = backup.getNode().node(key).getString();
+            retrievedMessage = backup.getConfig().getString(key);
         }
         if (retrievedMessage == null) {
             retrievedMessage = "§c§lThis is not a bug do not report it! §c[Discord2FA >> Messages.yml] The following message is either missing or not set: §e" + key;

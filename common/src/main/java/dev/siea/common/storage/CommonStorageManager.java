@@ -7,6 +7,8 @@ import dev.siea.common.storage.mysql.MySQLStorage;
 import dev.siea.common.storage.mysql.MySQLWrapper;
 import dev.siea.common.storage.settings.UserDataStorage;
 import net.dv8tion.jda.api.entities.Member;
+import org.simpleyaml.configuration.ConfigurationSection;
+
 import java.nio.file.Path;
 import java.sql.SQLException;
 
@@ -17,9 +19,17 @@ public class CommonStorageManager {
     private final Common common;
 
     public CommonStorageManager(Common common, Path dir) {
+        ConfigurationSection config = common.getConfig().getConfig();
         this.common = common;
         try {
-            StorageType storageType = StorageType.valueOf(common.getConfigString("storage"));
+            String storageString = common.getConfigString("storage");
+
+            if (storageString == null) {
+                throw new Exception("Storage type not supported");
+            }
+
+            StorageType storageType = StorageType.valueOf(storageString);
+
             switch (storageType) {
                 case MYSQL:
                     mySQLWrapper = new MySQLWrapper(common);
@@ -32,7 +42,7 @@ public class CommonStorageManager {
                     throw new Exception("Storage type not supported");
             }
         } catch (Exception e) {
-            if (common.getConfig().node("fileAsFallback").getBoolean()) {
+            if (config.getBoolean("fileAsFallback")) {
                 common.log("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
                 accountStorage = new FileStorage(dir);
             } else {
@@ -40,7 +50,7 @@ public class CommonStorageManager {
             }
         }
 
-        if (common.getConfig().node("rememberIPAddresses").getBoolean()) {
+        if (config.getBoolean("rememberIPAddresses")) {
             userDataStorage = new UserDataStorage(dir);
         }
     }
@@ -60,7 +70,7 @@ public class CommonStorageManager {
                     throw new Exception("Storage type not supported");
             }
         } catch (Exception e) {
-            if (common.getConfig().node("fileAsFallback").getBoolean()) {
+            if (common.getConfig().getConfig().getBoolean("fileAsFallback")) {
                 common.log("Switching to File Storage (fileAsFallback) due to invalid Storage Type or connection failure!");
                 accountStorage = new FileStorage(dir);
             } else {
@@ -68,7 +78,7 @@ public class CommonStorageManager {
             }
         }
 
-        if (common.getConfig().node("rememberIPAddresses").getBoolean()) {
+        if (common.getConfig().getConfig().getBoolean("rememberIPAddresses")) {
             userDataStorage = new UserDataStorage(dir);
         }
     }
