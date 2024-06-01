@@ -21,7 +21,7 @@ public class VerifyManager implements Listener, BaseVerifyManager {
     private final boolean forceLink = Discord2FA.getPlugin().getConfig().getBoolean("force-link");
 
     public VerifyManager(){
-        allowedCommands = Discord2FA.getPlugin().getConfig().getStringList("allowedCommands");
+        allowedCommands = Discord2FA.getCommon().getConfig().getConfig().getStringList("allowedCommands");
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Discord2FA.getPlugin(), () -> {
             for (Player p : titleCooldown.keySet()) {
                 if (titleCooldown.get(p) == 0) {

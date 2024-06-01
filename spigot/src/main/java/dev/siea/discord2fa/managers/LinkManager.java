@@ -1,4 +1,5 @@
 package dev.siea.discord2fa.managers;
+
 import dev.siea.common.base.BaseLinkManager;
 import dev.siea.common.storage.models.Account;
 import dev.siea.discord2fa.Discord2FA;

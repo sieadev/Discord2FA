@@ -29,7 +29,6 @@ public final class Discord2FA extends JavaPlugin {
 
     private void enablePlugin() {
         plugin = this;
-        saveDefaultConfig();
 
         LinkManager linkManager = new LinkManager();
         VerifyManager verifyManager = new VerifyManager();
@@ -76,7 +75,11 @@ public final class Discord2FA extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        common.shutdown();
+        try{
+            common.shutdown();
+        } catch (Exception ignore){
+
+        }
     }
     
     public static Plugin getPlugin() {
@@ -101,5 +104,9 @@ public final class Discord2FA extends JavaPlugin {
 
     public static Messages getMessages(){
         return common.getMessages();
+    }
+
+    public static Common getCommon() {
+        return common;
     }
 }
