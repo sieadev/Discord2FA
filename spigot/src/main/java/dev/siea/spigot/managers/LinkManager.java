@@ -1,12 +1,10 @@
-package dev.siea.discord2fa.managers;
+package dev.siea.spigot.managers;
 
-import com.velocitypowered.api.proxy.Player;
 import dev.siea.common.base.BaseLinkManager;
 import dev.siea.common.storage.models.Account;
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.spigot.Discord2FA;
 import net.dv8tion.jda.api.entities.Member;
-import net.kyori.adventure.text.Component;
-
+import org.bukkit.entity.Player;
 import java.util.HashMap;
 
 public class LinkManager implements BaseLinkManager {
@@ -14,7 +12,6 @@ public class LinkManager implements BaseLinkManager {
     public void queLink(Member member, String code) {
         linking.put(code, member);
     }
-
     public void tryLink(Player player, String code) {
         if (linking.containsKey(code)) {
             Member member = linking.get(code);
@@ -22,13 +19,13 @@ public class LinkManager implements BaseLinkManager {
             try {
                 Discord2FA.getStorageManager().linkAccount(player.getUniqueId().toString(), member.getId());
                 Discord2FA.getDiscordUtils().giveRole(member.getId());
-                player.sendMessage(Component.text(Discord2FA.getMessages().get("linkSuccess").replace("%member%", member.getEffectiveName())));
+                player.sendMessage(Discord2FA.getMessages().get("linkSuccess").replace("%member%", member.getEffectiveName()));
                 Discord2FA.getVerifyManager().linked(player);
             } catch (Exception e) {
-                player.sendMessage(Component.text("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage()));
+                player.sendMessage("§cAn error occurred while linking your account! Contact an administrator!: " + e.getMessage());
             }
         } else {
-            player.sendMessage(Component.text(Discord2FA.getMessages().get("invalidCode")));
+           player.sendMessage(Discord2FA.getMessages().get("invalidCode"));
         }
     }
 

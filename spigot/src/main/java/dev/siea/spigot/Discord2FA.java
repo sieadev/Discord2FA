@@ -1,16 +1,16 @@
-package dev.siea.discord2fa;
+package dev.siea.spigot;
 
 import dev.siea.common.CommonException;
 import dev.siea.common.discord.DiscordUtils;
 import dev.siea.common.messages.Messages;
 import dev.siea.common.storage.CommonStorageManager;
 import dev.siea.common.util.UpdateChecker;
-import dev.siea.discord2fa.commands.Discord2FACommand;
-import dev.siea.discord2fa.commands.LinkCommand;
-import dev.siea.discord2fa.commands.UnlinkCommand;
-import dev.siea.discord2fa.managers.LinkManager;
+import dev.siea.spigot.commands.Discord2FACommand;
+import dev.siea.spigot.commands.LinkCommand;
+import dev.siea.spigot.commands.UnlinkCommand;
+import dev.siea.spigot.managers.LinkManager;
 import dev.siea.common.Common;
-import dev.siea.discord2fa.managers.VerifyManager;
+import dev.siea.spigot.managers.VerifyManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;

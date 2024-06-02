@@ -1,8 +1,8 @@
-package dev.siea.discord2fa.managers;
+package dev.siea.spigot.managers;
 
 import dev.siea.common.base.BaseVerifyManager;
 import dev.siea.common.storage.models.Account;
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.spigot.Discord2FA;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

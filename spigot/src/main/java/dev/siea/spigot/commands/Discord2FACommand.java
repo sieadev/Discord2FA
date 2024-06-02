@@ -1,7 +1,7 @@
-package dev.siea.discord2fa.commands;
+package dev.siea.spigot.commands;
 
 import dev.siea.common.util.UpdateChecker;
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.spigot.Discord2FA;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

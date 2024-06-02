@@ -1,9 +1,9 @@
-package dev.siea.discord2fa.commands;
+package dev.siea.velocity.commands;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.velocity.Discord2FA;
 import net.kyori.adventure.text.Component;
 
 public class LinkCommand implements SimpleCommand {

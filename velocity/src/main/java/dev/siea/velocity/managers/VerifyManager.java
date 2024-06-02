@@ -1,4 +1,4 @@
-package dev.siea.discord2fa.managers;
+package dev.siea.velocity.managers;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.siea.common.base.BaseVerifyManager;
 import dev.siea.common.storage.models.Account;
-import dev.siea.discord2fa.Discord2FA;
+import dev.siea.velocity.Discord2FA;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 

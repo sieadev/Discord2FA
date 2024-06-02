@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>Discord2FA-dist</artifactId>
-    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -30,18 +29,6 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -62,6 +49,11 @@
         <dependency>
             <groupId>dev.siea</groupId>
             <artifactId>velocity</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.siea</groupId>
+            <artifactId>fabric</artifactId>
             <version>1.5.3</version>
         </dependency>
     </dependencies>

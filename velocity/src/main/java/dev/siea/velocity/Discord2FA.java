@@ -1,4 +1,4 @@
-package dev.siea.discord2fa;
+package dev.siea.velocity;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
@@ -13,11 +13,11 @@ import dev.siea.common.discord.DiscordUtils;
 import dev.siea.common.messages.Messages;
 import dev.siea.common.storage.CommonStorageManager;
 import dev.siea.common.util.UpdateChecker;
-import dev.siea.discord2fa.commands.Discord2FACommand;
-import dev.siea.discord2fa.commands.LinkCommand;
-import dev.siea.discord2fa.commands.UnlinkCommand;
-import dev.siea.discord2fa.managers.LinkManager;
-import dev.siea.discord2fa.managers.VerifyManager;
+import dev.siea.velocity.commands.Discord2FACommand;
+import dev.siea.velocity.commands.LinkCommand;
+import dev.siea.velocity.commands.UnlinkCommand;
+import dev.siea.velocity.managers.LinkManager;
+import dev.siea.velocity.managers.VerifyManager;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.slf4j.Logger;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
