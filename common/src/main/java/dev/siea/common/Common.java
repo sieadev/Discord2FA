@@ -111,7 +111,6 @@ public class Common extends ListenerAdapter {
            log("Disabled Discord Bot...");
         } catch (Exception ignore) {
         }
-
     }
 
     public static Common getInstance() {

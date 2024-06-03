@@ -26,18 +26,18 @@ public class DiscordUtils extends ListenerAdapter {
     private TextChannel channel;
     private Role role;
     private final BaseLinkManager lm;
-    private Messages messages;
+    private final Messages messages;
     private final BaseVerifyManager vm;
     private final CommonStorageManager sm;
 
     public DiscordUtils(Common common) {
+        this.messages = common.getMessages();
         String title = messages.get("link.title");
         String text = messages.get("link.text");
         String footer = messages.get("link.footer");
         String button = messages.get("link.linkButton");
         ShardManager shardManager = common.getShardManager();
         this.lm = common.getLinkManager();
-        this.messages = common.getMessages();
         this.vm = common.getVerifyManager();
         this.sm = common.getStorageManager();
 

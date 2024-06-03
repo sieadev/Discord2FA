@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 public class VerifyManager implements BaseVerifyManager {
     private final List<Player> verifyingPlayers = new ArrayList<>();
     private final List<Player> forcedPlayers = new ArrayList<>();
-    private final List<String> allowedCommands;
+    private List<String> allowedCommands;
     private final HashMap<Player, Integer> titleCooldown = new HashMap<>();
-    private final boolean forceLink;
+    private boolean forceLink;
     private final ProxyServer server;
     private final Discord2FA plugin;
 
@@ -31,8 +31,12 @@ public class VerifyManager implements BaseVerifyManager {
         this.plugin = plugin;
         this.forceLink = plugin.getCommon().getConfig().getConfig().getBoolean("force-link");
         this.allowedCommands = plugin.getCommon().getConfig().getConfig().getStringList("allowedCommands");
-
         server.getScheduler().buildTask(plugin, this::updateTitleCooldowns).repeat(1L, TimeUnit.SECONDS).schedule();
+    }
+
+    public void loadConfig(){
+        allowedCommands = plugin.getCommon().getConfig().getConfig().getStringList("allowedCommands");
+        forceLink = plugin.getCommon().getConfig().getConfig().getBoolean("force-link");
     }
 
     private void updateTitleCooldowns() {

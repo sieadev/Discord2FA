@@ -16,12 +16,11 @@ import java.util.*;
 public class VerifyManager implements Listener, BaseVerifyManager {
     private final List<Player> verifyingPlayers = new ArrayList<>();
     private final List<Player> forcedPlayers = new ArrayList<>();
-    private final List<String> allowedCommands;
+    private List<String> allowedCommands;
     private final HashMap<Player, Integer> titleCooldown = new HashMap<>();
-    private final boolean forceLink = Discord2FA.getPlugin().getConfig().getBoolean("force-link");
+    private boolean forceLink;
 
     public VerifyManager(){
-        allowedCommands = Discord2FA.getCommon().getConfig().getConfig().getStringList("allowedCommands");
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Discord2FA.getPlugin(), () -> {
             for (Player p : titleCooldown.keySet()) {
                 if (titleCooldown.get(p) == 0) {
@@ -31,6 +30,11 @@ public class VerifyManager implements Listener, BaseVerifyManager {
                 titleCooldown.put(p, titleCooldown.get(p) - 1);
             }
         }, 0, 20);
+    }
+
+    public void loadConfig(){
+        allowedCommands = Discord2FA.getCommon().getConfig().getConfig().getStringList("allowedCommands");
+        forceLink = Discord2FA.getCommon().getConfig().getConfig().getBoolean("force-link");
     }
 
     public void linked(Player player){

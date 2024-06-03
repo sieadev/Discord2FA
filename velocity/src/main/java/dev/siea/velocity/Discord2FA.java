@@ -55,6 +55,8 @@ public class Discord2FA {
             return;
         }
 
+        verifyManager.loadConfig();
+
         proxy.getEventManager().register(this, verifyManager);
         commandManager.register("discord2fa", new Discord2FACommand(this));
         commandManager.register("link", new LinkCommand());

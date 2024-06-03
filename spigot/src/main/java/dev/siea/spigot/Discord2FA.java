@@ -38,6 +38,8 @@ public final class Discord2FA extends JavaPlugin {
             return;
         }
 
+        verifyManager.loadConfig();
+
         getServer().getPluginManager().registerEvents(verifyManager, this);
         Objects.requireNonNull(getCommand("link")).setExecutor(new LinkCommand());
         Objects.requireNonNull(getCommand("unlink")).setExecutor(new UnlinkCommand());
@@ -46,7 +48,9 @@ public final class Discord2FA extends JavaPlugin {
         if (versionMessage != null) {
             plugin.getLogger().severe(versionMessage);
         }
-        enableBStats();
+        try {
+            enableBStats();
+        } catch (Exception ignore){}
     }
 
     private void enableBStats(){
@@ -60,9 +64,10 @@ public final class Discord2FA extends JavaPlugin {
     }
 
     public static void disable(String reason){
-        common.disable(reason);
+        try {
+            common.disable(reason);
+        } catch (Exception ignore) {}
         plugin.getLogger().severe(reason);
-        common.shutdown();
         plugin.getServer().getPluginManager().disablePlugin(plugin);
     }
 

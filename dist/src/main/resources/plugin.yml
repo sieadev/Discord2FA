@@ -1,6 +1,6 @@
 name: Discord2FA
 version: 1.5.3
-main: dev.siea.discord2fa.Discord2FA
+main: dev.siea.spigot.Discord2FA
 api-version: '1.16'
 load: STARTUP
 commands:
