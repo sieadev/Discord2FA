@@ -29,14 +29,12 @@ public class VerifyManager implements BaseVerifyManager {
     public VerifyManager(ProxyServer server, Discord2FA plugin) {
         this.server = server;
         this.plugin = plugin;
-        this.forceLink = plugin.getCommon().getConfig().getConfig().getBoolean("force-link");
-        this.allowedCommands = plugin.getCommon().getConfig().getConfig().getStringList("allowedCommands");
-        server.getScheduler().buildTask(plugin, this::updateTitleCooldowns).repeat(1L, TimeUnit.SECONDS).schedule();
     }
 
     public void loadConfig(){
         allowedCommands = plugin.getCommon().getConfig().getConfig().getStringList("allowedCommands");
         forceLink = plugin.getCommon().getConfig().getConfig().getBoolean("force-link");
+        server.getScheduler().buildTask(plugin, this::updateTitleCooldowns).repeat(1L, TimeUnit.SECONDS).schedule();
     }
 
     private void updateTitleCooldowns() {
@@ -54,6 +52,11 @@ public class VerifyManager implements BaseVerifyManager {
     public void linked(Player player) {
         forcedPlayers.remove(player);
         Discord2FA.getStorageManager().updateIPAddress(player.getUniqueId().toString(), Objects.requireNonNull(player.getRemoteAddress()).getAddress().toString());
+    }
+
+    @Subscribe
+    public void onServerConnected(ServerConnectedEvent event) {
+        server.getScheduler().buildTask(plugin, this::updateTitleCooldowns).repeat(1L, TimeUnit.SECONDS).schedule();
     }
 
     @Subscribe
