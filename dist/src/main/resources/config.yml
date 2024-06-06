@@ -31,5 +31,11 @@ discord:
 
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/link"] # Commands allowed before the Player is verified
+
+# Actions allowed before verifying
+# Values: 'BREAK' 'PLACE' 'CHAT' 'MOVE' 'DROP' 'INVENTORY'
+allowedActions: ["CHAT"]
+
 force-link: false # Force Users to Link their accounts
+
 rememberIPAddresses: true # Remember IP addresses; only request verification on new ones
