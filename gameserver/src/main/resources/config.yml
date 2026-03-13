@@ -13,14 +13,16 @@ language: en
 
 # --------------------------- Database ---------------------------
 database:
-  type:
-  url:
-  username:
-  password:
+  type: ""
+  url: ""
+  username: ""
+  password: ""
 
 # -------------------------- DiscordBot --------------------------
 discord:
-  token:
+  token: ""
+  guild: ""
+  channel: ""
 
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/link"] # Commands allowed before the Player is verified
