@@ -19,9 +19,7 @@ public final class LangLoader {
     public static final String CONFIG_LANGUAGE_KEY = "language";
 
     /** Bundled language codes shipped in the jar. Each has a resource at lang/{code}.yml */
-    public static final List<String> BUNDLED_LANGS = Collections.unmodifiableList(
-        Arrays.asList("default", "en", "de", "fr", "it", "pl", "ro", "rs", "tr", "ua")
-    );
+    public static final List<String> BUNDLED_LANGS = List.of("default", "en", "de", "fr", "it", "pl", "ro", "rs", "tr", "ua");
 
     /** Fallback file used when a key is missing in the selected language. */
     public static final String DEFAULT_LANG_FILE = "default.yml";
@@ -39,7 +37,7 @@ public final class LangLoader {
     /**
      * Ensures lang directory exists, copies any bundled lang file to disk if it
      * doesn't exist, then loads the language from config and returns a MessageProvider.
-     * Missing keys are resolved from default.yml, then from the optional default value, then the key itself.
+     * Missing keys are resolved from default.yml (fallback), then the key itself.
      * If the configured language file is missing or invalid, falls back to en.yml then default.yml.
      */
     public MessageProvider load() throws IOException {
@@ -74,18 +72,18 @@ public final class LangLoader {
 
         Map<String, String> finalMessages = messages;
         Map<String, String> finalDefault = defaultMap;
-        return (key, defaultValue) -> {
+        return key -> {
             String v = finalMessages.get(key);
             if (v != null && !v.isEmpty()) return v;
             v = finalDefault.get(key);
             if (v != null && !v.isEmpty()) return v;
-            return defaultValue != null ? defaultValue : key;
+            return key;
         };
     }
 
     /**
      * Builds a MessageProvider that uses only default.yml from the jar (for when load() fails).
-     * Uses no hardcoded strings; missing keys return the key.
+     * Missing keys return the key.
      */
     public static MessageProvider loadFallback(ResourceLoader resourceLoader) {
         Map<String, String> defaultMap = new HashMap<>();
@@ -99,10 +97,10 @@ public final class LangLoader {
         } catch (IOException ignored) {
         }
         Map<String, String> finalDefault = defaultMap;
-        return (key, defaultValue) -> {
+        return key -> {
             String v = finalDefault.get(key);
             if (v != null && !v.isEmpty()) return v;
-            return defaultValue != null ? defaultValue : key;
+            return key;
         };
     }
 

@@ -31,7 +31,7 @@ public abstract class BaseServer {
         this.databaseAdapter = new DatabaseAdapter(configProvider);
         this.discordBot = new DiscordBot(configProvider);
         this.serverConfig = new ServerConfig(configProvider);
-        this.messageProvider = messageProvider != null ? messageProvider : (k, d) -> d != null ? d : k;
+        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         checkForUpdates();
     }
 
@@ -57,9 +57,21 @@ public abstract class BaseServer {
 
         player.setOnVerifiedCallback(() -> verifyingPlayers.remove(player.getUniqueId()));
         verifyingPlayers.put(player.getUniqueId(), player);
-    }
 
-    private static final String NOT_VERIFIED_KEY = "notVerified";
+        if (player.isLinked()) {
+            discordBot.attemptVerify(player.getLinkedPlayer(), player.getSigninLocation())
+                    .thenAcceptAsync(verified -> {
+                        if (verified) {
+                            player.sendMessage(messageProvider.get("verifySuccess"));
+                            player.onVerified();
+                        } else {
+                            player.kick(messageProvider.get("verifyDenied"));
+                        }
+                    });
+        } else {
+            player.sendMessage(messageProvider.get("forceLink"));
+        }
+    }
 
     /**
      * Called by platform listeners for non-command events. Returns true to allow,
@@ -69,7 +81,11 @@ public abstract class BaseServer {
         CommonPlayer player = verifyingPlayers.get(uuid);
         if (player == null) return true;
         if (serverConfig.isEventAllowed(eventType)) return true;
-        player.sendMessage(messageProvider.get(NOT_VERIFIED_KEY, null));
+        if (player.isLinked()) {
+            player.sendMessage(messageProvider.get("notVerified"));
+        } else {
+            player.sendMessage(messageProvider.get("forceLink"));
+        }
         return false;
     }
 
@@ -81,7 +97,11 @@ public abstract class BaseServer {
         CommonPlayer player = verifyingPlayers.get(uuid);
         if (player == null) return true;
         if (serverConfig.isCommandAllowed(commandLabel)) return true;
-        player.sendMessage(messageProvider.get(NOT_VERIFIED_KEY, null));
+        if (player.isLinked()) {
+            player.sendMessage(messageProvider.get("notVerified"));
+        } else {
+            player.sendMessage(messageProvider.get("forceLink"));
+        }
         return false;
     }
 

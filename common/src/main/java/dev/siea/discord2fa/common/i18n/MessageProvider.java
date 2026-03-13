@@ -7,7 +7,8 @@ package dev.siea.discord2fa.common.i18n;
 public interface MessageProvider {
 
     /**
-     * Get a message by key. If the key is missing, returns the default value.
+     * Get a message by key. If no message is specified for the key, the fallback (e.g. default.yml) is used.
+     * If that does not exist either, returns the key.
      */
-    String get(String key, String defaultValue);
+    String get(String key);
 }

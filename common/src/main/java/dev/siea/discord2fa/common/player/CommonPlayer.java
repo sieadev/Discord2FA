@@ -56,8 +56,8 @@ public abstract class CommonPlayer {
      * then subclass logic (e.g. send to post-verification server).
      */
     public final void onVerified() {
-        if (onVerifiedCallback != null) onVerifiedCallback.run();
         onVerifiedImpl();
+        if (onVerifiedCallback != null) onVerifiedCallback.run();
     }
 
     /**
