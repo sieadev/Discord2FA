@@ -24,7 +24,6 @@ public final class UpdateChecker {
     /**
      * Check how many releases behind the current version is.
      *
-     * @param currentVersion plugin version string (e.g. "2.0.0" or "V2.0.0")
      * @return result with versions behind (0 = latest) and download URL; never null
      */
     public static UpdateCheckResult check() {
