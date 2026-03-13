@@ -22,6 +22,10 @@
             <artifactId>paper-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
