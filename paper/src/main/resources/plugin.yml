@@ -1,0 +1,5 @@
+name: Discord2FA
+version: ${project.version}
+main: dev.siea.discord2fa.paper.Discord2FAPaper
+api-version: '1.20'
+authors: ['sieadev']

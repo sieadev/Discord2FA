@@ -1,0 +1,34 @@
+#################################################################
+# -------------------------- Spanish -------------------------- #
+# --------- By: Github[Happyuky7] & Discord[happy7] ----------- #
+#################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Verificar Login"
+  text: "Alguien ha iniciado sesión en su cuenta desde una nueva ubicación (%ip%)"
+  footer: "Si no has sido tú, ¡cambia tu contraseña inmediatamente!"
+  VerifyButton: "Verificar"
+  DenyButton: "Denegar"
+link:
+  title: "Vincula tu cuenta!"
+  text: "Quieres hacer tu Cuenta de Minecraft más segura? Enlázala con tu Discord!"
+  footer: "¡Haz clic en el Botón de abajo para vincular tu Cuenta!"
+  linkButton: "Vincular"
+codeMessage: "Su código de verificación es: %code%"
+acceptMessage: "¡Ha aceptado la verificación!"
+denyMessage: "¡Ha rechazado la verificación!"
+alreadyLinking: "¡Ya se le ha enviado un código de verificación!"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&c¡Código inválido!"
+linkSuccess: "&aHas vinculado con éxito tu Cuenta."
+noCode: "&c¡Debe proporcionar un Código!"
+verifyTitle: "&c¡Verifique su Cuenta!"
+notLinked: "&c¡Usted no está vinculado!"
+unlinkSuccess: "&a¡Has desvinculado tu cuenta con éxito!"
+verifyDenied: "&c¡Verificación denegada!"
+verifySuccess: "&a¡Ha verificado correctamente su cuenta!"
+alreadyLinked: "&cSu cuenta ya está vinculada!"
+
+forceLink: "&eHola &a%player%&e, antes de continuar tendrás que vincular tu Minecraft a tu cuenta de Discord. Para ello por favor únete a nuestro servidor dev.siea.discord2fa.discord y sigue las instrucciones que allí se indican."

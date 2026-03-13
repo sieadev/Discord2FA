@@ -1,0 +1,38 @@
+#################################################################
+# +-----------------------------------------------------------+ #
+# |                       Discord2FA 2.0                      | #
+# |                  Made with <3 by sieadev                  | #
+# +-----------------------------------------------------------+ #
+#################################################################
+
+# Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
+
+# ----------------------------- Lang -----------------------------
+# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
+language: en
+
+# --------------------------- Database ---------------------------
+database:
+  type:
+  url:
+  username:
+  password:
+
+# -------------------------- DiscordBot --------------------------
+discord:
+  token:
+
+# --------------------------- Settings ---------------------------
+allowedCommands: ["/link"] # Commands allowed before the Player is verified
+
+# Actions allowed before verifying
+# Values: 'BREAK' 'PLACE' 'CHAT' 'MOVE' 'DROP' 'INVENTORY'
+allowedActions: ["CHAT"]
+
+forceLink: false # Force Users to Link their accounts
+
+rememberSignInLocation: true # Remember IP addresses; only request verification on new ones
+
+server:
+  verification:
+  post-verification:

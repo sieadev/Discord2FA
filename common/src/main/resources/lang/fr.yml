@@ -1,0 +1,34 @@
+#################################################################
+# -------------------------- Français ------------------------- #
+# ------------------------- By: Kwiiro ------------------------ #
+#################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Vérifier la connexion"
+  text: "Quelqu'un s'est connecté à votre compte depuis un nouvel endroit (%ip%)"
+  footer: "Si ce n'est pas vous, changez immédiatement votre mot de passe !"
+  VerifyButton: "Vérifier"
+  DenyButton: "Refuser"
+link:
+  title: "Liez votre compte !"
+  text: "Vous voulez rendre votre compte minecraft plus sécurisé ? Liez le avec votre dev.siea.discord2fa.discord !"
+  footer: "Cliquez sur le bouton dessous pour lier votre compte !"
+  linkButton: "Lien"
+codeMessage: "Votre code de vérification est : %code%"
+acceptMessage: "Vous avez accepté la vérification !"
+denyMessage: "Vous avez refusé la vérification !"
+alreadyLinking: "Vous avez déjà réçu un code de vérification !"
+
+# ----------------------- In-game Messages -----------------------
+invalidCode: "&cCode invalide !"
+linkSuccess: "&aVous avez lié votre compte avec succès"
+noCode: "&cVous devez fournir un code !"
+verifyTitle: "&cVérifiez votre compte !"
+notLinked: "&cVous n'êtes pas lié !"
+unlinkSuccess: "&aVotre compte n'est plus lié avec succès !"
+verifyDenied: "&cVérification refusée !"
+verifySuccess: "&aVous avez vérifié votre compte avec succès !"
+alreadyLinked: "&cVotre compte est déjà lié !"
+
+forceLink: "&eBonjour &a%player%&e, avant de commencer, vous allez devoir lier votre compte minecraft à votre compte dev.siea.discord2fa.discord. Pour cela, veuillez rejoindre notre serveur dev.siea.discord2fa.discord et suivez les instructions dans la liste des instructions"
