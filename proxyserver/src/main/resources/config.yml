@@ -35,6 +35,7 @@ forceLink: false # Force Users to Link their accounts
 
 rememberSignInLocation: true # Remember IP addresses; only request verification on new ones
 
+# ----------------------------- Proxy ----------------------------
 server:
-  verification:
-  post-verification:
+  verification: ""
+  post-verification: ""
