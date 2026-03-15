@@ -67,7 +67,7 @@ public class DiscordBot {
                 ensureLinkMessageAsync();
             }, discordExecutor);
         } else {
-            loggerAdapter.warn("Discord bot has not been configured.");
+            loggerAdapter.warn("The Discord bot will not start because it has not been configured. Set discord.token, discord.guild, and discord.channel in your config.yml to enable it.");
         }
     }
 

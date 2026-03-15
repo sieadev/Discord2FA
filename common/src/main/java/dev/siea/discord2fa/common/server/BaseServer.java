@@ -9,6 +9,7 @@ import dev.siea.discord2fa.common.discord.DiscordBot;
 import dev.siea.discord2fa.common.event.EventType;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.common.player.CommonPlayer;
+import dev.siea.discord2fa.common.versioning.PluginVersion;
 import dev.siea.discord2fa.common.versioning.UpdateCheckResult;
 import dev.siea.discord2fa.common.versioning.UpdateChecker;
 
@@ -244,10 +245,12 @@ public abstract class BaseServer {
     private void checkForUpdates() {
         UpdateCheckResult result = UpdateChecker.check();
         if (result == null) logger.error("Unable to retrieve version. Please report this!!!");
-        else if (result.isUpToDate()) {
+        else if (result.isNewerThanLatest()) {
+            logger.warn("You are using an experimental build of Discord2FA (version " + PluginVersion.get() + "). Latest release is " + result.getLatestReleaseVersion() + ".");
+        } else if (result.isUpToDate()) {
             logger.info("You are running the latest release of Discord2FA.");
         } else {
-            logger.warn("You are " + result.getVersionsBehind() + " version(s) behind. Download the latest at " + result.getDownloadUrl());
+            logger.warn("You are " + result.getVersionsBehind() + " version(s) behind (Current version: " + PluginVersion.get() + "). Download the latest at " + result.getDownloadUrl());
         }
     }
 }
