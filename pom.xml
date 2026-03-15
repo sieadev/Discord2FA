@@ -146,6 +146,14 @@
                             </goals>
                             <configuration>
                                 <createDependencyReducedPom>false</createDependencyReducedPom>
+                                <artifactSet>
+                                    <excludes>
+                                        <exclude>org.spigotmc:spigot-api</exclude>
+                                        <exclude>io.papermc.paper:paper-api</exclude>
+                                        <exclude>net.md-5:bungeecord-api</exclude>
+                                        <exclude>com.velocitypowered:velocity-api</exclude>
+                                    </excludes>
+                                </artifactSet>
                                 <relocations>
                                     <relocation>
                                         <pattern>org.bstats</pattern>
