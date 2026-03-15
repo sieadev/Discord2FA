@@ -47,6 +47,23 @@ public final class VelocityProxyPlayer extends ProxyPlayer {
     }
 
     @Override
+    public void sendTitle(String title, String subtitle, int fadeIn, int duration, int fadeOut) {
+        handle.showTitle(
+                net.kyori.adventure.title.Title.title(
+                        net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                                .plainText().deserialize(title),
+                        net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                                .plainText().deserialize(subtitle),
+                        net.kyori.adventure.title.Title.Times.times(
+                                java.time.Duration.ofMillis(fadeIn * 50L),
+                                java.time.Duration.ofMillis(duration * 50L),
+                                java.time.Duration.ofMillis(fadeOut * 50L)
+                        )
+                )
+        );
+    }
+
+    @Override
     public void kick(String reason) {
         handle.disconnect(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().deserialize(reason));
     }

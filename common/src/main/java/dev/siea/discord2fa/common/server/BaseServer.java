@@ -143,7 +143,7 @@ public abstract class BaseServer {
         if (player == null) return true;
         if (serverConfig.isEventAllowed(eventType)) return true;
         if (player.isLinked()) {
-            player.sendMessage(messageProvider.get("notVerified"));
+            player.sendTitle(messageProvider.get("verifyTitle"));
         } else {
             player.sendMessage(messageProvider.get("forceLink"));
         }
@@ -228,7 +228,7 @@ public abstract class BaseServer {
         if (player == null) return true;
         if (serverConfig.isCommandAllowed(commandLabel)) return true;
         if (player.isLinked()) {
-            player.sendMessage(messageProvider.get("notVerified"));
+            player.sendTitle(messageProvider.get("verifyTitle"));
         } else {
             player.sendMessage(messageProvider.get("forceLink"));
         }

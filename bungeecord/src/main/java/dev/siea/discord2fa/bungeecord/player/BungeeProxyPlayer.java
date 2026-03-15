@@ -3,6 +3,7 @@ package dev.siea.discord2fa.bungeecord.player;
 import dev.siea.discord2fa.common.database.models.SignInLocation;
 import dev.siea.discord2fa.proxyserver.player.ProxyPlayer;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetSocketAddress;
@@ -42,6 +43,11 @@ public final class BungeeProxyPlayer extends ProxyPlayer {
     @Override
     public void sendMessage(String message) {
         handle.sendMessage(message);
+    }
+
+    @Override
+    public void sendTitle(String title, String subtitle, int fadeIn, int duration, int fadeOut) {
+        handle.sendTitle(new BungeeTitle().title(title).subTitle(subtitle).fadeIn(fadeIn).fadeOut(fadeOut).stay(duration));
     }
 
     @Override

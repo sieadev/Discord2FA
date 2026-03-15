@@ -41,6 +41,11 @@ public final class SpigotPlayer extends CommonPlayer {
     }
 
     @Override
+    public void sendTitle(String title, String subtitle, int fadeIn, int duration, int fadeOut) {
+        handle.sendTitle(title, subtitle, fadeIn, duration, fadeOut);
+    }
+
+    @Override
     public void kick(String reason) {
         handle.kickPlayer(reason);
     }

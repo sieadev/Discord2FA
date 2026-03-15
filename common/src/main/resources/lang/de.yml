@@ -15,13 +15,14 @@ link:
   text: "Willst du deinen Minecraft Konto sicherer machen? Verbinde es mit einem Discord Konto!"
   footer: "Drück den Knopf um los zu legen!"
   linkButton: "Verbinden"
+requestExpired: "Diese Anfrage ist abgelaufen."
 codeMessage: "Dein Verifizierungscode lautet: %code%"
 acceptMessage: "Verifizierung angenommen!"
 denyMessage: "Verifizierung abgelehnt!"
 alreadyLinking: "Dir wurde bereits ein Verifizierungscode zugestellt."
 
 # ----------------------- In-game Messages -----------------------
-notVerified: "Du musst dich zuerst verifizieren."
+notVerified: "&cDu musst dich zuerst verifizieren."
 invalidCode: "&cDieser Code ist ungültig!"
 linkSuccess: "&aDu hast erfolgreich deine Konten verbunden."
 noCode: "&cBitte gib einen Code an."

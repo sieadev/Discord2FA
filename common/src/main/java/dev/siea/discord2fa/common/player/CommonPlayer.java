@@ -99,6 +99,14 @@ public abstract class CommonPlayer {
 
     public abstract void sendMessage(String message);
 
+
+
+    public abstract void sendTitle(String title, String subtitle, int fadeIn, int duration, int fadeOut);
+
+    public final void sendTitle(String title) {
+        sendTitle(title, "", 10, 60, 10);
+    }
+
     public abstract void kick(String reason);
 }
 

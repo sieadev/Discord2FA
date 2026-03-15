@@ -172,7 +172,7 @@ public class DiscordBot {
         PendingVerify pending = pendingVerifies.remove(discordId);
         if (pending == null) {
             interaction.createImmediateResponder()
-                    .setContent(messageProvider.get("notVerified"))
+                    .setContent(messageProvider.get("requestExpired"))
                     .setFlags(org.javacord.api.entity.message.MessageFlag.EPHEMERAL)
                     .respond();
             return;

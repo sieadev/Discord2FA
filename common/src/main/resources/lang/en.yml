@@ -21,7 +21,7 @@ denyMessage: "You denied the Verification!"
 alreadyLinking: "You already been send a Verification Code!"
 
 # ----------------------- In-game Messages -----------------------
-notVerified: "You must verify first."
+notVerified: "&cYou must verify first."
 invalidCode: "&cInvalid Code!"
 linkSuccess: "&aYou successfully linked your Account"
 noCode: "&cYou must provide a Code!"
