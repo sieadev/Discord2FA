@@ -12,6 +12,10 @@ import java.util.*;
  * Loads the language file specified in config (key "language"), copies bundled
  * lang files to disk so users can edit them (like config.yml), and provides a
  * MessageProvider for that language.
+ * <p>
+ * Messages are cached in memory: files are read once at load time and the provider
+ * performs map lookups only. Ampersand color codes ({@code &}) are converted to
+ * section signs ({@code §}) when messages are loaded, so in-game color codes work.
  */
 public final class LangLoader {
 
@@ -124,8 +128,13 @@ public final class LangLoader {
             if (val instanceof Map) {
                 flatten(key, (Map<String, Object>) val, out);
             } else if (val != null) {
-                out.put(key, val.toString());
+                out.put(key, translateColor(val.toString()));
             }
         }
+    }
+
+    /** Replaces & with § so Minecraft color codes in lang files work in-game. Applied once when messages are cached. */
+    private static String translateColor(String s) {
+        return s.replace('&', '§');
     }
 }
