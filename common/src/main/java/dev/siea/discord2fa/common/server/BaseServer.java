@@ -32,6 +32,7 @@ public abstract class BaseServer {
     private final DiscordBot discordBot;
     private final ServerConfig serverConfig;
     private final MessageProvider messageProvider;
+
     /** Executor for blocking DB work so it doesn't block the server thread. */
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "Discord2FA-db");
@@ -97,6 +98,8 @@ public abstract class BaseServer {
     protected final void addPlayer(CommonPlayer player) {
         if (player == null) return;
         SignInLocation current = player.getSigninLocation();
+
+        if (!discordBot.isConnected() || databaseAdapter == null) return;
 
         CompletableFuture.supplyAsync(() -> {
             LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
