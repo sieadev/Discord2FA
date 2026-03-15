@@ -7,6 +7,7 @@ import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.gameserver.server.GameServer;
 import dev.siea.discord2fa.paper.adapter.PaperConfigAdapter;
+import dev.siea.discord2fa.paper.command.Discord2FAAdminCommand;
 import dev.siea.discord2fa.paper.command.Discord2FACommand;
 import dev.siea.discord2fa.paper.listener.Discord2FAEventListener;
 import org.bstats.bukkit.Metrics;
@@ -41,6 +42,12 @@ public final class Discord2FAPaper extends JavaPlugin {
                 cmd.setExecutor(commandExecutor);
                 cmd.setTabCompleter(commandExecutor);
             }
+        }
+        org.bukkit.command.PluginCommand adminCmd = getCommand("discord2fa");
+        if (adminCmd != null) {
+            Discord2FAAdminCommand adminExecutor = new Discord2FAAdminCommand(server);
+            adminCmd.setExecutor(adminExecutor);
+            adminCmd.setTabCompleter(adminExecutor);
         }
         new Metrics(this, BStats.PLUGIN_ID);
     }

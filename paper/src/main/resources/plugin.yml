@@ -10,7 +10,17 @@ libraries:
   - org.postgresql:postgresql:42.7.2
   - org.checkerframework:checker-qual:3.42.0
 
+permissions:
+  discord2fa.admin:
+    description: Use /discord2fa version and status
+    default: op
+
 commands:
+  discord2fa:
+    description: Discord2FA admin (version, status)
+    usage: /<command> [version|status]
+    permission: discord2fa.admin
+    aliases: [d2fa]
   link:
     description: Link your Minecraft account to Discord with a code from the Discord server
   unlink:

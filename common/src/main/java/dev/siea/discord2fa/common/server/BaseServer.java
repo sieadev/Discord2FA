@@ -44,6 +44,9 @@ public abstract class BaseServer {
     /** Players currently verifying. Removed only when they verify. */
     private final Map<UUID, CommonPlayer> verifyingPlayers = new ConcurrentHashMap<>();
 
+    /** Cached result of the last update check (startup); used by /discord2fa version. */
+    private volatile UpdateCheckResult lastUpdateCheckResult;
+
     /** Command labels that this server handles. Platforms should register these and pass execution here. */
     public static final List<String> HANDLED_COMMANDS = Collections.unmodifiableList(Arrays.asList("link", "unlink"));
 
@@ -244,6 +247,7 @@ public abstract class BaseServer {
      */
     private void checkForUpdates() {
         UpdateCheckResult result = UpdateChecker.check();
+        this.lastUpdateCheckResult = result;
         if (result == null) logger.error("Unable to retrieve version. Please report this!!!");
         else if (result.isNewerThanLatest()) {
             logger.warn("You are using an experimental build of Discord2FA (version " + PluginVersion.get() + "). Latest release is " + result.getLatestReleaseVersion() + ".");
@@ -252,6 +256,53 @@ public abstract class BaseServer {
         } else {
             logger.warn("You are " + result.getVersionsBehind() + " version(s) behind (Current version: " + PluginVersion.get() + "). Download the latest at " + result.getDownloadUrl());
         }
+    }
+
+    /**
+     * Returns lines for the /discord2fa version subcommand.
+     */
+    public List<String> getVersionInfoMessage() {
+        String current = PluginVersion.get();
+        if (current.isBlank()) current = "unknown";
+        List<String> lines = new java.util.ArrayList<>();
+        lines.add("§eDiscord2FA §fversion §a" + current);
+        UpdateCheckResult result = lastUpdateCheckResult;
+        if (result == null) {
+            lines.add("§7(Update check unavailable)");
+        } else if (result.isNewerThanLatest()) {
+            lines.add("§7Experimental build. Latest release: §f" + result.getLatestReleaseVersion());
+        } else if (result.isUpToDate()) {
+            lines.add("§7Latest release.");
+        } else {
+            lines.add("§c" + result.getVersionsBehind() + " version(s) behind. §7Download: §f" + result.getDownloadUrl());
+        }
+        return lines;
+    }
+
+    /**
+     * Returns lines for the /discord2fa status subcommand.
+     */
+    public List<String> getStatusInfoMessage() {
+        List<String> lines = new java.util.ArrayList<>();
+        int ok = 0;
+        int total = 2;
+        lines.add("§8[§a✓§8] §7Database §fconnected");
+        ok++;
+        if (discordBot.isConnected()) {
+            lines.add("§8[§a✓§8] §7Discord bot §fconnected");
+            ok++;
+        } else if (discordBot.isConfigured()) {
+            lines.add("§8[§c✗§8] §7Discord bot §cconfigured but failed to connect §7(check token and network)");
+        } else {
+            lines.add("§8[§c✗§8] §7Discord bot §cnot configured §7(set discord.token, discord.guild, discord.channel in config.yml)");
+        }
+        lines.add("");
+        if (ok == total) {
+            lines.add("§a" + ok + "/" + total + " services running.");
+        } else {
+            lines.add("§e" + ok + "/" + total + " services running.");
+        }
+        return lines;
     }
 }
 

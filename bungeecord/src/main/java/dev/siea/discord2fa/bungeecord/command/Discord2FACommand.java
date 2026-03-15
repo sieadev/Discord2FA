@@ -42,11 +42,13 @@ public final class Discord2FACommand extends Command implements TabExecutor {
     }
 
     /**
-     * Registers all handled commands (link, unlink) with the proxy.
+     * Registers all handled commands (link, unlink) and the admin command (discord2fa, d2fa) with the proxy.
      */
     public static void register(Plugin plugin, ProxyServer server, net.md_5.bungee.api.ProxyServer proxy) {
         for (String name : dev.siea.discord2fa.common.server.BaseServer.HANDLED_COMMANDS) {
             proxy.getPluginManager().registerCommand(plugin, new Discord2FACommand(name, server, proxy));
         }
+        proxy.getPluginManager().registerCommand(plugin, new Discord2FAAdminCommand("discord2fa", server));
+        proxy.getPluginManager().registerCommand(plugin, new Discord2FAAdminCommand("d2fa", server));
     }
 }

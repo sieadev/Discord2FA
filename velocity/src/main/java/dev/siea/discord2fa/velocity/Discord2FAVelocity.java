@@ -10,6 +10,7 @@ import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.common.i18n.ResourceLoader;
 import dev.siea.discord2fa.velocity.adapter.VelocityConfigAdapter;
+import dev.siea.discord2fa.velocity.command.Discord2FAAdminCommand;
 import dev.siea.discord2fa.velocity.command.Discord2FACommand;
 import dev.siea.discord2fa.velocity.listener.Discord2FAEventListener;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
 @Plugin(
     id = "discord2fa",
     name = "Discord2FA",
-    version = "2.0.0",
+    version = GeneratedVersion.VERSION,
     description = "Two-factor authentication via Discord",
     authors = {"sieadev"}
 )
@@ -37,8 +38,6 @@ public class Discord2FAVelocity {
     private final com.velocitypowered.api.proxy.ProxyServer proxy;
     private final Logger logger;
     private final Path dataDirectory;
-
-    private dev.siea.discord2fa.proxyserver.ProxyServer server;
 
     @Inject
     public Discord2FAVelocity(com.velocitypowered.api.proxy.ProxyServer proxy, Logger logger, @com.velocitypowered.api.plugin.annotation.DataDirectory Path dataDirectory) {
@@ -76,6 +75,7 @@ public class Discord2FAVelocity {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor proxyExecutor = r -> proxy.getScheduler().buildTask(this, r).schedule();
+        dev.siea.discord2fa.proxyserver.ProxyServer server;
         try {
             server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, dataDirectory);
         } catch (IllegalStateException e) {
@@ -84,6 +84,7 @@ public class Discord2FAVelocity {
         }
         proxy.getEventManager().register(this, new Discord2FAEventListener(server, proxy));
         Discord2FACommand.register(server, proxy, proxy.getCommandManager());
+        proxy.getCommandManager().register("discord2fa", new Discord2FAAdminCommand(server), "d2fa");
         startBStats();
     }
 

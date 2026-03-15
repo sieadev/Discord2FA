@@ -71,6 +71,16 @@ public class DiscordBot {
         }
     }
 
+    /** True if discord.token, discord.guild, and discord.channel are set in config. */
+    public boolean isConfigured() {
+        return discordConfig.isConfigured();
+    }
+
+    /** True if the bot has successfully connected to Discord (after startup). */
+    public boolean isConnected() {
+        return api != null;
+    }
+
     /**
      * Register button listeners: link button in channel, verify/deny in DMs.
      */
