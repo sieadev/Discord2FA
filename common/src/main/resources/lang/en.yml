@@ -19,6 +19,7 @@ codeMessage: "Your Verification Code is: %code%"
 acceptMessage: "You accepted the Verification!"
 denyMessage: "You denied the Verification!"
 alreadyLinking: "You already been send a Verification Code!"
+alreadyLinkedDiscord: "Your Account is already linked!"
 
 # ----------------------- In-game Messages -----------------------
 notVerified: "&cYou must verify first."

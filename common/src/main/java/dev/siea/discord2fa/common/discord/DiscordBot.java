@@ -297,7 +297,7 @@ public class DiscordBot {
         CompletableFuture.supplyAsync(() -> databaseAdapter.getLinkedByDiscord(user.getId()), discordExecutor)
                 .thenAccept(linked -> {
                     if (linked.isPresent()) {
-                        sendDmEmbed(user, messageProvider.get("alreadyLinked"), null);
+                        sendDmEmbed(user, messageProvider.get("alreadyLinkedDiscord"), null);
                         return;
                     }
                     if (pendingLinkUserIds.containsKey(user.getId())) {
