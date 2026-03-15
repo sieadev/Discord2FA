@@ -12,6 +12,7 @@ import dev.siea.discord2fa.common.player.CommonPlayer;
 import dev.siea.discord2fa.common.versioning.UpdateCheckResult;
 import dev.siea.discord2fa.common.versioning.UpdateChecker;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,16 +52,24 @@ public abstract class BaseServer {
 
     /**
      * @param serverExecutor optional executor for running player-facing callbacks (sendMessage, onVerified) on the server/main thread. If null, callbacks run on the internal DB thread.
+     * @param dataFolder     plugin data folder (where config.yml lives). When non-null, SQLite DB is stored here by default so no path need be set in config.
      */
-    public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
+    public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor, Path dataFolder) {
         this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         this.logger = logger;
-        this.databaseAdapter = new DatabaseAdapter(configProvider);
+        this.databaseAdapter = new DatabaseAdapter(configProvider, dataFolder);
         this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter);
         this.serverConfig = new ServerConfig(configProvider);
         this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
         purgeOldSignInLocationsAsync();
         checkForUpdates();
+    }
+
+    /**
+     * @param serverExecutor optional executor for running player-facing callbacks on the server/main thread. If null, callbacks run on the internal DB thread.
+     */
+    public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
+        this(configProvider, logger, messageProvider, serverExecutor, null);
     }
 
     /** Purges sign-in locations older than 30 days asynchronously so startup is not blocked. */

@@ -47,7 +47,13 @@ public final class Discord2FABungee extends Plugin {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor proxyExecutor = r -> getProxy().getScheduler().runAsync(this, r);
-        ProxyServer server = new ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor);
+        ProxyServer server;
+        try {
+            server = new ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, getDataFolder().toPath());
+        } catch (IllegalStateException e) {
+            getLogger().severe(e.getMessage());
+            return;
+        }
         getProxy().getPluginManager().registerListener(this, new Discord2FAEventListener(server, getProxy()));
         Discord2FACommand.register(this, server, getProxy());
         new Metrics(this, BStats.PLUGIN_ID);

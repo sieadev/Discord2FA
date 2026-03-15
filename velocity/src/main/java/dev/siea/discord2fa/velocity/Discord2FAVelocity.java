@@ -76,7 +76,12 @@ public class Discord2FAVelocity {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor proxyExecutor = r -> proxy.getScheduler().buildTask(this, r).schedule();
-        server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor);
+        try {
+            server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, dataDirectory);
+        } catch (IllegalStateException e) {
+            logger.severe(e.getMessage());
+            return;
+        }
         proxy.getEventManager().register(this, new Discord2FAEventListener(server, proxy));
         Discord2FACommand.register(server, proxy, proxy.getCommandManager());
         startBStats();

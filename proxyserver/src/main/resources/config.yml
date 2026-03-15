@@ -12,8 +12,10 @@
 language: en
 
 # --------------------------- Database ---------------------------
+# type: sqlite (default), mysql, or postgresql
+# For SQLite, leave url empty to use discord2fa.db in this plugin's folder
 database:
-  type: ""
+  type: sqlite
   url: ""
   username: ""
   password: ""

@@ -6,6 +6,10 @@ import dev.siea.discord2fa.common.config.ConfigAdapter;
 import dev.siea.discord2fa.common.database.models.LinkedPlayer;
 import dev.siea.discord2fa.common.database.models.SignInLocation;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,8 +27,19 @@ public final class DatabaseAdapter {
     private final DatabaseConfig.Type dbType;
 
     public DatabaseAdapter(ConfigAdapter config) {
-        DatabaseConfig dbConfig = new DatabaseConfig(config);
+        this(config, null);
+    }
+
+    /**
+     * @param dataFolder plugin data folder (where config.yml lives). When non-null, SQLite database path is resolved inside this folder so no path need be set in config.
+     */
+    public DatabaseAdapter(ConfigAdapter config, Path dataFolder) {
+        DatabaseConfig dbConfig = new DatabaseConfig(config, dataFolder);
         this.dbType = dbConfig.getType();
+
+        if (dbType == DatabaseConfig.Type.SQLITE) {
+            ensureSqlitePathExists(dbConfig.getJdbcUrl());
+        }
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName(dbConfig.getType().getDriverClass());
@@ -37,8 +52,29 @@ public final class DatabaseAdapter {
         }
         hikariConfig.setPoolName("Discord2FA-Pool");
 
-        this.dataSource = new HikariDataSource(hikariConfig);
-        createTables();
+        try {
+            this.dataSource = new HikariDataSource(hikariConfig);
+            createTables();
+        } catch (Exception e) {
+            String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            throw new IllegalStateException("Could not connect to the database: " + message + ". Check config and ensure the database path directory exists.", e);
+        }
+    }
+
+    /** Creates the parent directory for a SQLite JDBC URL so the file can be created. */
+    private static void ensureSqlitePathExists(String jdbcUrl) {
+        if (jdbcUrl == null || !jdbcUrl.startsWith("jdbc:sqlite:")) return;
+        String pathPart = jdbcUrl.substring("jdbc:sqlite:".length()).trim();
+        if (pathPart.isEmpty()) return;
+        try {
+            Path path = Paths.get(pathPart).toAbsolutePath().normalize();
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not create database directory for SQLite: " + e.getMessage(), e);
+        }
     }
 
     private void createTables() {

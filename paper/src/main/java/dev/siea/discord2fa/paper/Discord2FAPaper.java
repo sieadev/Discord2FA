@@ -25,7 +25,14 @@ public final class Discord2FAPaper extends JavaPlugin {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(getLogger());
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor mainThread = r -> getServer().getScheduler().runTask(this, r);
-        GameServer server = new GameServer(configAdapter, loggerAdapter, messageProvider, mainThread);
+        GameServer server;
+        try {
+            server = new GameServer(configAdapter, loggerAdapter, messageProvider, mainThread, getDataFolder().toPath());
+        } catch (IllegalStateException e) {
+            getLogger().severe(e.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         getServer().getPluginManager().registerEvents(new Discord2FAEventListener(server), this);
         Discord2FACommand commandExecutor = new Discord2FACommand(server);
         for (String name : BaseServer.HANDLED_COMMANDS) {

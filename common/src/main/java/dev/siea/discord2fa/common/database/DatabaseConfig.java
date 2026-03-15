@@ -2,20 +2,23 @@ package dev.siea.discord2fa.common.database;
 
 import dev.siea.discord2fa.common.config.ConfigAdapter;
 
+import java.nio.file.Path;
+
 /**
  * Database settings loaded from the config adapter.
  * Expected config keys:
  * <ul>
  *   <li>database.type - "sqlite", "mysql", or "postgresql"</li>
- *   <li>database.url - JDBC URL (e.g. jdbc:sqlite:./data/discord2fa.db, jdbc:mysql://localhost:3306/discord2fa)</li>
+ *   <li>database.url - JDBC URL, or for SQLite a filename (e.g. discord2fa.db) when dataFolder is set</li>
  *   <li>database.username - optional for SQLite, required for MySQL/PostgreSQL</li>
  *   <li>database.password - optional for SQLite, required for MySQL/PostgreSQL</li>
  * </ul>
+ * When {@code dataFolder} is non-null and type is SQLite, {@code database.url} is resolved relative to the data folder (default filename: discord2fa.db).
  */
 public final class DatabaseConfig {
 
     public enum Type {
-        SQLITE("org.sqlite.JDBC", "jdbc:sqlite:./data/discord2fa.db"),
+        SQLITE("org.sqlite.JDBC", "jdbc:sqlite:discord2fa.db"),
         MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/discord2fa"),
         POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/discord2fa");
 
@@ -42,6 +45,13 @@ public final class DatabaseConfig {
     private final String password;
 
     public DatabaseConfig(ConfigAdapter config) {
+        this(config, null);
+    }
+
+    /**
+     * @param dataFolder plugin data folder (where config.yml lives). When non-null and type is SQLite, database.url is resolved relative to this folder; empty url uses "discord2fa.db".
+     */
+    public DatabaseConfig(ConfigAdapter config, Path dataFolder) {
         String typeStr = config.getString("database.type");
         if (typeStr == null || typeStr.isBlank()) {
             typeStr = "sqlite";
@@ -60,7 +70,13 @@ public final class DatabaseConfig {
                 break;
         }
         String url = config.getString("database.url");
-        this.jdbcUrl = (url != null && !url.isBlank()) ? url : type.getDefaultUrl();
+        if (type == Type.SQLITE && dataFolder != null) {
+            String fileName = (url != null && !url.isBlank()) ? url : "discord2fa.db";
+            Path resolved = dataFolder.resolve(fileName).toAbsolutePath().normalize();
+            this.jdbcUrl = "jdbc:sqlite:" + resolved.toString();
+        } else {
+            this.jdbcUrl = (url != null && !url.isBlank()) ? url : type.getDefaultUrl();
+        }
         this.username = config.getString("database.username");
         this.password = config.getString("database.password");
     }
