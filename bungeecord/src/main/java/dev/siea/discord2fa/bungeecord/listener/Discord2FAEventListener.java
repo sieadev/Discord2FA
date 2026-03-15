@@ -31,7 +31,12 @@ public final class Discord2FAEventListener implements Listener {
         UUID uuid = player.getUniqueId();
         String message = event.getMessage();
         if (message != null && message.trim().startsWith("/")) {
-            if (!server.onCommand(uuid, parseCommandLabel(message))) event.setCancelled(true);
+            String label = parseCommandLabel(message);
+            if (!server.onCommand(uuid, label)) {
+                event.setCancelled(true);
+                String msg = server.getCommandDeniedMessage(uuid, label);
+                if (msg != null) player.sendMessage(msg);
+            }
         } else {
             if (!server.onEvent(uuid, EventType.CHAT)) event.setCancelled(true);
         }

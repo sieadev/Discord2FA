@@ -1,6 +1,7 @@
 package dev.siea.discord2fa.bungeecord;
 
 import dev.siea.discord2fa.bungeecord.adapter.BungeeConfigAdapter;
+import dev.siea.discord2fa.bungeecord.command.Discord2FACommand;
 import dev.siea.discord2fa.bungeecord.listener.Discord2FAEventListener;
 import dev.siea.discord2fa.common.logger.JulLoggerAdapter;
 import dev.siea.discord2fa.common.i18n.LangLoader;
@@ -48,6 +49,7 @@ public final class Discord2FABungee extends Plugin {
         MessageProvider messageProvider = loadMessages(configAdapter);
         server = new ProxyServer(configAdapter, loggerAdapter, messageProvider);
         getProxy().getPluginManager().registerListener(this, new Discord2FAEventListener(server, getProxy()));
+        Discord2FACommand.register(this, server, getProxy());
         new Metrics(this, BStats.PLUGIN_ID);
     }
 

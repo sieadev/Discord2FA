@@ -3,3 +3,9 @@ version: ${project.version}
 main: dev.siea.discord2fa.spigot.Discord2FASpigot
 api-version: '1.20'
 authors: ['sieadev']
+
+commands:
+  link:
+    description: Link your Minecraft account to Discord with a code from the Discord server
+  unlink:
+    description: Unlink your Minecraft account from Discord (must be verified first)

@@ -12,6 +12,10 @@ import dev.siea.discord2fa.common.player.CommonPlayer;
 import dev.siea.discord2fa.common.versioning.UpdateCheckResult;
 import dev.siea.discord2fa.common.versioning.UpdateChecker;
 
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,12 +30,15 @@ public abstract class BaseServer {
     /** Players currently verifying. Removed only when they verify. */
     private final Map<UUID, CommonPlayer> verifyingPlayers = new ConcurrentHashMap<>();
 
+    /** Command labels that this server handles. Platforms should register these and pass execution here. */
+    public static final List<String> HANDLED_COMMANDS = Collections.unmodifiableList(Arrays.asList("link", "unlink"));
+
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider) {
+        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         this.logger = logger;
         this.databaseAdapter = new DatabaseAdapter(configProvider);
-        this.discordBot = new DiscordBot(configProvider);
+        this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter);
         this.serverConfig = new ServerConfig(configProvider);
-        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         checkForUpdates();
     }
 
@@ -41,7 +48,7 @@ public abstract class BaseServer {
      * If force-link is disabled and the player has no linked Discord account, they are not added.
      * If rememberSignInLocation is enabled and the same IP+version signed in within 30 days, they are not added (skip verify).
      */
-    protected void addPlayer(CommonPlayer player) {
+    protected final void addPlayer(CommonPlayer player) {
         if (player == null) return;
 
         LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
@@ -77,7 +84,7 @@ public abstract class BaseServer {
      * Called by platform listeners for non-command events. Returns true to allow,
      * false to deny (e.g. cancel). Not in map = verified or unknown → allow.
      */
-    public boolean onEvent(UUID uuid, EventType eventType) {
+    public final boolean onEvent(UUID uuid, EventType eventType) {
         CommonPlayer player = verifyingPlayers.get(uuid);
         if (player == null) return true;
         if (serverConfig.isEventAllowed(eventType)) return true;
@@ -90,10 +97,78 @@ public abstract class BaseServer {
     }
 
     /**
+     * Dispatches a command from the platform. Call this when a player runs one of {@link #HANDLED_COMMANDS}.
+     * Performs the verification gate (if player is verifying and command not in allowedCommands, sends message and returns true).
+     * Then runs the appropriate handler for "link" or "unlink". Returns true if the command was handled (so the platform should not pass to other handlers).
+     */
+    public final boolean handleCommand(CommonPlayer player, String commandLabel, List<String> args) {
+        String label = commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT);
+        if (verifyingPlayers.containsKey(player.getUniqueId()) && !serverConfig.isCommandAllowed(label)) {
+            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
+            player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink"));
+            return true;
+        }
+        return switch (label) {
+            case "link" -> {
+                handleLinkCommand(player, args.isEmpty() ? "" : args.get(0));
+                yield true;
+            }
+            case "unlink" -> {
+                handleUnlinkCommand(player);
+                yield true;
+            }
+            default -> false;
+        };
+    }
+
+    /**
+     * Handle the /link &lt;code&gt; command. Call this when the player runs link with a code from Discord.
+     * Sends the appropriate message (noCode, invalidCode, linkSuccess) to the player.
+     * If the player was in the verifying state, removes them and calls onVerified so they can play.
+     */
+    private void handleLinkCommand(CommonPlayer player, String code) {
+        if (code == null || code.isBlank()) {
+            player.sendMessage(messageProvider.get("noCode"));
+            return;
+        }
+        var discordUser = discordBot.consumeLinkCode(code);
+        if (discordUser.isEmpty()) {
+            player.sendMessage(messageProvider.get("invalidCode"));
+            return;
+        }
+        long discordId = discordUser.get().getId();
+        UUID playerUuid = player.getUniqueId();
+        databaseAdapter.saveLinkedPlayer(new LinkedPlayer(playerUuid, discordId, Instant.now()));
+        player.sendMessage(messageProvider.get("linkSuccess"));
+        if (verifyingPlayers.remove(playerUuid) != null) {
+            player.setLinkedPlayer(databaseAdapter.getLinkedPlayer(playerUuid));
+            player.onVerified();
+        }
+    }
+
+    /**
+     * Handles the /unlink command. Only allowed when the player is verified (not in the verifying state).
+     * If they are still verifying, sends notVerified. If not linked, sends notLinked. Otherwise removes the link and sends unlinkSuccess.
+     */
+    private void handleUnlinkCommand(CommonPlayer player) {
+        if (verifyingPlayers.containsKey(player.getUniqueId())) {
+            player.sendMessage(messageProvider.get("notVerified"));
+            return;
+        }
+        if (databaseAdapter.getLinkedPlayer(player.getUniqueId()) == null) {
+            player.sendMessage(messageProvider.get("notLinked"));
+            return;
+        }
+        databaseAdapter.removeLinkedPlayer(player.getUniqueId());
+        player.setLinkedPlayer(null);
+        player.sendMessage(messageProvider.get("unlinkSuccess"));
+    }
+
+    /**
      * Called by platform listeners for command events. Not in map = allow.
      * In map = check allowedCommands whitelist.
      */
-    public boolean onCommand(UUID uuid, String commandLabel) {
+    public final boolean onCommand(UUID uuid, String commandLabel) {
         CommonPlayer player = verifyingPlayers.get(uuid);
         if (player == null) return true;
         if (serverConfig.isCommandAllowed(commandLabel)) return true;
@@ -103,6 +178,17 @@ public abstract class BaseServer {
             player.sendMessage(messageProvider.get("forceLink"));
         }
         return false;
+    }
+
+    /**
+     * Returns the message to send when a command is denied (player is verifying and command not in allowedCommands).
+     * Returns null if the command is allowed or the player is not in the verifying state. Used by platforms to send the message when cancelling the command.
+     */
+    public final String getCommandDeniedMessage(UUID uuid, String commandLabel) {
+        if (!verifyingPlayers.containsKey(uuid)) return null;
+        if (serverConfig.isCommandAllowed(commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT))) return null;
+        LinkedPlayer linked = databaseAdapter.getLinkedPlayer(uuid);
+        return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink");
     }
 
     /**

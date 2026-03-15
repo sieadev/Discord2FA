@@ -1,11 +1,13 @@
 package dev.siea.discord2fa.paper;
 
+import dev.siea.discord2fa.common.server.BaseServer;
 import dev.siea.discord2fa.common.logger.JulLoggerAdapter;
 import dev.siea.discord2fa.common.i18n.LangLoader;
 import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.gameserver.server.GameServer;
 import dev.siea.discord2fa.paper.adapter.PaperConfigAdapter;
+import dev.siea.discord2fa.paper.command.Discord2FACommand;
 import dev.siea.discord2fa.paper.listener.Discord2FAEventListener;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,6 +27,14 @@ public final class Discord2FAPaper extends JavaPlugin {
         MessageProvider messageProvider = loadMessages(configAdapter);
         server = new GameServer(configAdapter, loggerAdapter, messageProvider);
         getServer().getPluginManager().registerEvents(new Discord2FAEventListener(server), this);
+        Discord2FACommand commandExecutor = new Discord2FACommand(server);
+        for (String name : BaseServer.HANDLED_COMMANDS) {
+            org.bukkit.command.PluginCommand cmd = getCommand(name);
+            if (cmd != null) {
+                cmd.setExecutor(commandExecutor);
+                cmd.setTabCompleter(commandExecutor);
+            }
+        }
         new Metrics(this, BStats.PLUGIN_ID);
     }
 

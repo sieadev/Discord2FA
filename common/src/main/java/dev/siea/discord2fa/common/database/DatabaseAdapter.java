@@ -10,6 +10,7 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -49,6 +50,13 @@ public final class DatabaseAdapter {
             )
             """;
 
+        String botStateSql = """
+            CREATE TABLE IF NOT EXISTS bot_state (
+                key VARCHAR(64) PRIMARY KEY,
+                value VARCHAR(512) NOT NULL
+            )
+            """;
+
         String loginLocationsSql = switch (dbType) {
             case SQLITE -> """
                 CREATE TABLE IF NOT EXISTS login_locations (
@@ -82,6 +90,7 @@ public final class DatabaseAdapter {
         try (Connection conn = dataSource.getConnection();
              Statement st = conn.createStatement()) {
             st.execute(linkedPlayersSql);
+            st.execute(botStateSql);
             st.execute(loginLocationsSql);
             try {
                 st.execute("CREATE INDEX IF NOT EXISTS idx_login_locations_minecraft_uuid ON login_locations(minecraft_uuid)");
@@ -112,6 +121,28 @@ public final class DatabaseAdapter {
         return null;
     }
 
+    /**
+     * Returns the linked player for the given Discord user id, if any.
+     */
+    public Optional<LinkedPlayer> getLinkedByDiscord(long id) {
+        String sql = "SELECT minecraft_uuid, discord_id, time_linked FROM linked_players WHERE discord_id = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UUID minecraftUuid = UUID.fromString(rs.getString("minecraft_uuid"));
+                    long discordId = rs.getLong("discord_id");
+                    Instant timeLinked = rs.getTimestamp("time_linked").toInstant();
+                    return Optional.of(new LinkedPlayer(minecraftUuid, discordId, timeLinked));
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to get linked player for Discord id " + id, e);
+        }
+        return Optional.empty();
+    }
+
     public void saveLinkedPlayer(LinkedPlayer player) {
         String sql = switch (dbType) {
             case SQLITE, POSTGRESQL -> "INSERT INTO linked_players (minecraft_uuid, discord_id, time_linked) VALUES (?, ?, ?) ON CONFLICT (minecraft_uuid) DO UPDATE SET discord_id = excluded.discord_id, time_linked = excluded.time_linked";
@@ -125,6 +156,20 @@ public final class DatabaseAdapter {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalStateException("Failed to save linked player " + player.getMinecraftUuid(), e);
+        }
+    }
+
+    /**
+     * Removes the Discord link for the given Minecraft player. No-op if not linked.
+     */
+    public void removeLinkedPlayer(UUID minecraftUuid) {
+        String sql = "DELETE FROM linked_players WHERE minecraft_uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, minecraftUuid.toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to remove linked player " + minecraftUuid, e);
         }
     }
 
@@ -185,6 +230,43 @@ public final class DatabaseAdapter {
             UUID.fromString(rs.getString("minecraft_uuid")),
             rs.getTimestamp("time_of_login").toInstant()
         );
+    }
+
+    /** Key for the stored link message id in the configured Discord channel. */
+    public static final String STATE_LINK_MESSAGE_ID = "link_message_id";
+
+    /**
+     * Returns persisted bot state value for the given key, or null if missing.
+     */
+    public String getState(String key) {
+        String sql = "SELECT value FROM bot_state WHERE key = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, key);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("value") : null;
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to get state for key " + key, e);
+        }
+    }
+
+    /**
+     * Persists a bot state value. Runs on the calling thread; use from async tasks if needed.
+     */
+    public void setState(String key, String value) {
+        String sql = switch (dbType) {
+            case SQLITE, POSTGRESQL -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value";
+            case MYSQL -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)";
+        };
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, key);
+            ps.setString(2, value);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to set state for key " + key, e);
+        }
     }
 
     public void close() {

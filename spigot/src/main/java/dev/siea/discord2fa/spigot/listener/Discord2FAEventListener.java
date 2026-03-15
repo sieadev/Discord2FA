@@ -70,8 +70,13 @@ public final class Discord2FAEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
+        org.bukkit.entity.Player player = event.getPlayer();
         String label = parseCommandLabel(event.getMessage());
-        if (!server.onCommand(event.getPlayer().getUniqueId(), label)) event.setCancelled(true);
+        if (!server.onCommand(player.getUniqueId(), label)) {
+            event.setCancelled(true);
+            String msg = server.getCommandDeniedMessage(player.getUniqueId(), label);
+            if (msg != null) player.sendMessage(msg);
+        }
     }
 
     private static String parseCommandLabel(String message) {

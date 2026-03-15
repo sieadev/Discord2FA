@@ -10,6 +10,7 @@ import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.common.i18n.ResourceLoader;
 import dev.siea.discord2fa.velocity.adapter.VelocityConfigAdapter;
+import dev.siea.discord2fa.velocity.command.Discord2FACommand;
 import dev.siea.discord2fa.velocity.listener.Discord2FAEventListener;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -75,6 +76,7 @@ public class Discord2FAVelocity {
         MessageProvider messageProvider = loadMessages(configAdapter);
         server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider);
         proxy.getEventManager().register(this, new Discord2FAEventListener(server, proxy));
+        Discord2FACommand.register(server, proxy, proxy.getCommandManager());
         startBStats();
     }
 
