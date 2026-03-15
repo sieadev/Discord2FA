@@ -39,7 +39,7 @@
     </modules>
 
     <properties>
-        <revision>2.0.1</revision>
+        <revision>2.0.2</revision>
         <java.version>16</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
