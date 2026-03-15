@@ -168,6 +168,10 @@ public abstract class BaseServer {
     }
 
     private CompletableFuture<Boolean> handleLinkCommandAsync(CommonPlayer player, String code) {
+        if (databaseAdapter.getLinkedPlayer(player.getUniqueId()) != null) {
+            serverExecutor.execute(() -> player.sendMessage(messageProvider.get("alreadyLinked")));
+            return CompletableFuture.completedFuture(true);
+        }
         if (code == null || code.isBlank()) {
             serverExecutor.execute(() -> player.sendMessage(messageProvider.get("noCode")));
             return CompletableFuture.completedFuture(true);
