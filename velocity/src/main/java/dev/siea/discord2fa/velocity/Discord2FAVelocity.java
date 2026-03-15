@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -74,7 +75,8 @@ public class Discord2FAVelocity {
         VelocityConfigAdapter configAdapter = new VelocityConfigAdapter(configMap);
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
-        server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider);
+        Executor proxyExecutor = r -> proxy.getScheduler().buildTask(this, r).schedule();
+        server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor);
         proxy.getEventManager().register(this, new Discord2FAEventListener(server, proxy));
         Discord2FACommand.register(server, proxy, proxy.getCommandManager());
         startBStats();
@@ -102,9 +104,5 @@ public class Discord2FAVelocity {
             logger.warning("Could not load lang file: " + e.getMessage());
             return LangLoader.loadFallback(path -> getClass().getResourceAsStream("/" + path));
         }
-    }
-
-    public dev.siea.discord2fa.proxyserver.ProxyServer getProxyServer() {
-        return server;
     }
 }

@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public abstract class BaseServer {
     private final LoggerAdapter logger;
@@ -27,6 +30,14 @@ public abstract class BaseServer {
     private final DiscordBot discordBot;
     private final ServerConfig serverConfig;
     private final MessageProvider messageProvider;
+    /** Executor for blocking DB work so it doesn't block the server thread. */
+    private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "Discord2FA-db");
+        t.setDaemon(true);
+        return t;
+    });
+    /** Optional executor for running callbacks on the server/main thread (e.g. Bukkit main thread). If null, callbacks run on dbExecutor. */
+    private final Executor serverExecutor;
 
     /** Players currently verifying. Removed only when they verify. */
     private final Map<UUID, CommonPlayer> verifyingPlayers = new ConcurrentHashMap<>();
@@ -35,11 +46,19 @@ public abstract class BaseServer {
     public static final List<String> HANDLED_COMMANDS = Collections.unmodifiableList(Arrays.asList("link", "unlink"));
 
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider) {
+        this(configProvider, logger, messageProvider, null);
+    }
+
+    /**
+     * @param serverExecutor optional executor for running player-facing callbacks (sendMessage, onVerified) on the server/main thread. If null, callbacks run on the internal DB thread.
+     */
+    public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
         this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         this.logger = logger;
         this.databaseAdapter = new DatabaseAdapter(configProvider);
         this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter);
         this.serverConfig = new ServerConfig(configProvider);
+        this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
         purgeOldSignInLocationsAsync();
         checkForUpdates();
     }
@@ -60,40 +79,43 @@ public abstract class BaseServer {
 
     /**
      * Register a player as verifying. Called from platform join/login events.
-     * When they verify, they are removed via the onVerified callback.
-     * If force-link is disabled and the player has no linked Discord account, they are not added.
-     * If rememberSignInLocation is enabled and the same IP+version signed in within 30 days, they are not added (skip verify).
+     * DB lookups run asynchronously so the join thread is not blocked; the actual add and messages run on the server executor.
      */
     protected final void addPlayer(CommonPlayer player) {
         if (player == null) return;
-
-        LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
-        if (linked != null) player.setLinkedPlayer(linked);
-
-        if (!serverConfig.isForceLink() && linked == null) return;
-
         SignInLocation current = player.getSigninLocation();
-        if (current != null && serverConfig.isRememberSignInLocation()
-            && databaseAdapter.hasRecentSignInLocation(player.getUniqueId(), current.getIpAddress(), current.getVersion())) {
-            return;
-        }
 
-        player.setOnVerifiedCallback(() -> verifyingPlayers.remove(player.getUniqueId()));
-        verifyingPlayers.put(player.getUniqueId(), player);
+        CompletableFuture.supplyAsync(() -> {
+            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
+            if (linked != null) player.setLinkedPlayer(linked);
+            boolean skip = !serverConfig.isForceLink() && linked == null;
+            if (!skip && current != null && serverConfig.isRememberSignInLocation()
+                && databaseAdapter.hasRecentSignInLocation(player.getUniqueId(), current.getIpAddress(), current.getVersion())) {
+                skip = true;
+            }
+            return new Object[]{ linked, skip, player };
+        }, dbExecutor).thenAcceptAsync(result -> {
+            boolean skip = (Boolean) ((Object[]) result)[1];
+            CommonPlayer p = (CommonPlayer) ((Object[]) result)[2];
+            if (skip) return;
 
-        if (player.isLinked()) {
-            discordBot.attemptVerify(player.getLinkedPlayer(), player.getSigninLocation())
-                    .thenAcceptAsync(verified -> {
-                        if (verified) {
-                            player.sendMessage(messageProvider.get("verifySuccess"));
-                            player.onVerified();
-                        } else {
-                            player.kick(messageProvider.get("verifyDenied"));
-                        }
-                    });
-        } else {
-            player.sendMessage(messageProvider.get("forceLink"));
-        }
+            p.setOnVerifiedCallback(() -> verifyingPlayers.remove(p.getUniqueId()));
+            verifyingPlayers.put(p.getUniqueId(), p);
+
+            if (p.isLinked()) {
+                discordBot.attemptVerify(p.getLinkedPlayer(), p.getSigninLocation())
+                        .thenAcceptAsync(verified -> {
+                            if (verified) {
+                                p.sendMessage(messageProvider.get("verifySuccess"));
+                                p.onVerified();
+                            } else {
+                                p.kick(messageProvider.get("verifyDenied"));
+                            }
+                        }, serverExecutor);
+            } else {
+                p.sendMessage(messageProvider.get("forceLink"));
+            }
+        }, serverExecutor);
     }
 
     /**
@@ -113,71 +135,68 @@ public abstract class BaseServer {
     }
 
     /**
-     * Dispatches a command from the platform. Call this when a player runs one of {@link #HANDLED_COMMANDS}.
-     * Performs the verification gate (if player is verifying and command not in allowedCommands, sends message and returns true).
-     * Then runs the appropriate handler for "link" or "unlink". Returns true if the command was handled (so the platform should not pass to other handlers).
+     * Dispatches a command asynchronously. DB work runs off the server thread; messages and onVerified run on the server executor.
+     * Returns a future that completes with true if the command was handled (platform should cancel the command event when true).
      */
-    public final boolean handleCommand(CommonPlayer player, String commandLabel, List<String> args) {
+    public final CompletableFuture<Boolean> handleCommand(CommonPlayer player, String commandLabel, List<String> args) {
         String label = commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT);
         if (verifyingPlayers.containsKey(player.getUniqueId()) && !serverConfig.isCommandAllowed(label)) {
-            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
-            player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink"));
-            return true;
+            return CompletableFuture.supplyAsync(() -> databaseAdapter.getLinkedPlayer(player.getUniqueId()), dbExecutor)
+                    .thenApplyAsync(linked -> {
+                        player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink"));
+                        return true;
+                    }, serverExecutor);
         }
         return switch (label) {
-            case "link" -> {
-                handleLinkCommand(player, args.isEmpty() ? "" : args.get(0));
-                yield true;
-            }
-            case "unlink" -> {
-                handleUnlinkCommand(player);
-                yield true;
-            }
-            default -> false;
+            case "link" -> handleLinkCommandAsync(player, args.isEmpty() ? "" : args.get(0));
+            case "unlink" -> handleUnlinkCommandAsync(player);
+            default -> CompletableFuture.completedFuture(false);
         };
     }
 
-    /**
-     * Handle the /link &lt;code&gt; command. Call this when the player runs link with a code from Discord.
-     * Sends the appropriate message (noCode, invalidCode, linkSuccess) to the player.
-     * If the player was in the verifying state, removes them and calls onVerified so they can play.
-     */
-    private void handleLinkCommand(CommonPlayer player, String code) {
+    private CompletableFuture<Boolean> handleLinkCommandAsync(CommonPlayer player, String code) {
         if (code == null || code.isBlank()) {
-            player.sendMessage(messageProvider.get("noCode"));
-            return;
+            serverExecutor.execute(() -> player.sendMessage(messageProvider.get("noCode")));
+            return CompletableFuture.completedFuture(true);
         }
         var discordUser = discordBot.consumeLinkCode(code);
         if (discordUser.isEmpty()) {
-            player.sendMessage(messageProvider.get("invalidCode"));
-            return;
+            serverExecutor.execute(() -> player.sendMessage(messageProvider.get("invalidCode")));
+            return CompletableFuture.completedFuture(true);
         }
         long discordId = discordUser.get().getId();
         UUID playerUuid = player.getUniqueId();
-        databaseAdapter.saveLinkedPlayer(new LinkedPlayer(playerUuid, discordId, Instant.now()));
-        player.sendMessage(messageProvider.get("linkSuccess"));
-        if (verifyingPlayers.remove(playerUuid) != null) {
-            player.setLinkedPlayer(databaseAdapter.getLinkedPlayer(playerUuid));
-            player.onVerified();
-        }
+        return CompletableFuture.runAsync(() -> {
+            databaseAdapter.saveLinkedPlayer(new LinkedPlayer(playerUuid, discordId, Instant.now()));
+        }, dbExecutor).thenApplyAsync(v -> {
+            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(playerUuid);
+            player.sendMessage(messageProvider.get("linkSuccess"));
+            if (verifyingPlayers.remove(playerUuid) != null) {
+                player.setLinkedPlayer(linked);
+                player.onVerified();
+            }
+            return true;
+        }, serverExecutor);
     }
 
-    /**
-     * Handles the /unlink command. Only allowed when the player is verified (not in the verifying state).
-     * If they are still verifying, sends notVerified. If not linked, sends notLinked. Otherwise removes the link and sends unlinkSuccess.
-     */
-    private void handleUnlinkCommand(CommonPlayer player) {
+    private CompletableFuture<Boolean> handleUnlinkCommandAsync(CommonPlayer player) {
         if (verifyingPlayers.containsKey(player.getUniqueId())) {
-            player.sendMessage(messageProvider.get("notVerified"));
-            return;
+            serverExecutor.execute(() -> player.sendMessage(messageProvider.get("notVerified")));
+            return CompletableFuture.completedFuture(true);
         }
-        if (databaseAdapter.getLinkedPlayer(player.getUniqueId()) == null) {
-            player.sendMessage(messageProvider.get("notLinked"));
-            return;
-        }
-        databaseAdapter.removeLinkedPlayer(player.getUniqueId());
-        player.setLinkedPlayer(null);
-        player.sendMessage(messageProvider.get("unlinkSuccess"));
+        return CompletableFuture.supplyAsync(() -> databaseAdapter.getLinkedPlayer(player.getUniqueId()), dbExecutor)
+                .thenComposeAsync(linked -> {
+                    if (linked == null) {
+                        player.sendMessage(messageProvider.get("notLinked"));
+                        return CompletableFuture.completedFuture(true);
+                    }
+                    return CompletableFuture.runAsync(() -> databaseAdapter.removeLinkedPlayer(player.getUniqueId()), dbExecutor)
+                            .thenRunAsync(() -> {
+                                player.setLinkedPlayer(null);
+                                player.sendMessage(messageProvider.get("unlinkSuccess"));
+                            }, serverExecutor)
+                            .thenApply(v -> true);
+                }, serverExecutor);
     }
 
     /**
@@ -197,14 +216,16 @@ public abstract class BaseServer {
     }
 
     /**
-     * Returns the message to send when a command is denied (player is verifying and command not in allowedCommands).
-     * Returns null if the command is allowed or the player is not in the verifying state. Used by platforms to send the message when cancelling the command.
+     * Returns a future with the message to send when a command is denied (player is verifying and command not in allowedCommands).
+     * Completes with null if the command is allowed or the player is not in the verifying state. Run the lookup async so the event thread is not blocked.
      */
-    public final String getCommandDeniedMessage(UUID uuid, String commandLabel) {
-        if (!verifyingPlayers.containsKey(uuid)) return null;
-        if (serverConfig.isCommandAllowed(commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT))) return null;
-        LinkedPlayer linked = databaseAdapter.getLinkedPlayer(uuid);
-        return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink");
+    public final CompletableFuture<String> getCommandDeniedMessage(UUID uuid, String commandLabel) {
+        if (!verifyingPlayers.containsKey(uuid)) return CompletableFuture.completedFuture(null);
+        if (serverConfig.isCommandAllowed(commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT))) return CompletableFuture.completedFuture(null);
+        return CompletableFuture.supplyAsync(() -> {
+            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(uuid);
+            return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink");
+        }, dbExecutor);
     }
 
     /**

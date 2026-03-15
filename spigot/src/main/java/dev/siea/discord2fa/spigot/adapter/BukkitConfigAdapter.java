@@ -31,7 +31,6 @@ public final class BukkitConfigAdapter implements ConfigAdapter {
 
     @Override
     public List<String> getStringList(String key) {
-        List<String> list = config.getStringList(key);
-        return list != null ? list : java.util.Collections.emptyList();
+        return config.getStringList(key);
     }
 }

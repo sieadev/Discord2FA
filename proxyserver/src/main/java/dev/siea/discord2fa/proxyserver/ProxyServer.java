@@ -6,10 +6,12 @@ import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.common.player.CommonPlayer;
 import dev.siea.discord2fa.common.server.BaseServer;
 
-public final class ProxyServer extends BaseServer {
+import java.util.concurrent.Executor;
 
-    public ProxyServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider) {
-        super(configProvider, logger, messageProvider);
+public final class ProxyServer extends BaseServer {
+    /** Use this when the platform can run callbacks on the proxy thread (e.g. Bungee/Velocity scheduler). */
+    public ProxyServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
+        super(configProvider, logger, messageProvider, serverExecutor);
         ProxyTargetServers.initialize(configProvider);
     }
 

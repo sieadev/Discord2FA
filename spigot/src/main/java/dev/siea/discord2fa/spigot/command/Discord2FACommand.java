@@ -8,6 +8,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,16 +27,17 @@ public final class Discord2FACommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender,@NotNull Command command,@NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
             return true;
         }
         List<String> argsList = args.length == 0 ? List.of() : Arrays.asList(args);
-        return server.handleCommand(new SpigotPlayer(player), label, argsList);
+        server.handleCommand(new SpigotPlayer(player), label, argsList);
+        return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender,@NotNull Command command,@NotNull String alias, String[] args) {
         return Collections.emptyList();
     }
 }

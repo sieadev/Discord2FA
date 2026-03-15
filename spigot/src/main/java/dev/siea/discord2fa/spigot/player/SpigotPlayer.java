@@ -25,7 +25,7 @@ public final class SpigotPlayer extends CommonPlayer {
 
     private static String ipFrom(Player p) {
         if (p.getAddress() == null) return null;
-        InetSocketAddress a = (InetSocketAddress) p.getAddress();
+        InetSocketAddress a = p.getAddress();
         if (a.getAddress() == null) return null;
         return a.getAddress().getHostAddress();
     }
@@ -43,9 +43,5 @@ public final class SpigotPlayer extends CommonPlayer {
     @Override
     public void kick(String reason) {
         handle.kickPlayer(reason);
-    }
-
-    public Player getHandle() {
-        return handle;
     }
 }

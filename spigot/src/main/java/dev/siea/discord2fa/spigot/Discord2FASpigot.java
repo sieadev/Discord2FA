@@ -14,10 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.Executor;
 
 public final class Discord2FASpigot extends JavaPlugin {
-
-    private GameServer server;
 
     @Override
     public void onEnable() {
@@ -25,7 +24,8 @@ public final class Discord2FASpigot extends JavaPlugin {
         BukkitConfigAdapter configAdapter = new BukkitConfigAdapter(getConfig());
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(getLogger());
         MessageProvider messageProvider = loadMessages(configAdapter);
-        server = new GameServer(configAdapter, loggerAdapter, messageProvider);
+        Executor mainThread = r -> getServer().getScheduler().runTask(this, r);
+        GameServer server = new GameServer(configAdapter, loggerAdapter, messageProvider, mainThread);
         getServer().getPluginManager().registerEvents(new Discord2FAEventListener(server), this);
         Discord2FACommand commandExecutor = new Discord2FACommand(server);
         for (String name : BaseServer.HANDLED_COMMANDS) {

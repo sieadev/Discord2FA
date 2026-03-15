@@ -74,8 +74,8 @@ public final class Discord2FAEventListener implements Listener {
         String label = parseCommandLabel(event.getMessage());
         if (!server.onCommand(player.getUniqueId(), label)) {
             event.setCancelled(true);
-            String msg = server.getCommandDeniedMessage(player.getUniqueId(), label);
-            if (msg != null) player.sendMessage(msg);
+            server.getCommandDeniedMessage(player.getUniqueId(), label)
+                    .thenAccept(msg -> { if (msg != null) player.sendMessage(msg); });
         }
     }
 

@@ -92,14 +92,18 @@ public class DiscordBot {
     /**
      * Ensures the configured channel has the "link your account" message. Loads stored message ID from DB;
      * if that message still exists, does nothing (button listener already handles it). Otherwise sends a new
-     * message and persists its ID. All work is done asynchronously.
+     * message and persists its ID. All work is done asynchronously; DB lookup runs off the discord thread.
      */
     private void ensureLinkMessageAsync() {
         if (api == null) return;
         ServerTextChannel channel = api.getServerTextChannelById(discordConfig.getChannelId()).orElse(null);
         if (channel == null) return;
 
-        String storedId = databaseAdapter.getState(DatabaseAdapter.STATE_LINK_MESSAGE_ID);
+        CompletableFuture.supplyAsync(() -> databaseAdapter.getState(DatabaseAdapter.STATE_LINK_MESSAGE_ID), discordExecutor)
+                .thenAccept(storedId -> ensureLinkMessageWithStoredId(channel, storedId));
+    }
+
+    private void ensureLinkMessageWithStoredId(ServerTextChannel channel, String storedId) {
         if (storedId != null && !storedId.isBlank()) {
             try {
                 long messageId = Long.parseLong(storedId.trim());
@@ -116,6 +120,7 @@ public class DiscordBot {
         }
         sendNewLinkMessage(channel);
     }
+
 
     /**
      * Sends a new link message to the channel and persists its message ID in the database (async).

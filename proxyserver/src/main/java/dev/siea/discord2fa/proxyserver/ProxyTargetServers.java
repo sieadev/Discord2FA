@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * Static registry for the logical server names used by the proxy while a
  * player is going through verification and after they have been verified.
- *
+ * <p>
  * Expected config keys (resolved via {@link ConfigAdapter}):
  * <ul>
  *   <li><strong>proxy.verification-server</strong> – server players should be on while verifying</li>

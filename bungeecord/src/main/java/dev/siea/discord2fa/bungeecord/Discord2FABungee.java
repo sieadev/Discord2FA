@@ -20,10 +20,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
+import java.util.concurrent.Executor;
 
 public final class Discord2FABungee extends Plugin {
-
-    private ProxyServer server;
 
     @Override
     public void onEnable() {
@@ -47,7 +46,8 @@ public final class Discord2FABungee extends Plugin {
         Logger logger = getLogger();
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
-        server = new ProxyServer(configAdapter, loggerAdapter, messageProvider);
+        Executor proxyExecutor = r -> getProxy().getScheduler().runAsync(this, r);
+        ProxyServer server = new ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor);
         getProxy().getPluginManager().registerListener(this, new Discord2FAEventListener(server, getProxy()));
         Discord2FACommand.register(this, server, getProxy());
         new Metrics(this, BStats.PLUGIN_ID);

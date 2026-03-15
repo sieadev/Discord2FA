@@ -31,8 +31,7 @@ public final class VelocityProxyPlayer extends ProxyPlayer {
     }
 
     private static String ipFrom(SocketAddress addr) {
-        if (!(addr instanceof InetSocketAddress)) return null;
-        InetSocketAddress a = (InetSocketAddress) addr;
+        if (!(addr instanceof InetSocketAddress a)) return null;
         if (a.getAddress() == null) return null;
         return a.getAddress().getHostAddress();
     }
@@ -56,9 +55,5 @@ public final class VelocityProxyPlayer extends ProxyPlayer {
     public void sendToServer(String serverName) {
         Optional<RegisteredServer> server = proxy.getServer(serverName);
         server.ifPresent(s -> handle.createConnectionRequest(s).fireAndForget());
-    }
-
-    public Player getHandle() {
-        return handle;
     }
 }

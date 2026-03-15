@@ -31,8 +31,10 @@ public final class Discord2FAEventListener {
             String label = parseCommandLabel(message);
             if (!server.onCommand(uuid, label)) {
                 event.setResult(PlayerChatEvent.ChatResult.denied());
-                String msg = server.getCommandDeniedMessage(uuid, label);
-                if (msg != null) player.sendMessage(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().deserialize(msg));
+                server.getCommandDeniedMessage(uuid, label)
+                        .thenAccept(msg -> {
+                            if (msg != null) player.sendMessage(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().deserialize(msg));
+                        });
             }
         } else {
             if (!server.onEvent(uuid, EventType.CHAT)) event.setResult(PlayerChatEvent.ChatResult.denied());
