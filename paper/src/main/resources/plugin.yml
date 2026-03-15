@@ -1,7 +1,6 @@
 name: Discord2FA
 version: ${project.version}
 main: dev.siea.discord2fa.paper.Discord2FAPaper
-description: Two-factor authentication via Discord
 api-version: '1.20'
 authors: ['sieadev']
 # Optional JDBC drivers: downloaded by Paper and added to classpath when using MySQL/PostgreSQL
