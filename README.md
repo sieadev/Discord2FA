@@ -26,8 +26,8 @@ Lets players link their Minecraft account to Discord enabling two-factor authent
 
 | Platform       | Module       | Notes                                                  |
 |----------------|--------------|--------------------------------------------------------|
-| **Paper**      | `paper`      | Recommended for game servers                           |
-| **Spigot**     | `spigot`     | 1.19+ for library loading                              |
+| **Paper**      | `paper`      | 1.16.5+                                                |
+| **Spigot**     | `spigot`     | 1.16.5+                                                |
 | **BungeeCord** | `bungeecord` | Proxy; optional verification/post-verification servers |
 | **Velocity**   | `velocity`   | Proxy; same options as BungeeCord                      |
 

@@ -1,7 +1,8 @@
 name: Discord2FA
 version: ${project.version}
 main: dev.siea.discord2fa.paper.Discord2FAPaper
-api-version: '1.20'
+description: Two-factor authentication via Discord
+api-version: '1.16'
 authors: ['sieadev']
 # Optional JDBC drivers: downloaded by Paper and added to classpath when using MySQL/PostgreSQL
 libraries:
@@ -33,3 +34,4 @@ commands:
   unlink:
     description: Unlink your Minecraft account from Discord (must be verified first)
     permission: discord2fa.unlink
+

@@ -1,7 +1,7 @@
 name: Discord2FA
 version: ${project.version}
 main: dev.siea.discord2fa.spigot.Discord2FASpigot
-api-version: '1.20'
+api-version: '1.16'
 authors: ['sieadev']
 # Optional JDBC drivers: downloaded by Spigot and added to classpath when using MySQL/PostgreSQL (1.19+)
 libraries:
