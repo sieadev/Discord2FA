@@ -205,7 +205,6 @@ public final class DatabaseAdapter {
     }
 
     public boolean hasRecentSignInLocation(UUID minecraftUuid, String ipAddress, String version) {
-        // Same player, same IP, same version, and time_of_login within last 30 days
         String sql = "SELECT 1 FROM login_locations WHERE minecraft_uuid = ? AND ip_address = ? AND version = ? AND time_of_login >= ? LIMIT 1";
         Instant thirtyDaysAgo = Instant.now().minusSeconds(30L * 24 * 60 * 60);
         try (Connection conn = dataSource.getConnection();
@@ -219,6 +218,25 @@ public final class DatabaseAdapter {
             }
         } catch (SQLException e) {
             throw new IllegalStateException("Failed to check recent sign-in for " + minecraftUuid, e);
+        }
+    }
+
+    /**
+     * Deletes all sign-in locations older than the given number of days. Use to keep the table small;
+     * locations older than 30 days are not used by {@link #hasRecentSignInLocation} anyway.
+     *
+     * @param days age in days; records with time_of_login before (now - days) are deleted
+     * @return number of rows deleted
+     */
+    public int purgeSignInLocationsOlderThan(int days) {
+        Instant cutoff = Instant.now().minusSeconds(days * 24L * 60 * 60);
+        String sql = "DELETE FROM login_locations WHERE time_of_login < ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, Timestamp.from(cutoff));
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to purge old sign-in locations", e);
         }
     }
 

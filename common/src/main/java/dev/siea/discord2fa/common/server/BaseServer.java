@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class BaseServer {
@@ -39,7 +40,22 @@ public abstract class BaseServer {
         this.databaseAdapter = new DatabaseAdapter(configProvider);
         this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter);
         this.serverConfig = new ServerConfig(configProvider);
+        purgeOldSignInLocationsAsync();
         checkForUpdates();
+    }
+
+    /** Purges sign-in locations older than 30 days asynchronously so startup is not blocked. */
+    private void purgeOldSignInLocationsAsync() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                int deleted = databaseAdapter.purgeSignInLocationsOlderThan(30);
+                if (deleted > 0) {
+                    logger.info("Purged " + deleted + " sign-in location(s) older than 30 days.");
+                }
+            } catch (Exception e) {
+                logger.error("Failed to purge old sign-in locations: " + e.getMessage());
+            }
+        });
     }
 
     /**
