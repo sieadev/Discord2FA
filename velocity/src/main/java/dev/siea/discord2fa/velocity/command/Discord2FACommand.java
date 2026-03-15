@@ -5,6 +5,7 @@ import com.velocitypowered.api.proxy.Player;
 import dev.siea.discord2fa.common.server.BaseServer;
 import dev.siea.discord2fa.proxyserver.ProxyServer;
 import dev.siea.discord2fa.velocity.player.VelocityProxyPlayer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,9 +13,13 @@ import java.util.List;
 
 /**
  * Velocity command that passes through Discord2FA commands (link, unlink) to the core.
- * Tab completion returns no suggestions (link code is secret, unlink has no arguments).
+ * Uses permissions discord2fa.link and discord2fa.unlink (default allow; revoke to deny).
  */
 public final class Discord2FACommand implements SimpleCommand {
+
+    private static final String PERM_LINK = "discord2fa.link";
+    private static final String PERM_UNLINK = "discord2fa.unlink";
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
     private final ProxyServer discord2faServer;
     private final com.velocitypowered.api.proxy.ProxyServer velocityProxy;
@@ -27,9 +32,18 @@ public final class Discord2FACommand implements SimpleCommand {
     @Override
     public void execute(Invocation invocation) {
         if (!(invocation.source() instanceof Player player)) {
+            invocation.source().sendMessage(LEGACY.deserialize("§cThis command can only be executed by players."));
             return;
         }
         String alias = invocation.alias();
+        if ("link".equals(alias) && !invocation.source().hasPermission(PERM_LINK)) {
+            invocation.source().sendMessage(LEGACY.deserialize("§cYou do not have permission to use this command."));
+            return;
+        }
+        if ("unlink".equals(alias) && !invocation.source().hasPermission(PERM_UNLINK)) {
+            invocation.source().sendMessage(LEGACY.deserialize("§cYou do not have permission to use this command."));
+            return;
+        }
         String[] args = invocation.arguments();
         List<String> argsList = args == null ? List.of() : Arrays.asList(args);
         discord2faServer.handleCommand(new VelocityProxyPlayer(player, velocityProxy), alias, argsList);

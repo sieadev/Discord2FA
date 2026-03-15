@@ -29,6 +29,7 @@ public final class Discord2FACommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender,@NotNull Command command,@NotNull String label, String[] args) {
         if (!(sender instanceof Player player)) {
+            sender.sendMessage("§cThis command can only be executed by players.");
             return true;
         }
         List<String> argsList = args.length == 0 ? List.of() : Arrays.asList(args);
