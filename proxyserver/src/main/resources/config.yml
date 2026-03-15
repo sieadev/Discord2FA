@@ -13,7 +13,7 @@ language: en
 
 # --------------------------- Database ---------------------------
 # type: sqlite (default), mysql, or postgresql
-# For SQLite, leave url empty to use discord2fa.db in this plugin's folder
+# For MySQL/PostgreSQL, add the JDBC driver JAR to your proxy classpath (BungeeCord/Velocity).
 database:
   type: sqlite
   url: ""

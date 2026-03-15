@@ -58,7 +58,7 @@ public abstract class BaseServer {
         this.messageProvider = messageProvider != null ? messageProvider : k -> k;
         this.logger = logger;
         this.databaseAdapter = new DatabaseAdapter(configProvider, dataFolder);
-        this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter);
+        this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter, logger);
         this.serverConfig = new ServerConfig(configProvider);
         this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
         purgeOldSignInLocationsAsync();

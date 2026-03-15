@@ -152,6 +152,11 @@
                                         <exclude>io.papermc.paper:paper-api</exclude>
                                         <exclude>net.md-5:bungeecord-api</exclude>
                                         <exclude>com.velocitypowered:velocity-api</exclude>
+                                        <!-- Optional DB drivers: use SQLite (included) or add MySQL/PostgreSQL JAR to server classpath -->
+                                        <exclude>com.mysql:mysql-connector-j</exclude>
+                                        <exclude>org.postgresql:postgresql</exclude>
+                                        <exclude>com.google.protobuf:protobuf-java</exclude>
+                                        <exclude>org.checkerframework:checker-qual</exclude>
                                     </excludes>
                                 </artifactSet>
                                 <relocations>
@@ -175,6 +180,22 @@
                                             <exclude>META-INF/*.SF</exclude>
                                             <exclude>META-INF/*.DSA</exclude>
                                             <exclude>META-INF/*.RSA</exclude>
+                                        </excludes>
+                                    </filter>
+                                    <!-- Keep only Linux x86_64 and aarch64 SQLite natives (typical server platforms); drop Windows/Mac/other archs -->
+                                    <filter>
+                                        <artifact>org.xerial:sqlite-jdbc</artifact>
+                                        <excludes>
+                                            <exclude>org/sqlite/native/Windows/**</exclude>
+                                            <exclude>org/sqlite/native/Mac/**</exclude>
+                                            <exclude>org/sqlite/native/FreeBSD/**</exclude>
+                                            <exclude>org/sqlite/native/Linux-Android/**</exclude>
+                                            <exclude>org/sqlite/native/Linux-Musl/**</exclude>
+                                            <exclude>org/sqlite/native/Linux/arm/**</exclude>
+                                            <exclude>org/sqlite/native/Linux/armv6/**</exclude>
+                                            <exclude>org/sqlite/native/Linux/armv7/**</exclude>
+                                            <exclude>org/sqlite/native/Linux/riscv64/**</exclude>
+                                            <exclude>org/sqlite/native/Linux/ppc64/**</exclude>
                                         </excludes>
                                     </filter>
                                 </filters>

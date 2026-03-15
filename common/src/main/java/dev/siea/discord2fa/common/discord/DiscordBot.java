@@ -5,6 +5,7 @@ import dev.siea.discord2fa.common.database.DatabaseAdapter;
 import dev.siea.discord2fa.common.database.models.LinkedPlayer;
 import dev.siea.discord2fa.common.database.models.SignInLocation;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
+import dev.siea.discord2fa.common.logger.LoggerAdapter;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -44,7 +45,7 @@ public class DiscordBot {
 
     private volatile DiscordApi api;
 
-    public DiscordBot(ConfigAdapter configAdapter, MessageProvider messageProvider, DatabaseAdapter databaseAdapter) {
+    public DiscordBot(ConfigAdapter configAdapter, MessageProvider messageProvider, DatabaseAdapter databaseAdapter, LoggerAdapter loggerAdapter) {
         this.discordConfig = new DiscordConfig(configAdapter);
         this.messageProvider = messageProvider;
         this.databaseAdapter = databaseAdapter;
@@ -65,6 +66,8 @@ public class DiscordBot {
                 registerListeners();
                 ensureLinkMessageAsync();
             }, discordExecutor);
+        } else {
+            loggerAdapter.warn("Discord bot has not been configured.");
         }
     }
 
