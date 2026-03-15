@@ -80,6 +80,8 @@ The bot creates one link message in that channel and reuses it after restarts.
 - **server.verification** — Optional backend server name where unverified players are sent.
 - **server.post-verification** — Optional server to send players to after they verify.
 
+**Important:** The proxy only sees connection, chat, and commands. It does **not** see in-game events (block break/place, movement, etc.). To keep unverified players from breaking or building on your verification server, secure that server with a protection plugin (e.g. [WorldGuard](https://dev.bukkit.org/projects/worldguard) or similar) so the verification server is a restricted area—no build/destroy, or a small safe lobby—instead of relying on Discord2FA on every backend.
+
 ---
 
 ## Commands

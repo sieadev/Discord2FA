@@ -47,7 +47,6 @@ public class Discord2FAVelocity {
         this.proxy = proxy;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
-        proxy.getEventManager().register(this, this);
     }
 
     @Subscribe

@@ -15,12 +15,10 @@ public abstract class ProxyPlayer extends CommonPlayer {
 
     protected ProxyPlayer(UUID uniqueId) {
         super(uniqueId, null);
-        ProxyTargetServers.sendPlayerToVerificationServer(this);
     }
 
     protected ProxyPlayer(UUID uniqueId, SignInLocation signinLocation) {
         super(uniqueId, signinLocation);
-        ProxyTargetServers.sendPlayerToVerificationServer(this);
     }
 
     @Override

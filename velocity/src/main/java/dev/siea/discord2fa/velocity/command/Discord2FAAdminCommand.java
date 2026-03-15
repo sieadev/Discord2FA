@@ -24,8 +24,16 @@ public final class Discord2FAAdminCommand implements SimpleCommand {
     }
 
     @Override
+    public boolean hasPermission(Invocation invocation) {
+        return true; // we always handle the command and check permission in execute() to show our message
+    }
+
+    @Override
     public void execute(Invocation invocation) {
-        if (!invocation.source().hasPermission(PERMISSION)) {
+        boolean allowed = invocation.source() instanceof com.velocitypowered.api.proxy.Player
+                ? invocation.source().hasPermission(PERMISSION)
+                : true; // console always allowed
+        if (!allowed) {
             invocation.source().sendMessage(LEGACY.deserialize("§cYou do not have permission to use this command."));
             return;
         }
@@ -47,7 +55,10 @@ public final class Discord2FAAdminCommand implements SimpleCommand {
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        if (!invocation.source().hasPermission(PERMISSION)) return Collections.emptyList();
+        boolean allowed = invocation.source() instanceof com.velocitypowered.api.proxy.Player
+                ? invocation.source().hasPermission(PERMISSION)
+                : true;
+        if (!allowed) return Collections.emptyList();
         String[] args = invocation.arguments();
         if (args != null && args.length <= 1) {
             String prefix = args.length == 1 ? args[0].toLowerCase(java.util.Locale.ROOT) : "";

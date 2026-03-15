@@ -2,6 +2,7 @@ package dev.siea.discord2fa.bungeecord.listener;
 
 import dev.siea.discord2fa.bungeecord.player.BungeeProxyPlayer;
 import dev.siea.discord2fa.common.event.EventType;
+import dev.siea.discord2fa.proxyserver.ProxyTargetServers;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -22,7 +23,14 @@ public final class Discord2FAEventListener implements Listener {
 
     @EventHandler
     public void onPostLogin(PostLoginEvent event) {
-        server.handlePlayerJoin(new BungeeProxyPlayer(event.getPlayer(), proxy));
+        BungeeProxyPlayer player = new BungeeProxyPlayer(event.getPlayer(), proxy);
+        boolean skip = server.shouldSkipVerificationBlocking(player);
+        if (skip) {
+            ProxyTargetServers.sendPlayerToPostVerificationServer(player);
+        } else {
+            ProxyTargetServers.sendPlayerToVerificationServer(player);
+        }
+        server.handlePlayerJoin(player, () -> ProxyTargetServers.sendPlayerToPostVerificationServer(player));
     }
 
     @EventHandler

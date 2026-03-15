@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,8 @@ public abstract class BaseServer {
 
     /** Players currently verifying. Removed only when they verify. */
     private final Map<UUID, CommonPlayer> verifyingPlayers = new ConcurrentHashMap<>();
+    /** Players whose join is still being processed (async). Block actions until we decide skip or verify. */
+    private final Set<UUID> pendingVerification = ConcurrentHashMap.newKeySet();
 
     /** Cached result of the last update check (startup); used by /discord2fa version. */
     private volatile UpdateCheckResult lastUpdateCheckResult;
@@ -113,14 +116,52 @@ public abstract class BaseServer {
     }
 
     /**
+     * Returns true if the player is either still pending (join being processed) or in the verifying set.
+     * Used by platforms to block commands/events until we either skip or complete verification.
+     */
+    public final boolean isPlayerPendingOrVerifying(UUID uuid) {
+        return pendingVerification.contains(uuid) || verifyingPlayers.containsKey(uuid);
+    }
+
+    /** Whether the given command label is in the allowed-while-unverified list (e.g. /link). */
+    public final boolean isCommandAllowed(String commandLabel) {
+        return serverConfig.isCommandAllowed(commandLabel);
+    }
+
+    /**
+     * Runs the same "skip verification?" logic as addPlayer on the DB executor and blocks until done.
+     * Returns true if the player should skip verification (e.g. not linked and forceLink off, or location remembered).
+     * Proxy platforms use this to send the player directly to the post-verification server instead of the verification server.
+     * If the bot is not connected or the database is unavailable, returns true (skip) so the player is not stuck.
+     */
+    public final boolean shouldSkipVerificationBlocking(CommonPlayer player) {
+        if (player == null) return true;
+        if (!discordBot.isConnected() || databaseAdapter == null) return true;
+        SignInLocation current = player.getSigninLocation();
+        return CompletableFuture.supplyAsync(() -> {
+            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
+            if (linked != null) player.setLinkedPlayer(linked);
+            boolean skip = !serverConfig.isForceLink() && linked == null;
+            if (!skip && current != null && serverConfig.isRememberSignInLocation()
+                && databaseAdapter.hasRecentSignInLocation(player.getUniqueId(), current.getIpAddress(), current.getVersion())) {
+                skip = true;
+            }
+            return skip;
+        }, dbExecutor).join();
+    }
+
+    /**
      * Register a player as verifying. Called from platform join/login events.
      * DB lookups run asynchronously so the join thread is not blocked; the actual add and messages run on the server executor.
+     * @param onSkippedVerification optional callback when the player is skipped (e.g. not linked and forceLink off, or location remembered). Proxy platforms use this to send the player to the post-verification server.
      */
-    protected final void addPlayer(CommonPlayer player) {
+    protected final void addPlayer(CommonPlayer player, Runnable onSkippedVerification) {
         if (player == null) return;
         SignInLocation current = player.getSigninLocation();
 
         if (!discordBot.isConnected() || databaseAdapter == null) return;
+
+        pendingVerification.add(player.getUniqueId());
 
         CompletableFuture.supplyAsync(() -> {
             LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
@@ -134,7 +175,12 @@ public abstract class BaseServer {
         }, dbExecutor).thenAcceptAsync(result -> {
             boolean skip = (Boolean) ((Object[]) result)[1];
             CommonPlayer p = (CommonPlayer) ((Object[]) result)[2];
-            if (skip) return;
+            pendingVerification.remove(p.getUniqueId());
+
+            if (skip) {
+                if (onSkippedVerification != null) onSkippedVerification.run();
+                return;
+            }
 
             p.setOnVerifiedCallback(() -> verifyingPlayers.remove(p.getUniqueId()));
             verifyingPlayers.put(p.getUniqueId(), p);
@@ -155,18 +201,25 @@ public abstract class BaseServer {
         }, serverExecutor);
     }
 
+    /** Overload for non-proxy platforms; no callback when skipped. */
+    protected final void addPlayer(CommonPlayer player) {
+        addPlayer(player, null);
+    }
+
     /**
      * Called by platform listeners for non-command events. Returns true to allow,
-     * false to deny (e.g. cancel). Not in map = verified or unknown → allow.
+     * false to deny (e.g. cancel). Pending or verifying = block unless event is allowed.
      */
     public final boolean onEvent(UUID uuid, EventType eventType) {
-        CommonPlayer player = verifyingPlayers.get(uuid);
-        if (player == null) return true;
+        if (!isPlayerPendingOrVerifying(uuid)) return true;
         if (serverConfig.isEventAllowed(eventType)) return true;
-        if (player.isLinked()) {
-            player.sendTitle(messageProvider.get("verifyTitle"));
-        } else {
-            player.sendMessage(messageProvider.get("forceLink"));
+        CommonPlayer player = verifyingPlayers.get(uuid);
+        if (player != null) {
+            if (player.isLinked()) {
+                player.sendTitle(messageProvider.get("verifyTitle"));
+            } else {
+                player.sendMessage(messageProvider.get("forceLink"));
+            }
         }
         return false;
     }
@@ -177,7 +230,7 @@ public abstract class BaseServer {
      */
     public final CompletableFuture<Boolean> handleCommand(CommonPlayer player, String commandLabel, List<String> args) {
         String label = commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT);
-        if (verifyingPlayers.containsKey(player.getUniqueId()) && !serverConfig.isCommandAllowed(label)) {
+        if (isPlayerPendingOrVerifying(player.getUniqueId()) && !serverConfig.isCommandAllowed(label)) {
             return CompletableFuture.supplyAsync(() -> databaseAdapter.getLinkedPlayer(player.getUniqueId()), dbExecutor)
                     .thenApplyAsync(linked -> {
                         player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink"));
@@ -241,17 +294,18 @@ public abstract class BaseServer {
     }
 
     /**
-     * Called by platform listeners for command events. Not in map = allow.
-     * In map = check allowedCommands whitelist.
+     * Called by platform listeners for command events. Pending or verifying = block unless command is allowed.
      */
     public final boolean onCommand(UUID uuid, String commandLabel) {
-        CommonPlayer player = verifyingPlayers.get(uuid);
-        if (player == null) return true;
+        if (!isPlayerPendingOrVerifying(uuid)) return true;
         if (serverConfig.isCommandAllowed(commandLabel)) return true;
-        if (player.isLinked()) {
-            player.sendTitle(messageProvider.get("verifyTitle"));
-        } else {
-            player.sendMessage(messageProvider.get("forceLink"));
+        CommonPlayer player = verifyingPlayers.get(uuid);
+        if (player != null) {
+            if (player.isLinked()) {
+                player.sendTitle(messageProvider.get("verifyTitle"));
+            } else {
+                player.sendMessage(messageProvider.get("forceLink"));
+            }
         }
         return false;
     }
@@ -261,8 +315,10 @@ public abstract class BaseServer {
      * Completes with null if the command is allowed or the player is not in the verifying state. Run the lookup async so the event thread is not blocked.
      */
     public final CompletableFuture<String> getCommandDeniedMessage(UUID uuid, String commandLabel) {
-        if (!verifyingPlayers.containsKey(uuid)) return CompletableFuture.completedFuture(null);
+        if (!isPlayerPendingOrVerifying(uuid)) return CompletableFuture.completedFuture(null);
         if (serverConfig.isCommandAllowed(commandLabel == null ? "" : commandLabel.trim().toLowerCase(java.util.Locale.ROOT))) return CompletableFuture.completedFuture(null);
+        CommonPlayer player = verifyingPlayers.get(uuid);
+        if (player == null) return CompletableFuture.completedFuture(messageProvider.get("notVerified"));
         return CompletableFuture.supplyAsync(() -> {
             LinkedPlayer linked = databaseAdapter.getLinkedPlayer(uuid);
             return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink");

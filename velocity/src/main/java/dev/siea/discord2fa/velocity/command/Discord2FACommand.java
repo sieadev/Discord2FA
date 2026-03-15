@@ -13,12 +13,11 @@ import java.util.List;
 
 /**
  * Velocity command that passes through Discord2FA commands (link, unlink) to the core.
- * Uses permissions discord2fa.link and discord2fa.unlink (default allow; revoke to deny).
+ * All players can use link/unlink by default; use a permission plugin and revoke
+ * discord2fa.link / discord2fa.unlink to restrict.
  */
 public final class Discord2FACommand implements SimpleCommand {
 
-    private static final String PERM_LINK = "discord2fa.link";
-    private static final String PERM_UNLINK = "discord2fa.unlink";
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
     private final ProxyServer discord2faServer;
@@ -30,20 +29,17 @@ public final class Discord2FACommand implements SimpleCommand {
     }
 
     @Override
+    public boolean hasPermission(Invocation invocation) {
+        return true; // allow all; link/unlink are player-only and checked in execute()
+    }
+
+    @Override
     public void execute(Invocation invocation) {
         if (!(invocation.source() instanceof Player player)) {
             invocation.source().sendMessage(LEGACY.deserialize("§cThis command can only be executed by players."));
             return;
         }
         String alias = invocation.alias();
-        if ("link".equals(alias) && !invocation.source().hasPermission(PERM_LINK)) {
-            invocation.source().sendMessage(LEGACY.deserialize("§cYou do not have permission to use this command."));
-            return;
-        }
-        if ("unlink".equals(alias) && !invocation.source().hasPermission(PERM_UNLINK)) {
-            invocation.source().sendMessage(LEGACY.deserialize("§cYou do not have permission to use this command."));
-            return;
-        }
         String[] args = invocation.arguments();
         List<String> argsList = args == null ? List.of() : Arrays.asList(args);
         discord2faServer.handleCommand(new VelocityProxyPlayer(player, velocityProxy), alias, argsList);

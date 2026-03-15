@@ -20,7 +20,16 @@ public final class ProxyServer extends BaseServer {
      * To be called by proxy platform modules (BungeeCord, Velocity) when a player joins the proxy.
      */
     public void handlePlayerJoin(CommonPlayer player) {
-        addPlayer(player);
+        addPlayer(player, null);
+    }
+
+    /**
+     * Same as {@link #handlePlayerJoin(CommonPlayer)} but with a callback when the player is skipped
+     * (e.g. not linked and forceLink off, or location remembered). Use this to send the player to the
+     * post-verification server so they are not stuck on the verification server.
+     */
+    public void handlePlayerJoin(CommonPlayer player, Runnable onSkippedVerification) {
+        addPlayer(player, onSkippedVerification);
     }
 }
 
