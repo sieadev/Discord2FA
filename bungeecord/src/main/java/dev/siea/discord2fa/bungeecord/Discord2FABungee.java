@@ -24,6 +24,8 @@ import java.util.concurrent.Executor;
 
 public final class Discord2FABungee extends Plugin {
 
+    private ProxyServer server;
+
     @Override
     public void onEnable() {
         if (!getDataFolder().exists()) getDataFolder().mkdirs();
@@ -47,7 +49,6 @@ public final class Discord2FABungee extends Plugin {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor proxyExecutor = r -> getProxy().getScheduler().runAsync(this, r);
-        ProxyServer server;
         try {
             server = new ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, getDataFolder().toPath());
         } catch (IllegalStateException e) {
@@ -57,6 +58,14 @@ public final class Discord2FABungee extends Plugin {
         getProxy().getPluginManager().registerListener(this, new Discord2FAEventListener(server, getProxy()));
         Discord2FACommand.register(this, server, getProxy());
         new Metrics(this, BStats.PLUGIN_ID);
+    }
+
+    @Override
+    public void onDisable() {
+        if (server != null) {
+            server.shutdown();
+            server = null;
+        }
     }
 
     private MessageProvider loadMessages(BungeeConfigAdapter configAdapter) {

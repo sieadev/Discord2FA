@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class DiscordBot {
     /** Pending link codes: code -> Discord user who requested it. */
@@ -81,6 +82,42 @@ public class DiscordBot {
     /** True if the bot has successfully connected to Discord (after startup). */
     public boolean isConnected() {
         return api != null;
+    }
+
+    /**
+     * Disconnects the Discord API and shuts down the executor. Blocks until disconnect completes
+     * so the plugin classloader can be closed safely (avoids "zip file closed" on Javacord shutdown thread).
+     * Safe to call multiple times; no-op if not connected.
+     */
+    public void shutdown() {
+        DiscordApi current = api;
+        api = null;
+        if (current == null) return;
+
+        discordExecutor.shutdown();
+        try {
+            if (!discordExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                discordExecutor.shutdownNow();
+                discordExecutor.awaitTermination(5, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            discordExecutor.shutdownNow();
+        }
+
+        try {
+            Object result = current.getClass().getMethod("disconnect").invoke(current);
+            if (result instanceof CompletableFuture) {
+                ((CompletableFuture<?>) result).get(15, TimeUnit.SECONDS);
+            } else {
+                Thread.sleep(2000);
+            }
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            loggerAdapter.warn("Discord disconnect: " + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
+        }
     }
 
     /**

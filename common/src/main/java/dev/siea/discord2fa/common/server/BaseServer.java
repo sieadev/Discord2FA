@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public abstract class BaseServer {
     private final LoggerAdapter logger;
@@ -75,6 +76,26 @@ public abstract class BaseServer {
      */
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
         this(configProvider, logger, messageProvider, serverExecutor, null);
+    }
+
+    /**
+     * Shuts down the Discord bot, closes the database, and stops executors. Call from plugin onDisable()
+     * so the Discord API disconnects before the plugin classloader is closed (avoids "zip file closed" errors).
+     * Safe to call multiple times.
+     */
+    public final void shutdown() {
+        discordBot.shutdown();
+        databaseAdapter.close();
+        dbExecutor.shutdown();
+        try {
+            if (!dbExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                dbExecutor.shutdownNow();
+                dbExecutor.awaitTermination(5, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            dbExecutor.shutdownNow();
+        }
     }
 
     /** Purges sign-in locations older than 30 days asynchronously so startup is not blocked. */

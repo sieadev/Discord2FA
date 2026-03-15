@@ -19,6 +19,8 @@ import java.util.concurrent.Executor;
 
 public final class Discord2FASpigot extends JavaPlugin {
 
+    private GameServer server;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -26,7 +28,6 @@ public final class Discord2FASpigot extends JavaPlugin {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(getLogger());
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor mainThread = r -> getServer().getScheduler().runTask(this, r);
-        GameServer server;
         try {
             server = new GameServer(configAdapter, loggerAdapter, messageProvider, mainThread, getDataFolder().toPath());
         } catch (IllegalStateException e) {
@@ -50,6 +51,14 @@ public final class Discord2FASpigot extends JavaPlugin {
             adminCmd.setTabCompleter(adminExecutor);
         }
         new Metrics(this, BStats.PLUGIN_ID);
+    }
+
+    @Override
+    public void onDisable() {
+        if (server != null) {
+            server.shutdown();
+            server = null;
+        }
     }
 
     private MessageProvider loadMessages(BukkitConfigAdapter configAdapter) {

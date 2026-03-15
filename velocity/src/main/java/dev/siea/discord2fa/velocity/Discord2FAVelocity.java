@@ -3,6 +3,7 @@ package dev.siea.discord2fa.velocity;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import dev.siea.discord2fa.common.logger.JulLoggerAdapter;
 import dev.siea.discord2fa.common.i18n.LangLoader;
@@ -38,6 +39,8 @@ public class Discord2FAVelocity {
     private final com.velocitypowered.api.proxy.ProxyServer proxy;
     private final Logger logger;
     private final Path dataDirectory;
+
+    private dev.siea.discord2fa.proxyserver.ProxyServer server;
 
     @Inject
     public Discord2FAVelocity(com.velocitypowered.api.proxy.ProxyServer proxy, Logger logger, @com.velocitypowered.api.plugin.annotation.DataDirectory Path dataDirectory) {
@@ -75,7 +78,6 @@ public class Discord2FAVelocity {
         JulLoggerAdapter loggerAdapter = new JulLoggerAdapter(logger);
         MessageProvider messageProvider = loadMessages(configAdapter);
         Executor proxyExecutor = r -> proxy.getScheduler().buildTask(this, r).schedule();
-        dev.siea.discord2fa.proxyserver.ProxyServer server;
         try {
             server = new dev.siea.discord2fa.proxyserver.ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, dataDirectory);
         } catch (IllegalStateException e) {
@@ -86,6 +88,14 @@ public class Discord2FAVelocity {
         Discord2FACommand.register(server, proxy, proxy.getCommandManager());
         proxy.getCommandManager().register("discord2fa", new Discord2FAAdminCommand(server), "d2fa");
         startBStats();
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        if (server != null) {
+            server.shutdown();
+            server = null;
+        }
     }
 
     private void startBStats() {
