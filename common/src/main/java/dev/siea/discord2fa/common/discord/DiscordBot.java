@@ -36,6 +36,7 @@ public class DiscordBot {
     private final DiscordConfig discordConfig;
     private final MessageProvider messageProvider;
     private final DatabaseAdapter databaseAdapter;
+    private final LoggerAdapter loggerAdapter;
     /** Executor for Discord-related async work (DB state, non-blocking callbacks). */
     private final ExecutorService discordExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "Discord2FA-discord");
@@ -49,6 +50,7 @@ public class DiscordBot {
         this.discordConfig = new DiscordConfig(configAdapter);
         this.messageProvider = messageProvider;
         this.databaseAdapter = databaseAdapter;
+        this.loggerAdapter = loggerAdapter;
 
         if (discordConfig.isConfigured()) {
             CompletableFuture.supplyAsync(() -> {
@@ -110,7 +112,10 @@ public class DiscordBot {
     private void ensureLinkMessageAsync() {
         if (api == null) return;
         ServerTextChannel channel = api.getServerTextChannelById(discordConfig.getChannelId()).orElse(null);
-        if (channel == null) return;
+        if (channel == null) {
+            loggerAdapter.error("Unable to locate Text Channel. Ensure the Bot is on the Discord Server and has access to the channel.");
+            return;
+        }
 
         CompletableFuture.supplyAsync(() -> databaseAdapter.getState(DatabaseAdapter.STATE_LINK_MESSAGE_ID), discordExecutor)
                 .thenAccept(storedId -> ensureLinkMessageWithStoredId(channel, storedId));
