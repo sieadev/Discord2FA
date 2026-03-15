@@ -12,6 +12,7 @@ import dev.siea.discord2fa.velocity.player.VelocityProxyPlayer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +33,10 @@ public final class Discord2FAEventListener {
         VelocityProxyPlayer player = new VelocityProxyPlayer(event.getPlayer(), proxy);
         boolean skip = server.shouldSkipVerificationBlocking(player);
         initialServerSkip.put(player.getUniqueId(), skip);
-        server.handlePlayerJoin(player, () -> ProxyTargetServers.sendPlayerToPostVerificationServer(player));
+        // No-op when skipped: we already send them to post-verification in ServerPreConnectEvent.
+        // Calling sendPlayerToPostVerificationServer again here would trigger a redundant transfer and can
+        // disconnect them with "no available servers" when Velocity reconnects them to the same server.
+        server.handlePlayerJoin(player, () -> {});
     }
 
     /**
@@ -46,10 +50,20 @@ public final class Discord2FAEventListener {
         if (skip == null) return;
         if (skip) {
             String postVerification = ProxyTargetServers.getPostVerificationServer();
-            if (postVerification != null) proxy.getServer(postVerification).ifPresent(reg -> event.setResult(ServerPreConnectEvent.ServerResult.allowed(reg)));
+            Optional<com.velocitypowered.api.proxy.server.RegisteredServer> target =
+                postVerification != null ? proxy.getServer(postVerification) : Optional.empty();
+            if (target.isPresent()) {
+                event.setResult(ServerPreConnectEvent.ServerResult.allowed(target.get()));
+            }
+            // else: post-verification not configured or server name not in Velocity — keep default connection
         } else {
             String verification = ProxyTargetServers.getVerificationServer();
-            if (verification != null) proxy.getServer(verification).ifPresent(reg -> event.setResult(ServerPreConnectEvent.ServerResult.allowed(reg)));
+            Optional<com.velocitypowered.api.proxy.server.RegisteredServer> target =
+                verification != null ? proxy.getServer(verification) : Optional.empty();
+            if (target.isPresent()) {
+                event.setResult(ServerPreConnectEvent.ServerResult.allowed(target.get()));
+            }
+            // else: verification not configured or server name not in Velocity — keep default connection
         }
     }
 
