@@ -54,10 +54,10 @@ Config lives in the plugin folder as `config.yml`. Key sections:
 
 ### Database
 
-- **type:** `sqlite` (default), `mysql`, or `postgresql`
-- **url:** Leave empty for SQLite to use `discord2fa.db` in the plugin folder. For MySQL/PostgreSQL, set the JDBC URL.
-- **Paper/Spigot:** MySQL/PostgreSQL drivers are loaded automatically via `plugin.yml` libraries.
-- **BungeeCord/Velocity:** For MySQL or PostgreSQL, add the matching JDBC driver JAR to the proxy’s classpath (e.g. plugin folder or `lib/`).
+- **type:** `sqlite` (default), `mysql`, `mariadb`, or `postgresql`
+- **url:** Leave empty for SQLite to use `discord2fa.db` in the plugin folder. For MySQL/MariaDB/PostgreSQL, set the JDBC URL.
+- **Paper/Spigot:** MySQL/MariaDB/PostgreSQL drivers are loaded automatically via `plugin.yml` libraries.
+- **BungeeCord/Velocity:** For MySQL/MariaDB/PostgreSQL, add the matching JDBC driver JAR to the proxy’s classpath (e.g. plugin folder or `lib/`).
 
 ### Discord bot
 
@@ -155,7 +155,7 @@ Discord2FA/
 └── pom.xml          # Parent POM (revision, dependency management, shade config)
 ```
 
-- **common** — Database (HikariCP, SQLite/MySQL/PostgreSQL), Discord (Javacord), config adapters, messages.
+- **common** — Database (HikariCP, SQLite/MySQL/MariaDB/PostgreSQL), Discord (Javacord), config adapters, messages.
 - **gameserver / proxyserver** — Extend `BaseServer` and add platform-agnostic player handling; platforms wrap these and register commands/listeners.
 
 ### Contributing

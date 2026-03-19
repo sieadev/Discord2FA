@@ -12,8 +12,8 @@
 language: en
 
 # --------------------------- Database ---------------------------
-# type: sqlite (default), mysql, or postgresql
-# For MySQL/PostgreSQL, add the JDBC driver JAR to your proxy classpath (BungeeCord/Velocity).
+# type: sqlite (default), mysql, mariadb, or postgresql
+# For MySQL/MariaDB/PostgreSQL, add the matching JDBC driver JAR to your proxy classpath (BungeeCord/Velocity).
 database:
   type: sqlite
   url: ""

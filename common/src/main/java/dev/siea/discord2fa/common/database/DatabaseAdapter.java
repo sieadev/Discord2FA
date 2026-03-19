@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Database adapter backed by HikariCP. Supports SQLite, MySQL, and PostgreSQL.
+ * Database adapter backed by HikariCP. Supports SQLite, MySQL, MariaDB, and PostgreSQL.
  * Uses {@link ConfigAdapter} for database settings (database.type, database.url, database.username, database.password).
  */
 public final class DatabaseAdapter {
@@ -103,7 +103,7 @@ public final class DatabaseAdapter {
                     time_of_login TIMESTAMP NOT NULL
                 )
                 """;
-            case MYSQL -> """
+            case MYSQL, MARIADB -> """
                 CREATE TABLE IF NOT EXISTS login_locations (
                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
                     ip_address VARCHAR(45) NOT NULL,
@@ -182,7 +182,7 @@ public final class DatabaseAdapter {
     public void saveLinkedPlayer(LinkedPlayer player) {
         String sql = switch (dbType) {
             case SQLITE, POSTGRESQL -> "INSERT INTO linked_players (minecraft_uuid, discord_id, time_linked) VALUES (?, ?, ?) ON CONFLICT (minecraft_uuid) DO UPDATE SET discord_id = excluded.discord_id, time_linked = excluded.time_linked";
-            case MYSQL -> "INSERT INTO linked_players (minecraft_uuid, discord_id, time_linked) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE discord_id = VALUES(discord_id), time_linked = VALUES(time_linked)";
+            case MYSQL, MARIADB -> "INSERT INTO linked_players (minecraft_uuid, discord_id, time_linked) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE discord_id = VALUES(discord_id), time_linked = VALUES(time_linked)";
         };
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -311,7 +311,7 @@ public final class DatabaseAdapter {
     public void setState(String key, String value) {
         String sql = switch (dbType) {
             case SQLITE, POSTGRESQL -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value";
-            case MYSQL -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)";
+            case MYSQL, MARIADB -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)";
         };
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

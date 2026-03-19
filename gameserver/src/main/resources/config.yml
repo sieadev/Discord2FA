@@ -12,7 +12,7 @@
 language: en
 
 # --------------------------- Database ---------------------------
-# type: sqlite (default), mysql, or postgresql
+# type: sqlite (default), mysql, mariadb, or postgresql
 database:
   type: sqlite
   url: ""

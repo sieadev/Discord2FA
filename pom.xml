@@ -39,7 +39,7 @@
     </modules>
 
     <properties>
-        <revision>2.0.2</revision>
+        <revision>2.1.0</revision>
         <java.version>16</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -152,7 +152,7 @@
                                         <exclude>io.papermc.paper:paper-api</exclude>
                                         <exclude>net.md-5:bungeecord-api</exclude>
                                         <exclude>com.velocitypowered:velocity-api</exclude>
-                                        <!-- Optional DB drivers: use SQLite (included) or add MySQL/PostgreSQL JAR to server classpath -->
+                                        <!-- Optional DB drivers: use SQLite (included) or add MySQL/MariaDB/PostgreSQL JAR to server classpath -->
                                         <exclude>com.mysql:mysql-connector-j</exclude>
                                         <exclude>org.postgresql:postgresql</exclude>
                                         <exclude>com.google.protobuf:protobuf-java</exclude>

@@ -8,10 +8,10 @@ import java.nio.file.Path;
  * Database settings loaded from the config adapter.
  * Expected config keys:
  * <ul>
- *   <li>database.type - "sqlite", "mysql", or "postgresql"</li>
+ *   <li>database.type - "sqlite", "mysql", "mariadb", or "postgresql"</li>
  *   <li>database.url - JDBC URL, or for SQLite a filename (e.g. discord2fa.db) when dataFolder is set</li>
- *   <li>database.username - optional for SQLite, required for MySQL/PostgreSQL</li>
- *   <li>database.password - optional for SQLite, required for MySQL/PostgreSQL</li>
+ *   <li>database.username - optional for SQLite, required for MySQL/MariaDB/PostgreSQL</li>
+ *   <li>database.password - optional for SQLite, required for MySQL/MariaDB/PostgreSQL</li>
  * </ul>
  * When {@code dataFolder} is non-null and type is SQLite, {@code database.url} is resolved relative to the data folder (default filename: discord2fa.db).
  */
@@ -20,6 +20,7 @@ public final class DatabaseConfig {
     public enum Type {
         SQLITE("org.sqlite.JDBC", "jdbc:sqlite:discord2fa.db"),
         MYSQL("com.mysql.cj.jdbc.Driver", "jdbc:mysql://localhost:3306/discord2fa"),
+        MARIADB("org.mariadb.jdbc.Driver", "jdbc:mariadb://localhost:3306/discord2fa"),
         POSTGRESQL("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/discord2fa");
 
         private final String driverClass;
@@ -59,6 +60,9 @@ public final class DatabaseConfig {
         switch (typeStr.toLowerCase()) {
             case "mysql":
                 this.type = Type.MYSQL;
+                break;
+            case "mariadb":
+                this.type = Type.MARIADB;
                 break;
             case "postgresql":
             case "postgres":
