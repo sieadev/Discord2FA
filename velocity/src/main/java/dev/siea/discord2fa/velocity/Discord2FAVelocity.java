@@ -14,10 +14,9 @@ import dev.siea.discord2fa.velocity.adapter.VelocityConfigAdapter;
 import dev.siea.discord2fa.velocity.command.Discord2FAAdminCommand;
 import dev.siea.discord2fa.velocity.command.Discord2FACommand;
 import dev.siea.discord2fa.velocity.listener.Discord2FAEventListener;
-import org.slf4j.LoggerFactory;
+import org.bstats.velocity.Metrics;
 import org.yaml.snakeyaml.Yaml;
 
-import java.lang.reflect.Constructor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -39,14 +38,20 @@ public class Discord2FAVelocity {
     private final com.velocitypowered.api.proxy.ProxyServer proxy;
     private final Logger logger;
     private final Path dataDirectory;
+    private final Metrics.Factory metricsFactory;
 
     private dev.siea.discord2fa.proxyserver.ProxyServer server;
 
     @Inject
-    public Discord2FAVelocity(com.velocitypowered.api.proxy.ProxyServer proxy, Logger logger, @com.velocitypowered.api.plugin.annotation.DataDirectory Path dataDirectory) {
+    public Discord2FAVelocity(
+            com.velocitypowered.api.proxy.ProxyServer proxy,
+            Logger logger,
+            @com.velocitypowered.api.plugin.annotation.DataDirectory Path dataDirectory,
+            Metrics.Factory metricsFactory) {
         this.proxy = proxy;
         this.logger = logger;
         this.dataDirectory = dataDirectory;
+        this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
@@ -86,7 +91,7 @@ public class Discord2FAVelocity {
         proxy.getEventManager().register(this, new Discord2FAEventListener(server, proxy));
         Discord2FACommand.register(server, proxy, proxy.getCommandManager());
         proxy.getCommandManager().register("discord2fa", new Discord2FAAdminCommand(server), "d2fa");
-        startBStats();
+        metricsFactory.make(this, BStats.PLUGIN_ID);
     }
 
     @Subscribe
@@ -94,19 +99,6 @@ public class Discord2FAVelocity {
         if (server != null) {
             server.shutdown();
             server = null;
-        }
-    }
-
-    private void startBStats() {
-        try {
-            org.slf4j.Logger slf4j = LoggerFactory.getLogger(Discord2FAVelocity.class);
-            Constructor<?> c = org.bstats.velocity.Metrics.Factory.class.getDeclaredConstructor(
-                com.velocitypowered.api.proxy.ProxyServer.class, org.slf4j.Logger.class, Path.class);
-            c.setAccessible(true);
-            Object factory = c.newInstance(proxy, slf4j, dataDirectory);
-            factory.getClass().getMethod("make", Object.class, int.class).invoke(factory, this, BStats.PLUGIN_ID);
-        } catch (Exception e) {
-            logger.warning("Could not start bStats metrics: " + e.getMessage());
         }
     }
 
