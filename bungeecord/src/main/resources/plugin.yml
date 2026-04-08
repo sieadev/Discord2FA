@@ -1,4 +1,4 @@
 name: Discord2FA
 version: ${project.version}
-main: dev.siea.discord2fa.bungeecord.Discord2FaBungee
+main: dev.siea.discord2fa.bungeecord.Discord2FABungee
 author: sieadev

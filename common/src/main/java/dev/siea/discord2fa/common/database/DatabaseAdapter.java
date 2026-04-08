@@ -86,12 +86,21 @@ public final class DatabaseAdapter {
             )
             """;
 
-        String botStateSql = """
-            CREATE TABLE IF NOT EXISTS bot_state (
-                key VARCHAR(64) PRIMARY KEY,
-                value VARCHAR(512) NOT NULL
-            )
-            """;
+        // MySQL/MariaDB: `key` and `value` are reserved; must quote identifiers.
+        String botStateSql = switch (dbType) {
+            case MYSQL, MARIADB -> """
+                CREATE TABLE IF NOT EXISTS bot_state (
+                    `key` VARCHAR(64) PRIMARY KEY,
+                    `value` VARCHAR(512) NOT NULL
+                )
+                """;
+            default -> """
+                CREATE TABLE IF NOT EXISTS bot_state (
+                    key VARCHAR(64) PRIMARY KEY,
+                    value VARCHAR(512) NOT NULL
+                )
+                """;
+        };
 
         String loginLocationsSql = switch (dbType) {
             case SQLITE -> """
@@ -293,7 +302,10 @@ public final class DatabaseAdapter {
      * Returns persisted bot state value for the given key, or null if missing.
      */
     public String getState(String key) {
-        String sql = "SELECT value FROM bot_state WHERE key = ?";
+        String sql = switch (dbType) {
+            case MYSQL, MARIADB -> "SELECT `value` FROM bot_state WHERE `key` = ?";
+            default -> "SELECT value FROM bot_state WHERE key = ?";
+        };
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, key);
@@ -311,7 +323,7 @@ public final class DatabaseAdapter {
     public void setState(String key, String value) {
         String sql = switch (dbType) {
             case SQLITE, POSTGRESQL -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value";
-            case MYSQL, MARIADB -> "INSERT INTO bot_state (key, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)";
+            case MYSQL, MARIADB -> "INSERT INTO bot_state (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
         };
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
