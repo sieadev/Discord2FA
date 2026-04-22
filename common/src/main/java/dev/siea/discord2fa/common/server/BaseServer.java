@@ -196,7 +196,7 @@ public abstract class BaseServer {
                             }
                         }, serverExecutor);
             } else {
-                p.sendMessage(messageProvider.get("forceLink"));
+                p.sendMessage(messageProvider.get("forceLink").replace("%player%", player.getName()));
             }
         }, serverExecutor);
     }
@@ -218,7 +218,7 @@ public abstract class BaseServer {
             if (player.isLinked()) {
                 player.sendTitle(messageProvider.get("verifyTitle"));
             } else {
-                player.sendMessage(messageProvider.get("forceLink"));
+                player.sendMessage(messageProvider.get("forceLink").replace("%player%", player.getName()));
             }
         }
         return false;
@@ -233,7 +233,7 @@ public abstract class BaseServer {
         if (isPlayerPendingOrVerifying(player.getUniqueId()) && !serverConfig.isCommandAllowed(label)) {
             return CompletableFuture.supplyAsync(() -> databaseAdapter.getLinkedPlayer(player.getUniqueId()), dbExecutor)
                     .thenApplyAsync(linked -> {
-                        player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink"));
+                        player.sendMessage(linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink").replace("%player%", player.getName()));
                         return true;
                     }, serverExecutor);
         }
@@ -304,7 +304,7 @@ public abstract class BaseServer {
             if (player.isLinked()) {
                 player.sendTitle(messageProvider.get("verifyTitle"));
             } else {
-                player.sendMessage(messageProvider.get("forceLink"));
+                player.sendMessage(messageProvider.get("forceLink").replace("%player%", player.getName()));
             }
         }
         return false;
@@ -321,7 +321,7 @@ public abstract class BaseServer {
         if (player == null) return CompletableFuture.completedFuture(messageProvider.get("notVerified"));
         return CompletableFuture.supplyAsync(() -> {
             LinkedPlayer linked = databaseAdapter.getLinkedPlayer(uuid);
-            return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink");
+            return linked != null ? messageProvider.get("notVerified") : messageProvider.get("forceLink").replace("%player%", player.getName());
         }, dbExecutor);
     }
 

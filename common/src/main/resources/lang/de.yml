@@ -21,6 +21,7 @@ acceptMessage: "Verifizierung angenommen!"
 denyMessage: "Verifizierung abgelehnt!"
 alreadyLinking: "Dir wurde bereits ein Verifizierungscode zugestellt."
 alreadyLinkedDiscord: "Du bist bereits mit einen Minecraft Konto verbunden!"
+
 # ----------------------- In-game Messages -----------------------
 notVerified: "&cDu musst dich zuerst verifizieren."
 invalidCode: "&cDieser Code ist ungültig!"
