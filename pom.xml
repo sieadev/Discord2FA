@@ -32,7 +32,6 @@
         <module>common</module>
         <module>gameserver</module>
         <module>spigot</module>
-        <module>paper</module>
         <module>proxyserver</module>
         <module>velocity</module>
         <module>bungeecord</module>
@@ -68,12 +67,6 @@
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-api</artifactId>
                 <version>1.16.5-R0.1-SNAPSHOT</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.papermc.paper</groupId>
-                <artifactId>paper-api</artifactId>
-                <version>1.20.4-R0.1-SNAPSHOT</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
