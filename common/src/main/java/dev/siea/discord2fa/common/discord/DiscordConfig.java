@@ -9,11 +9,13 @@ public class DiscordConfig {
     private final String token;
     private final long guildId;
     private final long channelId;
+    private final long roleId;
 
     public DiscordConfig(ConfigAdapter configAdapter) {
         this.token = trimToNull(configAdapter.getString("discord.token"));
         this.guildId = parseLong(configAdapter.getString("discord.guild"), 0L);
         this.channelId = parseLong(configAdapter.getString("discord.channel"), 0L);
+        this.roleId =  parseLong(configAdapter.getString("discord.verifiedRoleId"), 0L);
     }
 
     public String getToken() {
@@ -26,6 +28,10 @@ public class DiscordConfig {
 
     public long getChannelId() {
         return channelId;
+    }
+
+    public long getRoleId() {
+        return roleId;
     }
 
     public boolean isConfigured() {

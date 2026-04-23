@@ -26,6 +26,9 @@ discord:
   guild: ""
   channel: ""
 
+  # Optional: Role assigned after successful verification
+  verifiedRoleId: ""
+
 # --------------------------- Settings ---------------------------
 allowedCommands: ["/link"] # Commands allowed before the Player is verified
 

@@ -269,6 +269,7 @@ public abstract class BaseServer {
                 player.setLinkedPlayer(linked);
                 player.onVerified();
             }
+            discordBot.giveVerifiedRole(discordUser.get());
             return true;
         }, serverExecutor);
     }
