@@ -7,40 +7,56 @@
 
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
-# ----------------------------- Lang -----------------------------
-# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
+# ==============================
+# Language Settings
+# ==============================
+# Available options: EN, DE, FR, IT, PL, RO, RS, TR, UA
 language: en
 
-# --------------------------- Database ---------------------------
-# type: sqlite (default), mysql, mariadb, or postgresql
-# For MySQL/MariaDB/PostgreSQL, add the matching JDBC driver JAR to your proxy classpath (BungeeCord/Velocity).
+
+# ==============================
+# Database Configuration
+# ==============================
+# Supported types: sqlite (default), mysql, mariadb, postgresql
+# NOTE:
+# For MySQL/MariaDB/PostgreSQL, add the matching JDBC driver JAR
+# to your proxy classpath (BungeeCord/Velocity).
 database:
   type: sqlite
-  url: ""
+  url: ""         # Database connection URL (not required for sqlite)
   username: ""
   password: ""
 
-# -------------------------- DiscordBot --------------------------
+
+# ==============================
+# Discord Bot Configuration
+# ==============================
 discord:
-  token: ""
-  guild: ""
-  channel: ""
+  token: ""           # Your Discord bot token
+  guild: ""           # Your server (guild) ID
+  channel: ""         # Channel ID for the verification embed
 
   # Optional: Role assigned after successful verification
   verifiedRoleId: ""
 
-# --------------------------- Settings ---------------------------
-allowedCommands: ["/link"] # Commands allowed before the Player is verified
 
-# Actions allowed before verifying
-# Values: 'BREAK' 'PLACE' 'CHAT' 'MOVE' 'DROP' 'INVENTORY'
-allowedActions: ["CHAT"]
+# ==============================
+# Pre-Verification Rules
+# ==============================
 
-forceLink: false # Force Users to Link their accounts
+# Commands users are allowed to use before verifying
+allowedCommands: ["/link"]
 
-rememberSignInLocation: true # Remember IP addresses; only request verification on new ones
+# Force users to link their account before playing
+forceLink: false
 
-# ----------------------------- Proxy ----------------------------
+# If enabled, users only need to verify when joining from a new IP
+rememberSignInLocation: true
+
+
+# ==============================
+# Proxy Server Routing
+# ==============================
 server:
-  verification: ""
-  post-verification: ""
+  verification: ""       # Server players are sent to before verification
+  post-verification: ""  # Server players are sent to after verification
