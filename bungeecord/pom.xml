@@ -26,6 +26,10 @@
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bungeecord</artifactId>
         </dependency>
+        <dependency>
+            <groupId>dev.faststats.metrics</groupId>
+            <artifactId>bungeecord</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

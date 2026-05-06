@@ -7,12 +7,15 @@ import dev.siea.discord2fa.common.logger.JulLoggerAdapter;
 import dev.siea.discord2fa.common.i18n.LangLoader;
 import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.i18n.MessageProvider;
+import dev.siea.discord2fa.common.versioning.FastStats;
 import dev.siea.discord2fa.proxyserver.ProxyServer;
+import dev.faststats.bungee.BungeeMetrics;
+import dev.faststats.core.ErrorTracker;
+import dev.faststats.core.Metrics;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import org.bstats.bungeecord.Metrics;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +27,13 @@ import java.util.concurrent.Executor;
 
 public final class Discord2FABungee extends Plugin {
 
+    public static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
+
+    private final Metrics fastStatsMetrics = BungeeMetrics.factory()
+            .token(FastStats.id)
+            .errorTracker(ERROR_TRACKER)
+            .create(this);
+
     private ProxyServer server;
 
     @Override
@@ -34,6 +44,7 @@ public final class Discord2FABungee extends Plugin {
             try (InputStream in = getResourceAsStream("config.yml")) {
                 if (in != null) Files.copy(in, configFile.toPath());
             } catch (IOException e) {
+                ERROR_TRACKER.trackError(e);
                 getLogger().warning("Could not save default config: " + e.getMessage());
             }
         }
@@ -41,6 +52,7 @@ public final class Discord2FABungee extends Plugin {
         try {
             configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
         } catch (IOException e) {
+            ERROR_TRACKER.trackError(e);
             getLogger().severe("Could not load config: " + e.getMessage());
             configuration = null;
         }
@@ -52,16 +64,19 @@ public final class Discord2FABungee extends Plugin {
         try {
             server = new ProxyServer(configAdapter, loggerAdapter, messageProvider, proxyExecutor, getDataFolder().toPath());
         } catch (IllegalStateException e) {
+            ERROR_TRACKER.trackError(e);
             getLogger().severe(e.getMessage());
             return;
         }
         getProxy().getPluginManager().registerListener(this, new Discord2FAEventListener(server, getProxy()));
         Discord2FACommand.register(this, server, getProxy());
-        new Metrics(this, BStats.PLUGIN_ID);
+        new org.bstats.bungeecord.Metrics(this, BStats.PLUGIN_ID);
+        fastStatsMetrics.ready();
     }
 
     @Override
     public void onDisable() {
+        fastStatsMetrics.shutdown();
         if (server != null) {
             server.shutdown();
             server = null;
@@ -73,6 +88,7 @@ public final class Discord2FABungee extends Plugin {
             Path langDir = getDataFolder().toPath().resolve("lang");
             return new LangLoader(configAdapter, Files.createDirectories(langDir), this::getResourceAsStream).load();
         } catch (IOException e) {
+            ERROR_TRACKER.trackError(e);
             getLogger().warning("Could not load lang file: " + e.getMessage());
             return LangLoader.loadFallback(this::getResourceAsStream);
         }

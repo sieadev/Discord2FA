@@ -5,12 +5,15 @@ import dev.siea.discord2fa.common.i18n.MessageProvider;
 import dev.siea.discord2fa.common.logger.JulLoggerAdapter;
 import dev.siea.discord2fa.common.versioning.BStats;
 import dev.siea.discord2fa.common.server.BaseServer;
+import dev.siea.discord2fa.common.versioning.FastStats;
 import dev.siea.discord2fa.gameserver.server.GameServer;
 import dev.siea.discord2fa.spigot.adapter.BukkitConfigAdapter;
 import dev.siea.discord2fa.spigot.command.Discord2FAAdminCommand;
 import dev.siea.discord2fa.spigot.command.Discord2FACommand;
 import dev.siea.discord2fa.spigot.listener.Discord2FAEventListener;
-import org.bstats.bukkit.Metrics;
+import dev.faststats.bukkit.BukkitMetrics;
+import dev.faststats.core.ErrorTracker;
+import dev.faststats.core.Metrics;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -18,6 +21,13 @@ import java.nio.file.Files;
 import java.util.concurrent.Executor;
 
 public final class Discord2FASpigot extends JavaPlugin {
+
+    public static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
+
+    private final Metrics fastStatsMetrics = BukkitMetrics.factory()
+            .token(FastStats.id)
+            .errorTracker(ERROR_TRACKER)
+            .create(this);
 
     private GameServer server;
 
@@ -31,6 +41,7 @@ public final class Discord2FASpigot extends JavaPlugin {
         try {
             server = new GameServer(configAdapter, loggerAdapter, messageProvider, mainThread, getDataFolder().toPath());
         } catch (IllegalStateException e) {
+            ERROR_TRACKER.trackError(e);
             getLogger().severe(e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -50,11 +61,13 @@ public final class Discord2FASpigot extends JavaPlugin {
             adminCmd.setExecutor(adminExecutor);
             adminCmd.setTabCompleter(adminExecutor);
         }
-        new Metrics(this, BStats.PLUGIN_ID);
+        new org.bstats.bukkit.Metrics(this, BStats.PLUGIN_ID);
+        fastStatsMetrics.ready();
     }
 
     @Override
     public void onDisable() {
+        fastStatsMetrics.shutdown();
         if (server != null) {
             server.shutdown();
             server = null;
@@ -65,6 +78,7 @@ public final class Discord2FASpigot extends JavaPlugin {
         try {
             return new LangLoader(configAdapter, Files.createDirectories(getDataFolder().toPath().resolve("lang")), this::getResource).load();
         } catch (IOException e) {
+            ERROR_TRACKER.trackError(e);
             getLogger().warning("Could not load lang file: " + e.getMessage());
             return LangLoader.loadFallback(this::getResource);
         }

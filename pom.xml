@@ -39,7 +39,7 @@
 
     <properties>
         <revision>2.1.1</revision>
-        <java.version>16</java.version>
+        <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -96,6 +96,21 @@
                 <artifactId>bstats-velocity</artifactId>
                 <version>3.1.0</version>
             </dependency>
+            <dependency>
+                <groupId>dev.faststats.metrics</groupId>
+                <artifactId>bukkit</artifactId>
+                <version>0.22.0</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.faststats.metrics</groupId>
+                <artifactId>bungeecord</artifactId>
+                <version>0.22.0</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.faststats.metrics</groupId>
+                <artifactId>velocity</artifactId>
+                <version>0.22.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -111,6 +126,10 @@
         <repository>
             <id>bungeecord-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>faststats</id>
+            <url>https://repo.faststats.dev/releases</url>
         </repository>
     </repositories>
 
@@ -156,6 +175,10 @@
                                     <relocation>
                                         <pattern>org.bstats</pattern>
                                         <shadedPattern>dev.siea.discord2fa.libs.bstats</shadedPattern>
+                                    </relocation>
+                                    <relocation>
+                                        <pattern>dev.faststats</pattern>
+                                        <shadedPattern>dev.siea.discord2fa.libs.faststats</shadedPattern>
                                     </relocation>
                                 </relocations>
                                 <transformers>
