@@ -15,6 +15,7 @@ link:
   text: "Want to make your Minecraft Account more secure? Link it with your Discord!"
   footer: "Click the Button below to link your Account!"
   linkButton: "Link"
+requestExpired: "This verification request expired."
 codeMessage: "Your Verification Code is: %code%"
 acceptMessage: "You accepted the Verification!"
 denyMessage: "You denied the Verification!"

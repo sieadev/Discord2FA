@@ -13,6 +13,8 @@ import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.permission.Role;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.MessageComponentInteraction;
 
@@ -45,6 +47,9 @@ public class DiscordBot {
         return t;
     });
 
+    private Server guild;
+    private Role role;
+
     private volatile DiscordApi api;
 
     public DiscordBot(ConfigAdapter configAdapter, MessageProvider messageProvider, DatabaseAdapter databaseAdapter, LoggerAdapter loggerAdapter) {
@@ -66,6 +71,10 @@ public class DiscordBot {
             }, discordExecutor).thenAcceptAsync(connectedApi -> {
                 if (connectedApi == null) return;
                 this.api = connectedApi;
+                guild = api.getServerById(discordConfig.getGuildId()).orElse(null);
+                role = Optional.ofNullable(guild)
+                        .flatMap(g -> api.getRoleById(discordConfig.getRoleId()))
+                        .orElse(null);
                 registerListeners();
                 ensureLinkMessageAsync();
             }, discordExecutor);
@@ -288,6 +297,19 @@ public class DiscordBot {
             return Optional.of(user);
         }
         return Optional.empty();
+    }
+
+    public void giveVerifiedRole(User user) {
+        if (role != null) {
+            guild.addRoleToUser(user, role);
+        }
+    }
+
+    public void revokeVerifiedRole(Long userId) {
+        if (role != null) {
+            System.out.println(role.getId());
+            api.getUserById(userId).thenAcceptAsync(user -> user.removeRole(role));
+        }
     }
 
     /**

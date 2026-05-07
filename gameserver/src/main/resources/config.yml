@@ -7,31 +7,49 @@
 
 # Contact Discord[@sieadev] GitHub[@sieadev] Email[Contact@siea.dev]
 
-# ----------------------------- Lang -----------------------------
-# Choose from EN,DE,FR,IT,PL,RO,RS,TR and UA
+# ==============================
+# Language Settings
+# ==============================
+# Available options: EN, DE, FR, IT, PL, RO, RS, TR, UA, ES, HI, RU
 language: en
 
-# --------------------------- Database ---------------------------
-# type: sqlite (default), mysql, mariadb, or postgresql
+
+# ==============================
+# Database Configuration
+# ==============================
+# Supported types: sqlite (default), mysql, mariadb, postgresql
 database:
   type: sqlite
-  url: ""
+  url: ""         # Database connection URL (not required for sqlite)
   username: ""
   password: ""
 
-# -------------------------- DiscordBot --------------------------
-discord:
-  token: ""
-  guild: ""
-  channel: ""
 
-# --------------------------- Settings ---------------------------
-allowedCommands: ["/link"] # Commands allowed before the Player is verified
+# ==============================
+# Discord Bot Configuration
+# ==============================
+discord:
+  token: ""           # Your Discord bot token
+  guild: ""           # Your server (guild) ID
+  channel: ""         # Channel ID for the verification embed
+
+  # Optional: Role assigned after successful verification
+  verifiedRoleId: ""
+
+
+# ==============================
+# Pre-Verification Rules
+# ==============================
+
+# Commands users are allowed to use before verifying
+allowedCommands: ["/link"]
 
 # Actions allowed before verifying
-# Values: 'BREAK' 'PLACE' 'CHAT' 'MOVE' 'DROP' 'INVENTORY'
+# Possible values: BREAK, PLACE, CHAT, MOVE, DROP, INVENTORY
 allowedActions: ["CHAT"]
 
-forceLink: false # Force Users to Link their accounts
+# Force users to link their account before playing
+forceLink: false
 
-rememberSignInLocation: true # Remember Sign in Locations; only request verification on new ones
+# If enabled, users only need to verify when logging in from a new location
+rememberSignInLocation: true
