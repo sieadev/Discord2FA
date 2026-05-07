@@ -289,6 +289,7 @@ public abstract class BaseServer {
                             .thenRunAsync(() -> {
                                 player.setLinkedPlayer(null);
                                 player.sendMessage(messageProvider.get("unlinkSuccess"));
+                                discordBot.revokeVerifiedRole(linked.getDiscordId());
                             }, serverExecutor)
                             .thenApply(v -> true);
                 }, serverExecutor);

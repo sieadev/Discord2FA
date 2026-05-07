@@ -305,6 +305,13 @@ public class DiscordBot {
         }
     }
 
+    public void revokeVerifiedRole(Long userId) {
+        if (role != null) {
+            System.out.println(role.getId());
+            api.getUserById(userId).thenAcceptAsync(user -> user.removeRole(role));
+        }
+    }
+
     /**
      * Send the link-account DM: embed with code and store code for /link command. Runs async.
      */
