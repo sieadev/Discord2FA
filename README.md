@@ -24,12 +24,11 @@ Lets players link their Minecraft account to Discord enabling two-factor authent
 
 ## Supported platforms
 
-| Platform       | Module       | Notes                                                  |
-|----------------|--------------|--------------------------------------------------------|
-| **Paper**      | `paper`      | 1.16.5+                                                |
-| **Spigot**     | `spigot`     | 1.20.5+                                                |
-| **BungeeCord** | `bungeecord` | Proxy; optional verification/post-verification servers |
-| **Velocity**   | `velocity`   | Proxy; same options as BungeeCord                      |
+| Platform                | Module       | Notes                                                  |
+|-------------------------|--------------|--------------------------------------------------------|
+| **Spigot/Paper/Bukkit** | `spigot`     | 1.16.5+                                                |
+| **BungeeCord**          | `bungeecord` | Proxy; optional verification/post-verification servers |
+| **Velocity**            | `velocity`   | Proxy; same options as BungeeCord                      |
 
 Use the JAR that matches your platform (e.g. `discord2fa-paper-2.0.0.jar` for Paper).
 
