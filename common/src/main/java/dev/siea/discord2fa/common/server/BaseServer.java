@@ -160,8 +160,8 @@ public abstract class BaseServer {
     protected final void addPlayer(CommonPlayer player, Runnable onSkippedVerification) {
         if (player == null) return;
 
-        if (player.hasPermission("discord2fa.updatenotice")) {
-            player.sendMessage(messageProvider.get("outdatedPlugin"));
+        if (player.hasPermission("discord2fa.admin")) {
+            player.sendMessage("&cA new version of Discord2FA is available!");
             player.sendUrlButton("§b[DOWNLOAD]", "https://modrinth.com/plugin/discord2fa");
         }
 

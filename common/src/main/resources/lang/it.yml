@@ -32,6 +32,5 @@ unlinkSuccess: "&aHai scollegato il tuo account con successo!"
 verifyDenied: "&cVerifica rifiutata!"
 verifySuccess: "&aHai verificato il tuo account con successo!"
 alreadyLinked: "&cIl tuo account è già collegato!"
-outdatedPlugin: "&cÈ disponibile una nuova versione di Discord2FA!"
 
 forceLink: "&eCiao &a%player%&e, prima di procedere, dovrai collegare il tuo account Minecraft al tuo account Discord. Per farlo, accedi al nostro server Discord e segui le istruzioni fornite."

@@ -32,6 +32,5 @@ unlinkSuccess: "&aVotre compte a été délié avec succès."
 verifyDenied: "&cVérification refusée!"
 verifySuccess: "&aVotre compte a été vérifié avec succès."
 alreadyLinked: "&cVotre compte est déjà lié!"
-outdatedPlugin: "&cUne nouvelle version de Discord2FA est disponible!"
 
 forceLink: "&eBonjour &a%player%&e, avant de continuer, vous devez lier votre compte Minecraft à votre compte Discord. Pour ce faire, veuillez rejoindre notre serveur dev.siea.discord2fa.discord et suivre les instructions qui y sont indiquées."

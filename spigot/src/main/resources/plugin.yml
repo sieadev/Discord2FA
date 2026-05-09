@@ -21,9 +21,6 @@ permissions:
   discord2fa.unlink:
     description: Use /unlink to unlink your Discord account (revoke to deny)
     default: true
-  discord2fa.updatenotice:
-    description: Get Notified in game when an update is available.
-    default: op
 
 commands:
   discord2fa:

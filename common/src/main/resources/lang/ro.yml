@@ -30,7 +30,5 @@ unlinkSuccess: "&aȚi-ai deconectat cu succes contul"
 verifyDenied: "&cVerificare refuzată!"
 verifySuccess: "&aȚi-ai verificat cu succes contul!"
 alreadyLinked: "&cContul tău este deja conectat!"
-outdatedPlugin: "&cO nouă versiune a Discord2FA este disponibilă!"
-
 
 forceLink: "&eBună &a%player%&e, înainte de a continua va trebui să îți conectezi contul de Minecraft cu cel de Discord. Pentru asta, te rog să te alături serverului nostru de Discord și să urmezi instrucțiunile listate acolo."
