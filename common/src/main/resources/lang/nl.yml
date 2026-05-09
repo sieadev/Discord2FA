@@ -35,5 +35,6 @@ unlinkSuccess: "&aJe hebt je account succesvol ontkoppeld!"
 verifyDenied: "&cVerificatie geweigerd!"
 verifySuccess: "&aJe hebt je account succesvol geverifieerd!"
 alreadyLinked: "&cJe account is al gekoppeld!"
+outdatedPlugin: "&cEr is een nieuwe versie van Discord2FA beschikbaar!"
 
 forceLink: "&eHallo &a%player%&e, voordat je verder kunt gaan moet je je Minecraft-account koppelen aan je Discord-account. Ga hiervoor naar onze dev.siea.discord2fa.discord server en volg de instructies die daar vermeld staan."

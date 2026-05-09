@@ -23,7 +23,7 @@ public final class LangLoader {
     public static final String CONFIG_LANGUAGE_KEY = "language";
 
     /** Bundled language codes shipped in the jar. Each has a resource at lang/{code}.yml */
-    public static final List<String> BUNDLED_LANGS = List.of("default", "en", "de", "fr", "it", "pl", "ro", "rs", "tr", "ua");
+    public static final List<String> BUNDLED_LANGS = List.of("default", "en", "de", "fr", "it", "pl", "ro", "rs", "tr", "ua", "nl", "th");
 
     /** Fallback file used when a key is missing in the selected language. */
     public static final String DEFAULT_LANG_FILE = "default.yml";

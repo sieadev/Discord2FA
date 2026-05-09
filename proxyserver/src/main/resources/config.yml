@@ -10,7 +10,7 @@
 # ==============================
 # Language Settings
 # ==============================
-# Available options: EN, DE, FR, IT, PL, RO, RS, TR, UA, ES, HI, RU, NL
+# Available options: EN, DE, FR, IT, PL, RO, RS, TR, UA, ES, HI, RU, NL, TH
 language: en
 
 

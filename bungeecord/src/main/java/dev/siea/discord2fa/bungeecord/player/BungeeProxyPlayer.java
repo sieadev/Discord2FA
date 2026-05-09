@@ -5,6 +5,8 @@ import dev.siea.discord2fa.proxyserver.player.ProxyPlayer;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
@@ -41,8 +43,21 @@ public final class BungeeProxyPlayer extends ProxyPlayer {
     }
 
     @Override
+    public boolean hasPermission(String permission) {
+        return handle.hasPermission(permission);
+    }
+
+    @Override
     public void sendMessage(String message) {
         handle.sendMessage(message);
+    }
+
+    @Override
+    public void sendUrlButton(String text, String url) {
+        TextComponent component = new TextComponent(text);
+        component.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+
+        handle.sendMessage(component);
     }
 
     @Override

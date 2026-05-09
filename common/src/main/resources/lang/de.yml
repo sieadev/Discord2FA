@@ -33,5 +33,6 @@ unlinkSuccess: "&aDein Minecraft-Konto wurde erfolgreich von deinem Discord-Kont
 verifyDenied: "&cVerifizierung abgelehnt!"
 verifySuccess: "&aDu hast dich erfolgreich verifiziert!"
 alreadyLinked: "&cDu bist bereits mit einem Discord-Konto verbunden!"
+outdatedPlugin: "&cEs ist eine neue Version von Discord2FA verfügbar!"
 
 forceLink: "&eHallo &a%player%&e, bevor du weiter machst, musst du dein Minecraft-Konto mit deinem Discord-Konto verknüpfen. Trete dafür bitte unserem Discord-Server bei und folge den Anweisungen dort."

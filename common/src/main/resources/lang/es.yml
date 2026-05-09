@@ -30,5 +30,6 @@ unlinkSuccess: "&a¡Has desvinculado tu cuenta con éxito!"
 verifyDenied: "&c¡Verificación denegada!"
 verifySuccess: "&a¡Ha verificado correctamente su cuenta!"
 alreadyLinked: "&cSu cuenta ya está vinculada!"
+outdatedPlugin: "&c¡Hay una nueva versión de Discord2FA disponible!"
 
 forceLink: "&eHola &a%player%&e, antes de continuar tendrás que vincular tu Minecraft a tu cuenta de Discord. Para ello por favor únete a nuestro servidor dev.siea.discord2fa.discord y sigue las instrucciones que allí se indican."

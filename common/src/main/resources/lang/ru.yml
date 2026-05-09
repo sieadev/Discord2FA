@@ -33,5 +33,6 @@ unlinkSuccess: "&aВы успешно отвязали свой аккаунт!"
 verifyDenied: "&cВерификация отклонена!"
 verifySuccess: "&aВы успешно верифицировали свой аккаунт!"
 alreadyLinked: "&cВаш аккаунт уже привязан!"
+outdatedPlugin: "&cДоступна новая версия Discord2FA!"
 
 forceLink: "&eЗдравствуйте, &a%player%&e! Перед тем как продолжить - вам нужно привязать свой аккаунт Discord. Для этого зайдите на наш Discord сервер dev.siea.discord2fa.discord и действуйте по представленной инструкции."

@@ -5,6 +5,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.siea.discord2fa.common.database.models.SignInLocation;
 import dev.siea.discord2fa.proxyserver.player.ProxyPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -42,8 +44,21 @@ public final class VelocityProxyPlayer extends ProxyPlayer {
     }
 
     @Override
+    public boolean hasPermission(String permission) {
+        return handle.hasPermission(permission);
+    }
+
+    @Override
     public void sendMessage(String message) {
         handle.sendMessage(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().deserialize(message));
+    }
+
+    @Override
+    public void sendUrlButton(String text, String url) {
+        handle.sendMessage(
+                Component.text(text)
+                        .clickEvent(ClickEvent.openUrl(url))
+        );
     }
 
     @Override

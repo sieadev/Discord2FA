@@ -97,9 +97,11 @@ public abstract class CommonPlayer {
 
     public abstract String getName();
 
+    public abstract boolean hasPermission(String permission);
+
     public abstract void sendMessage(String message);
 
-
+    public abstract void sendUrlButton(String text, String url);
 
     public abstract void sendTitle(String title, String subtitle, int fadeIn, int duration, int fadeOut);
 

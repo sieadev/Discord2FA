@@ -13,6 +13,7 @@ import dev.siea.discord2fa.common.versioning.PluginVersion;
 import dev.siea.discord2fa.common.versioning.UpdateCheckResult;
 import dev.siea.discord2fa.common.versioning.UpdateChecker;
 
+import java.awt.*;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public abstract class BaseServer {
     private final DiscordBot discordBot;
     private final ServerConfig serverConfig;
     private final MessageProvider messageProvider;
+    private boolean isUpToDate;
 
     /** Executor for blocking DB work so it doesn't block the server thread. */
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor(r -> {
@@ -157,6 +159,12 @@ public abstract class BaseServer {
      */
     protected final void addPlayer(CommonPlayer player, Runnable onSkippedVerification) {
         if (player == null) return;
+
+        if (player.hasPermission("discord2fa.updatenotice")) {
+            player.sendMessage(messageProvider.get("outdatedPlugin"));
+            player.sendUrlButton("§b[DOWNLOAD]", "https://modrinth.com/plugin/discord2fa");
+        }
+
         SignInLocation current = player.getSigninLocation();
 
         if (!discordBot.isConnected() || databaseAdapter == null) return;
@@ -339,8 +347,22 @@ public abstract class BaseServer {
             logger.warn("You are using an experimental build of Discord2FA (version " + PluginVersion.get() + "). Latest release is " + result.getLatestReleaseVersion() + ".");
         } else if (result.isUpToDate()) {
             logger.info("You are running the latest release of Discord2FA.");
+            isUpToDate = true;
         } else {
             logger.warn("You are " + result.getVersionsBehind() + " version(s) behind (Current version: " + PluginVersion.get() + "). Download the latest at " + result.getDownloadUrl());
+            isUpToDate = false;
+        }
+    }
+
+    /**
+     * Checks for updates and logs the result to the permitted Player. Called automatically from the constructor.
+     * Version is read from the JAR manifest (Implementation-Version).
+     */
+    private void sendAdminUpdateAlert(CommonPlayer player){
+        if (!isUpToDate){
+            player.sendMessage(messageProvider.get("outdatedPlugin"));
+        }else{
+            return;
         }
     }
 
