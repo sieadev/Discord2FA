@@ -102,11 +102,12 @@ The bot creates one link message in that channel and reuses it after restarts.
 
 Discord2FA uses **grant-by-default** permissions for link/unlink and **op-only** for admin:
 
-| Permission          | Default  | Description                          |
-|---------------------|----------|--------------------------------------|
-| `discord2fa.link`   | **true** | Use `/link`.                         |
-| `discord2fa.unlink` | **true** | Use `/unlink`.                       |
-| `discord2fa.admin`  | op       | Use `/discord2fa` (version, status). |
+| Permission          | Default  | Description                                       |
+|---------------------|----------|---------------------------------------------------|
+| `discord2fa.link`   | **true** | Use `/link`.                                      |
+| `discord2fa.unlink` | **true** | Use `/unlink`.                                    |
+| `discord2fa.admin`  | op       | Use `/discord2fa` (version, status).              |
+| `discord2fa.updatenotice` | op       | Get Notified in game when an update is available. |
 
 **Grant by default vs revoke by default**
 
