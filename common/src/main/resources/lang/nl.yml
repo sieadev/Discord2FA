@@ -1,0 +1,39 @@
+#################################################################
+# ----------------------- Nederlands -------------------------- #
+# ---------------------- By: SamVolvo ------------------------- #
+#################################################################
+
+# ----------------------- Discord Messages -----------------------
+verify:
+  title: "Verifieer Inloggen"
+  text: "Iemand heeft ingelogd op je account vanaf een nieuwe locatie (%ip%)"
+  footer: "Als jij dit niet was, verander dan onmiddellijk je wachtwoord!"
+  VerifyButton: "Verifiëren"
+  DenyButton: "Weigeren"
+
+link:
+  title: "Koppel je Account!"
+  text: "Wil je je Minecraft-account veiliger maken? Koppel het met je Discord!"
+  footer: "Klik op de knop hieronder om je account te koppelen!"
+  linkButton: "Koppelen"
+
+requestExpired: "Deze verificatieaanvraag is verlopen."
+codeMessage: "Je verificatiecode is: %code%"
+acceptMessage: "Je hebt de verificatie geaccepteerd!"
+denyMessage: "Je hebt de verificatie geweigerd!"
+alreadyLinking: "Je hebt al een verificatiecode ontvangen!"
+alreadyLinkedDiscord: "Je account is al gekoppeld!"
+
+# ----------------------- In-game Messages -----------------------
+notVerified: "&cJe moet eerst verifiëren."
+invalidCode: "&cOngeldige code!"
+linkSuccess: "&aJe hebt je account succesvol gekoppeld."
+noCode: "&cJe moet een code opgeven!"
+verifyTitle: "&cVerifieer je account!"
+notLinked: "&cJe bent niet gekoppeld!"
+unlinkSuccess: "&aJe hebt je account succesvol ontkoppeld!"
+verifyDenied: "&cVerificatie geweigerd!"
+verifySuccess: "&aJe hebt je account succesvol geverifieerd!"
+alreadyLinked: "&cJe account is al gekoppeld!"
+
+forceLink: "&eHallo &a%player%&e, voordat je verder kunt gaan moet je je Minecraft-account koppelen aan je Discord-account. Ga hiervoor naar onze dev.siea.discord2fa.discord server en volg de instructies die daar vermeld staan."
