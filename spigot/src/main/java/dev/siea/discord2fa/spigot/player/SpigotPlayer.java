@@ -3,6 +3,8 @@ package dev.siea.discord2fa.spigot.player;
 import dev.siea.discord2fa.common.database.models.SignInLocation;
 import dev.siea.discord2fa.common.player.CommonPlayer;
 import org.bukkit.entity.Player;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 import java.net.InetSocketAddress;
 import java.time.Instant;
@@ -36,8 +38,21 @@ public final class SpigotPlayer extends CommonPlayer {
     }
 
     @Override
+    public boolean hasPermission(String permission) {
+        return handle.hasPermission(permission);
+    }
+
+    @Override
     public void sendMessage(String message) {
         handle.sendMessage(message);
+    }
+
+    @Override
+    public void sendUrlButton(String text, String url) {
+        TextComponent component = new TextComponent(text);
+        component.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+
+        handle.spigot().sendMessage(component);
     }
 
     @Override
