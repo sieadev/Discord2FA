@@ -41,7 +41,7 @@ public final class ServerConfig {
 
     /**
      * Returns true if this event type is in the allowed whitelist.
-     * EventType is mapped to config names: BREAK, PLACE, CHAT, MOVE, DROP, INVENTORY, SERVER_SWITCH.
+     * EventType is mapped to config names: BREAK, PLACE, CHAT, MOVE, DROP, INVENTORY, INTERACT, ATTACK, PICKUP.
      */
     public boolean isEventAllowed(EventType eventType) {
         if (eventType == null) return false;
@@ -71,6 +71,9 @@ public final class ServerConfig {
             case BLOCK_PLACE -> "PLACE";
             case DROP -> "DROP";
             case INVENTORY -> "INVENTORY";
+            case INTERACT -> "INTERACT";
+            case ATTACK -> "ATTACK";
+            case PICKUP -> "PICKUP";
             default -> null;
         };
     }

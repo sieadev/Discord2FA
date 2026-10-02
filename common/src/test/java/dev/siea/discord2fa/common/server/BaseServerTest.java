@@ -132,7 +132,8 @@ class BaseServerTest {
         UUID uuid = player.getUniqueId();
         assertTrue(server.isPlayerPendingOrVerifying(uuid), "player should be restricted");
         for (EventType type : List.of(EventType.MOVE, EventType.BLOCK_BREAK, EventType.BLOCK_PLACE,
-                EventType.DROP, EventType.INVENTORY, EventType.COMMAND)) {
+                EventType.DROP, EventType.INVENTORY, EventType.INTERACT, EventType.ATTACK, EventType.PICKUP,
+                EventType.COMMAND)) {
             assertFalse(server.onEvent(uuid, type), type + " should be blocked");
         }
         assertFalse(server.onCommand(uuid, "spawn"));

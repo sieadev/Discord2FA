@@ -56,7 +56,7 @@ class ServerConfigTest {
     @Test
     void actionsMapToTheirConfigNames() {
         ServerConfig config = new ServerConfig(new MapConfig()
-                .set("allowedActions", List.of("chat", " Move ", "BREAK", "PLACE", "DROP", "INVENTORY")));
+                .set("allowedActions", List.of("chat", " Move ", "BREAK", "PLACE", "DROP", "INVENTORY", "interact", "ATTACK", "PICKUP")));
 
         assertTrue(config.isEventAllowed(EventType.CHAT));
         assertTrue(config.isEventAllowed(EventType.MOVE));
@@ -64,6 +64,19 @@ class ServerConfigTest {
         assertTrue(config.isEventAllowed(EventType.BLOCK_PLACE));
         assertTrue(config.isEventAllowed(EventType.DROP));
         assertTrue(config.isEventAllowed(EventType.INVENTORY));
+        assertTrue(config.isEventAllowed(EventType.INTERACT));
+        assertTrue(config.isEventAllowed(EventType.ATTACK));
+        assertTrue(config.isEventAllowed(EventType.PICKUP));
+    }
+
+    @Test
+    void everyActionExceptCommandHasAConfigName() {
+        ServerConfig config = new ServerConfig(new MapConfig().set("allowedActions",
+                List.of("CHAT", "MOVE", "BREAK", "PLACE", "DROP", "INVENTORY", "INTERACT", "ATTACK", "PICKUP")));
+
+        for (EventType type : EventType.values()) {
+            assertEquals(type != EventType.COMMAND, config.isEventAllowed(type), type.name());
+        }
     }
 
     @Test

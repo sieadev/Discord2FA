@@ -71,7 +71,7 @@ The bot creates one link message in that channel and reuses it after restarts.
 
 - **language** — Language code for messages (e.g. `en`, `de`). Files in `lang/` can be edited.
 - **allowedCommands** — Commands players can run before verifying (e.g. `/link`).
-- **allowedActions** — What unverified players can do: `CHAT`, `MOVE`, `BREAK`, `PLACE`, etc.
+- **allowedActions** — What unverified players can do (Paper/Spigot): `CHAT`, `MOVE`, `BREAK`, `PLACE`, `DROP`, `INVENTORY`, `INTERACT` (buttons, levers, doors, buckets, eating, entities), `ATTACK`, `PICKUP`. Anything not listed is blocked.
 - **forceLink** — If `true`, every player must link before playing.
 - **rememberSignInLocation** — If `true`, players are only asked to verify when they join from a new IP/version; known locations are trusted for 30 days.
 
