@@ -2,6 +2,7 @@ package dev.siea.discord2fa.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -22,6 +23,8 @@ public final class Discord2FAEventListener {
     private final com.velocitypowered.api.proxy.ProxyServer proxy;
     /** Result of the blocking skip check per player, used in ServerPreConnectEvent to pick initial server. */
     private final Map<UUID, Boolean> initialServerSkip = new ConcurrentHashMap<>();
+    /** Login wrappers keyed by platform player handle so disconnect can match the correct session. */
+    private final Map<Player, VelocityProxyPlayer> wrappersByHandle = new ConcurrentHashMap<>();
 
     public Discord2FAEventListener(ProxyServer server, com.velocitypowered.api.proxy.ProxyServer proxy) {
         this.server = server;
@@ -30,13 +33,24 @@ public final class Discord2FAEventListener {
 
     @Subscribe
     public void onLogin(com.velocitypowered.api.event.connection.LoginEvent event) {
-        VelocityProxyPlayer player = new VelocityProxyPlayer(event.getPlayer(), proxy);
-        boolean skip = server.shouldSkipVerificationBlocking(player);
+        Player handle = event.getPlayer();
+        VelocityProxyPlayer player = new VelocityProxyPlayer(handle, proxy);
+        wrappersByHandle.put(handle, player);
+
+        boolean forceVerify = isSessionTakeover(handle);
+        boolean skip = server.shouldSkipVerificationBlocking(player, forceVerify);
         initialServerSkip.put(player.getUniqueId(), skip);
-        // No-op when skipped: we already send them to post-verification in ServerPreConnectEvent.
-        // Calling sendPlayerToPostVerificationServer again here would trigger a redundant transfer and can
-        // disconnect them with "no available servers" when Velocity reconnects them to the same server.
-        server.handlePlayerJoin(player, () -> {});
+        server.handlePlayerJoin(player, forceVerify, () -> {},
+                () -> ProxyTargetServers.sendPlayerToVerificationServer(player));
+    }
+
+    @Subscribe
+    public void onDisconnect(DisconnectEvent event) {
+        Player handle = event.getPlayer();
+        VelocityProxyPlayer wrapper = wrappersByHandle.remove(handle);
+        if (wrapper != null) {
+            server.endPlayerSession(handle.getUniqueId(), wrapper);
+        }
     }
 
     /**
@@ -55,7 +69,6 @@ public final class Discord2FAEventListener {
             if (target.isPresent()) {
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(target.get()));
             }
-            // else: post-verification not configured or server name not in Velocity — keep default connection
         } else {
             String verification = ProxyTargetServers.getVerificationServer();
             Optional<com.velocitypowered.api.proxy.server.RegisteredServer> target =
@@ -63,7 +76,6 @@ public final class Discord2FAEventListener {
             if (target.isPresent()) {
                 event.setResult(ServerPreConnectEvent.ServerResult.allowed(target.get()));
             }
-            // else: verification not configured or server name not in Velocity — keep default connection
         }
     }
 
@@ -107,6 +119,12 @@ public final class Discord2FAEventListener {
         } else {
             if (!server.onEvent(uuid, EventType.CHAT)) event.setResult(PlayerChatEvent.ChatResult.denied());
         }
+    }
+
+    private boolean isSessionTakeover(Player newPlayer) {
+        return proxy.getPlayer(newPlayer.getUniqueId())
+                .map(existing -> existing != newPlayer)
+                .orElse(false);
     }
 
     private static String parseCommandLabel(String message) {

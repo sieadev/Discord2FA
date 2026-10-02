@@ -19,7 +19,13 @@ public final class GameServer extends BaseServer {
      * To be called by the platform-specific game modules (Spigot/Paper) when a player joins.
      */
     public void handlePlayerJoin(CommonPlayer player) {
-        addPlayer(player);
+        handlePlayerJoin(player, false);
+    }
+
+    /**
+     * @param forceVerify when true (session takeover), remembered sign-in locations are ignored.
+     */
+    public void handlePlayerJoin(CommonPlayer player, boolean forceVerify) {
+        addPlayer(player, forceVerify, null, null);
     }
 }
-

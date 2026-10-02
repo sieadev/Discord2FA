@@ -130,6 +130,16 @@ public class DiscordBot {
     }
 
     /**
+     * Cancels any in-flight verify request for the given Discord user so a new login session can start cleanly.
+     */
+    public void cancelPendingVerify(long discordId) {
+        PendingVerify pending = pendingVerifies.remove(discordId);
+        if (pending != null && !pending.future.isDone()) {
+            pending.future.complete(false);
+        }
+    }
+
+    /**
      * Register button listeners: link button in channel, verify/deny in DMs.
      */
     private void registerListeners() {
@@ -215,8 +225,8 @@ public class DiscordBot {
      */
     private void handleVerifyButton(MessageComponentInteraction interaction, String customId) {
         long discordId = interaction.getUser().getId();
-        PendingVerify pending = pendingVerifies.remove(discordId);
-        if (pending == null) {
+        long requestedGeneration = parseVerifyGeneration(customId);
+        if (requestedGeneration < 0) {
             interaction.createImmediateResponder()
                     .setContent(messageProvider.get("requestExpired"))
                     .setFlags(org.javacord.api.entity.message.MessageFlag.EPHEMERAL)
@@ -224,7 +234,17 @@ public class DiscordBot {
             return;
         }
 
-        boolean accepted = customId.startsWith("verify_accept");
+        PendingVerify pending = pendingVerifies.get(discordId);
+        if (pending == null || pending.sessionGeneration != requestedGeneration) {
+            interaction.createImmediateResponder()
+                    .setContent(messageProvider.get("requestExpired"))
+                    .setFlags(org.javacord.api.entity.message.MessageFlag.EPHEMERAL)
+                    .respond();
+            return;
+        }
+
+        pendingVerifies.remove(discordId);
+        boolean accepted = customId.startsWith("verify_accept_");
         if (accepted) {
             SignInLocation loc = pending.signInLocation;
             if (loc != null) {
@@ -243,22 +263,37 @@ public class DiscordBot {
         }
     }
 
+    private static long parseVerifyGeneration(String customId) {
+        int lastUnderscore = customId.lastIndexOf('_');
+        if (lastUnderscore < 0 || lastUnderscore == customId.length() - 1) return -1;
+        try {
+            return Long.parseLong(customId.substring(lastUnderscore + 1));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     /**
      * Ask the Discord user to confirm the sign-in. Sends a DM with embed and Verify/Deny buttons.
      * On Verify, the sign-in location is stored as trusted and the future completes with true.
+     *
+     * @param sessionGeneration token from {@link dev.siea.discord2fa.common.server.BaseServer#beginPlayerSession};
+     *                          embedded in button custom IDs so stale DMs cannot verify a newer session.
      */
-    public CompletableFuture<Boolean> attemptVerify(LinkedPlayer linkedPlayer, SignInLocation signInLocation) {
+    public CompletableFuture<Boolean> attemptVerify(LinkedPlayer linkedPlayer, SignInLocation signInLocation, long sessionGeneration) {
         if (api == null) {
             return CompletableFuture.completedFuture(false);
         }
+
+        cancelPendingVerify(linkedPlayer.getDiscordId());
 
         CompletableFuture<User> userFuture = api.getUserById(linkedPlayer.getDiscordId());
         return userFuture
                 .thenCompose(user -> {
                     String ip = signInLocation != null ? signInLocation.getIpAddress() : "?";
-        String title = messageProvider.get("verify.title");
-        String text = messageProvider.get("verify.text").replace("%ip%", ip);
-        String footer = messageProvider.get("verify.footer");
+                    String title = messageProvider.get("verify.title");
+                    String text = messageProvider.get("verify.text").replace("%ip%", ip);
+                    String footer = messageProvider.get("verify.footer");
                     String verifyLabel = messageProvider.get("verify.VerifyButton");
                     String denyLabel = messageProvider.get("verify.DenyButton");
 
@@ -268,11 +303,11 @@ public class DiscordBot {
                             .setFooter(footer)
                             .setColor(Color.ORANGE);
 
-                    String acceptId = "verify_accept";
-                    String denyId = "verify_deny";
+                    String acceptId = "verify_accept_" + sessionGeneration;
+                    String denyId = "verify_deny_" + sessionGeneration;
 
                     CompletableFuture<Boolean> result = new CompletableFuture<>();
-                    pendingVerifies.put(linkedPlayer.getDiscordId(), new PendingVerify(result, signInLocation));
+                    pendingVerifies.put(linkedPlayer.getDiscordId(), new PendingVerify(result, signInLocation, sessionGeneration));
 
                     return new MessageBuilder()
                             .setEmbed(embed)
@@ -307,7 +342,6 @@ public class DiscordBot {
 
     public void revokeVerifiedRole(Long userId) {
         if (role != null) {
-            System.out.println(role.getId());
             api.getUserById(userId).thenAcceptAsync(user -> user.removeRole(role));
         }
     }
@@ -357,10 +391,12 @@ public class DiscordBot {
     private static final class PendingVerify {
         final CompletableFuture<Boolean> future;
         final SignInLocation signInLocation;
+        final long sessionGeneration;
 
-        PendingVerify(CompletableFuture<Boolean> future, SignInLocation signInLocation) {
+        PendingVerify(CompletableFuture<Boolean> future, SignInLocation signInLocation, long sessionGeneration) {
             this.future = future;
             this.signInLocation = signInLocation;
+            this.sessionGeneration = sessionGeneration;
         }
     }
 }
