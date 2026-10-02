@@ -19,22 +19,17 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.MessageComponentInteraction;
 
 import java.awt.Color;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordBot {
-    /** Pending link codes: code -> Discord user who requested it. */
-    private final Map<String, User> codes = new ConcurrentHashMap<>();
-    /** Discord user ids that have been sent a code and not yet linked (so we don't send duplicate codes). */
-    private final Map<Long, Boolean> pendingLinkUserIds = new ConcurrentHashMap<>();
-    /** Pending verify requests: discord id -> (future to complete, sign-in location to add to DB on accept). */
-    private final Map<Long, PendingVerify> pendingVerifies = new ConcurrentHashMap<>();
+    /** One-time link codes handed out in DMs; at most one outstanding code per Discord user. */
+    private final LinkCodes<User> linkCodes = new LinkCodes<>();
+    /** Pending verify requests, keyed by Discord id and bound to the player's session generation. */
+    private final PendingVerifications pendingVerifies = new PendingVerifications();
 
     private final DiscordConfig discordConfig;
     private final MessageProvider messageProvider;
@@ -133,10 +128,7 @@ public class DiscordBot {
      * Cancels any in-flight verify request for the given Discord user so a new login session can start cleanly.
      */
     public void cancelPendingVerify(long discordId) {
-        PendingVerify pending = pendingVerifies.remove(discordId);
-        if (pending != null && !pending.future.isDone()) {
-            pending.future.complete(false);
-        }
+        pendingVerifies.cancel(discordId);
     }
 
     /**
@@ -225,8 +217,8 @@ public class DiscordBot {
      */
     private void handleVerifyButton(MessageComponentInteraction interaction, String customId) {
         long discordId = interaction.getUser().getId();
-        long requestedGeneration = parseVerifyGeneration(customId);
-        if (requestedGeneration < 0) {
+        PendingVerifications.Decision pending = pendingVerifies.resolve(discordId, customId);
+        if (pending == null) {
             interaction.createImmediateResponder()
                     .setContent(messageProvider.get("requestExpired"))
                     .setFlags(org.javacord.api.entity.message.MessageFlag.EPHEMERAL)
@@ -234,19 +226,8 @@ public class DiscordBot {
             return;
         }
 
-        PendingVerify pending = pendingVerifies.get(discordId);
-        if (pending == null || pending.sessionGeneration != requestedGeneration) {
-            interaction.createImmediateResponder()
-                    .setContent(messageProvider.get("requestExpired"))
-                    .setFlags(org.javacord.api.entity.message.MessageFlag.EPHEMERAL)
-                    .respond();
-            return;
-        }
-
-        pendingVerifies.remove(discordId);
-        boolean accepted = customId.startsWith("verify_accept_");
-        if (accepted) {
-            SignInLocation loc = pending.signInLocation;
+        if (pending.accepted()) {
+            SignInLocation loc = pending.signInLocation();
             if (loc != null) {
                 discordExecutor.execute(() -> databaseAdapter.addLoginLocation(
                         loc.getIpAddress(), loc.getVersion(), loc.getMinecraftUuid(), loc.getTimeOfLogin()));
@@ -254,22 +235,12 @@ public class DiscordBot {
             interaction.createImmediateResponder()
                     .setContent(messageProvider.get("acceptMessage"))
                     .respond();
-            pending.future.complete(true);
+            pending.future().complete(true);
         } else {
             interaction.createImmediateResponder()
                     .setContent(messageProvider.get("denyMessage"))
                     .respond();
-            pending.future.complete(false);
-        }
-    }
-
-    private static long parseVerifyGeneration(String customId) {
-        int lastUnderscore = customId.lastIndexOf('_');
-        if (lastUnderscore < 0 || lastUnderscore == customId.length() - 1) return -1;
-        try {
-            return Long.parseLong(customId.substring(lastUnderscore + 1));
-        } catch (NumberFormatException e) {
-            return -1;
+            pending.future().complete(false);
         }
     }
 
@@ -303,11 +274,10 @@ public class DiscordBot {
                             .setFooter(footer)
                             .setColor(Color.ORANGE);
 
-                    String acceptId = "verify_accept_" + sessionGeneration;
-                    String denyId = "verify_deny_" + sessionGeneration;
+                    String acceptId = PendingVerifications.acceptId(sessionGeneration);
+                    String denyId = PendingVerifications.denyId(sessionGeneration);
 
-                    CompletableFuture<Boolean> result = new CompletableFuture<>();
-                    pendingVerifies.put(linkedPlayer.getDiscordId(), new PendingVerify(result, signInLocation, sessionGeneration));
+                    CompletableFuture<Boolean> result = pendingVerifies.register(linkedPlayer.getDiscordId(), signInLocation, sessionGeneration);
 
                     return new MessageBuilder()
                             .setEmbed(embed)
@@ -322,16 +292,11 @@ public class DiscordBot {
     }
 
     /**
-     * Consumes the link code if present: removes it from the map and returns the associated Discord user.
+     * Consumes the link code if present and not expired, returning the associated Discord user.
      * Call this when the player completes /link &lt;code&gt; so the code is only valid once.
      */
     public Optional<User> consumeLinkCode(String code) {
-        User user = codes.remove(code);
-        if (user != null) {
-            pendingLinkUserIds.remove(user.getId());
-            return Optional.of(user);
-        }
-        return Optional.empty();
+        return linkCodes.consume(code);
     }
 
     public void giveVerifiedRole(User user) {
@@ -356,13 +321,12 @@ public class DiscordBot {
                         sendDmEmbed(user, messageProvider.get("alreadyLinkedDiscord"), null);
                         return;
                     }
-                    if (pendingLinkUserIds.containsKey(user.getId())) {
+                    Optional<String> issued = linkCodes.issue(user.getId(), user);
+                    if (issued.isEmpty()) {
                         sendDmEmbed(user, messageProvider.get("alreadyLinking"), null);
                         return;
                     }
-                    String code = generateRandomString();
-                    codes.put(code, user);
-                    pendingLinkUserIds.put(user.getId(), Boolean.TRUE);
+                    String code = issued.get();
                     String message = messageProvider.get("codeMessage").replace("%code%", code);
                     sendDmEmbed(user, message, "Verification Code");
                 });
@@ -378,25 +342,4 @@ public class DiscordBot {
         new MessageBuilder().setEmbed(embed).send(user).exceptionally(ex -> null);
     }
 
-    private static String generateRandomString() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(8);
-        for (int i = 0; i < 8; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
-
-    private static final class PendingVerify {
-        final CompletableFuture<Boolean> future;
-        final SignInLocation signInLocation;
-        final long sessionGeneration;
-
-        PendingVerify(CompletableFuture<Boolean> future, SignInLocation signInLocation, long sessionGeneration) {
-            this.future = future;
-            this.signInLocation = signInLocation;
-            this.sessionGeneration = sessionGeneration;
-        }
-    }
 }
