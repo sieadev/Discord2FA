@@ -1,0 +1,65 @@
+name: Release
+
+# Publishing a GitHub release (tag like V2.2.0) builds the plugin, attaches the jars to the release
+# and publishes one Modrinth version per platform. Pre-releases go to Modrinth as beta.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to (re)publish, e.g. V2.2.0
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Read release
+        id: release
+        run: |
+          version="${TAG#[vV]}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+].*)?$ ]] || { echo "Tag '$TAG' is not a version"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          prerelease=$(gh release view "$TAG" --json isPrerelease --jq .isPrerelease)
+          echo "type=$([ "$prerelease" = true ] && echo beta || echo release)" >> "$GITHUB_OUTPUT"
+          gh release view "$TAG" --json body --jq .body > "$RUNNER_TEMP/changelog.md"
+
+      - name: Build and test
+        run: mvn -B verify -Drevision=${{ steps.release.outputs.version }}
+
+      - name: Attach jars to the GitHub release
+        run: >
+          gh release upload "$TAG" --clobber
+          spigot/target/discord2fa-spigot-${{ steps.release.outputs.version }}.jar
+          velocity/target/discord2fa-velocity-${{ steps.release.outputs.version }}.jar
+          bungeecord/target/discord2fa-bungeecord-${{ steps.release.outputs.version }}.jar
+
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: >
+          python3 .github/scripts/publish_modrinth.py
+          --version ${{ steps.release.outputs.version }}
+          --version-type ${{ steps.release.outputs.type }}
+          --changelog-file "$RUNNER_TEMP/changelog.md"

@@ -12,7 +12,7 @@ verify:
   DenyButton: "Refuser"
 link:
   title: "Liez votre compte !"
-  text: "Vous voulez rendre votre compte minecraft plus sécurisé ? Liez le avec votre dev.siea.discord2fa.discord !"
+  text: "Vous voulez rendre votre compte minecraft plus sécurisé ? Liez le avec votre Discord !"
   footer: "Cliquez sur le bouton dessous pour lier votre compte !"
   linkButton: "Lien"
 codeMessage: "Votre code de vérification est : %code%"
@@ -31,4 +31,4 @@ verifyDenied: "&cVérification refusée !"
 verifySuccess: "&aVous avez vérifié votre compte avec succès !"
 alreadyLinked: "&cVotre compte est déjà lié !"
 
-forceLink: "&eBonjour &a%player%&e, avant de commencer, vous allez devoir lier votre compte minecraft à votre compte dev.siea.discord2fa.discord. Pour cela, veuillez rejoindre notre serveur dev.siea.discord2fa.discord et suivez les instructions dans la liste des instructions"
+forceLink: "&eBonjour &a%player%&e, avant de commencer, vous allez devoir lier votre compte minecraft à votre compte Discord. Pour cela, veuillez rejoindre notre serveur Discord et suivez les instructions dans la liste des instructions"

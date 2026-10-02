@@ -26,11 +26,11 @@ Lets players link their Minecraft account to Discord enabling two-factor authent
 
 | Platform                | Module       | Notes                                                  |
 |-------------------------|--------------|--------------------------------------------------------|
-| **Spigot/Paper/Bukkit** | `spigot`     | 1.16.5+                                                |
+| **Spigot/Paper/Bukkit** | `spigot`     | 1.16.5 – 26.3                                          |
 | **BungeeCord**          | `bungeecord` | Proxy; optional verification/post-verification servers |
-| **Velocity**            | `velocity`   | Proxy; same options as BungeeCord                      |
+| **Velocity**            | `velocity`   | Proxy (3.3+ and 4.x); same options as BungeeCord       |
 
-Use the JAR that matches your platform (e.g. `discord2fa-paper-2.0.0.jar` for Paper).
+Use the JAR that matches your platform (e.g. `discord2fa-spigot-2.2.0.jar` for Paper/Spigot/Purpur).
 
 ---
 
@@ -43,7 +43,8 @@ Use the JAR that matches your platform (e.g. `discord2fa-paper-2.0.0.jar` for Pa
 5. Edit `config.yml`: set **database** (or leave SQLite default) and **Discord bot** (token, guild ID, channel ID).
 6. Restart the server.
 
-The Discord bot will only start when `discord.token`, `discord.guild`, and `discord.channel` are set. Until then, the plugin will run but log that the bot is not configured.
+The Discord bot will only start when `discord.token`, `discord.guild`, and `discord.channel` are set. Until then the plugin runs in **setup mode**: it logs that the bot is not configured and does not restrict anyone, so you can join and finish setting it up.
+Once the bot is configured, Discord2FA fails closed: if the bot cannot connect (bad token, Discord outage), players who would need to verify stay restricted instead of being let in.
 
 ---
 
@@ -70,7 +71,7 @@ The bot creates one link message in that channel and reuses it after restarts.
 
 - **language** — Language code for messages (e.g. `en`, `de`). Files in `lang/` can be edited.
 - **allowedCommands** — Commands players can run before verifying (e.g. `/link`).
-- **allowedActions** — What unverified players can do: `CHAT`, `MOVE`, `BREAK`, `PLACE`, etc.
+- **allowedActions** — What unverified players can do (Paper/Spigot): `CHAT`, `MOVE`, `BREAK`, `PLACE`, `DROP`, `INVENTORY`, `INTERACT` (buttons, levers, doors, buckets, eating, entities), `ATTACK`, `PICKUP`. Anything not listed is blocked.
 - **forceLink** — If `true`, every player must link before playing.
 - **rememberSignInLocation** — If `true`, players are only asked to verify when they join from a new IP/version; known locations are trusted for 30 days.
 
@@ -123,7 +124,7 @@ All other behavior is controlled by config (e.g. who must link, which commands a
 
 ### Building
 
-**Requirements:** Java 16+, Maven 3.6+
+**Requirements:** JDK 21+, Maven 3.6+ (Docker optional, for the database tests)
 
 ```bash
 git clone https://github.com/sieadev/Discord2FA.git
@@ -131,14 +132,38 @@ cd Discord2FA
 mvn package -DskipTests
 ```
 
-Output JARs (with version in the name, e.g. `2.0.0`):
+Output JARs (with version in the name, e.g. `2.2.0`):
 
-- `paper/target/discord2fa-paper-2.0.0.jar`
-- `spigot/target/discord2fa-spigot-2.0.0.jar`
-- `bungeecord/target/discord2fa-bungeecord-2.0.0.jar`
-- `velocity/target/discord2fa-velocity-2.0.0.jar`
+- `spigot/target/discord2fa-spigot-2.2.0.jar`
+- `bungeecord/target/discord2fa-bungeecord-2.2.0.jar`
+- `velocity/target/discord2fa-velocity-2.2.0.jar`
 
 Version is set in the root `pom.xml` via `<revision>` and is used for all modules.
+
+The plugin compiles against the **oldest** supported platform APIs (Spigot 1.16.5, Velocity 3.3, BungeeCord 1.20) so one JAR runs everywhere.
+To check the code against the newest releases, override the API versions (Minecraft 26.x and Velocity 4 need JDK 25):
+
+```bash
+mvn verify -Dspigot.api.version=26.3-R0.1-SNAPSHOT -Dvelocity.api.version=4.2.0 -Dbungeecord.api.version=26.1-R0.1-SNAPSHOT
+```
+
+### Testing
+
+```bash
+mvn test
+```
+
+Tests live in `common` and `proxyserver`. They cover the verification state machine (fail-closed behaviour, session takeover,
+stale Discord approvals, `/link` and `/unlink`), link codes, the database layer and the language files.
+The database tests run against SQLite always, and against PostgreSQL, MySQL and MariaDB via Testcontainers when Docker is available.
+
+### CI and releases
+
+- **Build** (`.github/workflows/build.yml`): runs the tests on every push and PR, and weekly compiles + tests against the newest
+  Spigot, Velocity and BungeeCord APIs so a breaking Minecraft update is caught early.
+- **Release** (`.github/workflows/release.yml`): publish a GitHub release with a tag like `V2.2.0`. The workflow builds that version,
+  attaches the three JARs to the release and publishes them to [Modrinth](https://modrinth.com/plugin/discord2fa)
+  (release notes become the changelog; pre-releases are published as beta). It needs the `MODRINTH_TOKEN` repository secret.
 
 ### Project structure
 
@@ -147,8 +172,7 @@ Discord2FA/
 ├── common/          # Shared logic: database, Discord bot, config, i18n
 ├── gameserver/      # Game-server core (used by Paper & Spigot)
 ├── proxyserver/     # Proxy core (used by BungeeCord & Velocity)
-├── paper/           # Paper plugin
-├── spigot/          # Spigot plugin
+├── spigot/          # Spigot/Paper plugin
 ├── bungeecord/      # BungeeCord plugin
 ├── velocity/        # Velocity plugin
 └── pom.xml          # Parent POM (revision, dependency management, shade config)
@@ -161,7 +185,7 @@ Discord2FA/
 
 1. Fork the repo and create a branch.
 2. Make changes; keep formatting and style consistent with the existing code.
-3. Run `mvn compile` (and tests if you add or change any).
+3. Run `mvn verify` and add tests for behaviour you change.
 4. Open a pull request with a short description of the change.
 
 ### License

@@ -48,6 +48,10 @@ public abstract class BaseServer {
     private final Map<UUID, CommonPlayer> verifyingPlayers = new ConcurrentHashMap<>();
     /** Players whose join is still being processed (async). Block actions until we decide skip or verify. */
     private final Set<UUID> pendingVerification = ConcurrentHashMap.newKeySet();
+    /** Monotonic session generation per UUID; incremented on each new login. */
+    private final Map<UUID, Long> sessionGeneration = new ConcurrentHashMap<>();
+    /** The live CommonPlayer wrapper for the current session of each UUID. */
+    private final Map<UUID, CommonPlayer> activeSessionPlayer = new ConcurrentHashMap<>();
 
     /** Cached result of the last update check (startup); used by /discord2fa version. */
     private volatile UpdateCheckResult lastUpdateCheckResult;
@@ -64,21 +68,33 @@ public abstract class BaseServer {
      * @param dataFolder     plugin data folder (where config.yml lives). When non-null, SQLite DB is stored here by default so no path need be set in config.
      */
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor, Path dataFolder) {
-        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
-        this.logger = logger;
-        this.databaseAdapter = new DatabaseAdapter(configProvider, dataFolder);
-        this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter, logger);
-        this.serverConfig = new ServerConfig(configProvider);
-        this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
+        this(configProvider, logger, messageProvider, serverExecutor, new DatabaseAdapter(configProvider, dataFolder));
         purgeOldSignInLocationsAsync();
         checkForUpdates();
+    }
+
+    private BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor, DatabaseAdapter databaseAdapter) {
+        this(new ServerConfig(configProvider), databaseAdapter,
+                new DiscordBot(configProvider, messageProvider, databaseAdapter, logger),
+                logger, messageProvider, serverExecutor);
+    }
+
+    /** Wires the server from already-built collaborators. Does not purge old locations or check for updates. */
+    BaseServer(ServerConfig serverConfig, DatabaseAdapter databaseAdapter, DiscordBot discordBot,
+               LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
+        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
+        this.logger = logger;
+        this.databaseAdapter = databaseAdapter;
+        this.discordBot = discordBot;
+        this.serverConfig = serverConfig;
+        this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
     }
 
     /**
      * @param serverExecutor optional executor for running player-facing callbacks on the server/main thread. If null, callbacks run on the internal DB thread.
      */
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
-        this(configProvider, logger, messageProvider, serverExecutor, null);
+        this(configProvider, logger, messageProvider, serverExecutor, (Path) null);
     }
 
     /**
@@ -99,6 +115,61 @@ public abstract class BaseServer {
             Thread.currentThread().interrupt();
             dbExecutor.shutdownNow();
         }
+    }
+
+    /**
+     * Starts a new session for the player. Increments the generation counter, clears stale in-memory state
+     * from any prior connection with the same UUID, and cancels in-flight Discord verify requests.
+     *
+     * @return the generation token for this session; pass to async callbacks to ignore stale results.
+     */
+    public final long beginPlayerSession(CommonPlayer player) {
+        UUID uuid = player.getUniqueId();
+        long generation = sessionGeneration.merge(uuid, 1L, Long::sum);
+
+        pendingVerification.remove(uuid);
+        verifyingPlayers.remove(uuid);
+        activeSessionPlayer.put(uuid, player);
+
+        LinkedPlayer linked = player.getLinkedPlayer();
+        if (linked == null) {
+            linked = databaseAdapter.getLinkedPlayer(uuid);
+            if (linked != null) player.setLinkedPlayer(linked);
+        }
+        if (linked != null) {
+            discordBot.cancelPendingVerify(linked.getDiscordId());
+        }
+
+        return generation;
+    }
+
+    /**
+     * Ends the session for a disconnecting player. Only clears state when the disconnecting wrapper
+     * is still the active session, so a late disconnect from a kicked connection cannot wipe a newer login.
+     */
+    public final void endPlayerSession(UUID uuid, CommonPlayer player) {
+        CommonPlayer active = activeSessionPlayer.get(uuid);
+        if (active != player) return;
+
+        activeSessionPlayer.remove(uuid, player);
+        pendingVerification.remove(uuid);
+        verifyingPlayers.remove(uuid);
+
+        LinkedPlayer linked = player.getLinkedPlayer();
+        if (linked != null) {
+            discordBot.cancelPendingVerify(linked.getDiscordId());
+        }
+    }
+
+    /** Returns true when the given generation is still the active session for this UUID. */
+    public final boolean isCurrentSession(UUID uuid, long generation) {
+        Long current = sessionGeneration.get(uuid);
+        return current != null && current == generation;
+    }
+
+    /** Returns true when the given player wrapper is the active session for this UUID. */
+    public final boolean isActiveSessionPlayer(UUID uuid, CommonPlayer player) {
+        return activeSessionPlayer.get(uuid) == player;
     }
 
     /** Purges sign-in locations older than 30 days asynchronously so startup is not blocked. */
@@ -132,78 +203,132 @@ public abstract class BaseServer {
      * Runs the same "skip verification?" logic as addPlayer on the DB executor and blocks until done.
      * Returns true if the player should skip verification (e.g. not linked and forceLink off, or location remembered).
      * Proxy platforms use this to send the player directly to the post-verification server instead of the verification server.
-     * If the bot is not connected or the database is unavailable, returns true (skip) so the player is not stuck.
+     * Before the Discord bot has been configured (fresh install), returns true so admins can join and set it up.
+     * When the bot is configured but not connected, returns false so the player stays restricted.
      */
     public final boolean shouldSkipVerificationBlocking(CommonPlayer player) {
+        return shouldSkipVerificationBlocking(player, false);
+    }
+
+    /**
+     * @param forceVerify when true (session takeover), remembered sign-in locations are ignored.
+     */
+    public final boolean shouldSkipVerificationBlocking(CommonPlayer player, boolean forceVerify) {
         if (player == null) return true;
-        if (!discordBot.isConnected() || databaseAdapter == null) return true;
+        if (isSetupMode()) return true;
+        if (!isVerificationServiceAvailable()) return false;
         SignInLocation current = player.getSigninLocation();
-        return CompletableFuture.supplyAsync(() -> {
-            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
-            if (linked != null) player.setLinkedPlayer(linked);
-            boolean skip = !serverConfig.isForceLink() && linked == null;
-            if (!skip && current != null && serverConfig.isRememberSignInLocation()
+        return CompletableFuture.supplyAsync(() -> computeShouldSkip(player, current, forceVerify), dbExecutor).join();
+    }
+
+    /**
+     * True until the Discord bot is configured (fresh install). 2FA cannot work without a bot, so nobody is
+     * restricted; once a bot is configured, an unreachable bot fails closed instead.
+     */
+    private boolean isSetupMode() {
+        return !discordBot.isConfigured();
+    }
+
+    private boolean isVerificationServiceAvailable() {
+        return discordBot.isConnected() && databaseAdapter != null;
+    }
+
+    private boolean computeShouldSkip(CommonPlayer player, SignInLocation current, boolean forceVerify) {
+        LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
+        if (linked != null) player.setLinkedPlayer(linked);
+        boolean skip = !serverConfig.isForceLink() && linked == null;
+        if (!skip && !forceVerify && current != null && serverConfig.isRememberSignInLocation()
                 && databaseAdapter.hasRecentSignInLocation(player.getUniqueId(), current.getIpAddress(), current.getVersion())) {
-                skip = true;
-            }
-            return skip;
-        }, dbExecutor).join();
+            skip = true;
+        }
+        return skip;
     }
 
     /**
      * Register a player as verifying. Called from platform join/login events.
      * DB lookups run asynchronously so the join thread is not blocked; the actual add and messages run on the server executor.
+     *
      * @param onSkippedVerification optional callback when the player is skipped (e.g. not linked and forceLink off, or location remembered). Proxy platforms use this to send the player to the post-verification server.
+     * @param onVerificationRequired optional callback when verification is required (proxy: send to verification server).
      */
-    protected final void addPlayer(CommonPlayer player, Runnable onSkippedVerification) {
+    protected final void addPlayer(CommonPlayer player, boolean forceVerify, Runnable onSkippedVerification, Runnable onVerificationRequired) {
         if (player == null) return;
+
+        UUID uuid = player.getUniqueId();
+        long generation = beginPlayerSession(player);
         SignInLocation current = player.getSigninLocation();
 
-        if (!discordBot.isConnected() || databaseAdapter == null) return;
+        if (isSetupMode()) {
+            if (onSkippedVerification != null) serverExecutor.execute(onSkippedVerification);
+            return;
+        }
 
-        pendingVerification.add(player.getUniqueId());
+        pendingVerification.add(uuid);
+
+        if (!isVerificationServiceAvailable()) {
+            enterVerificationRequired(player, generation, onVerificationRequired);
+            serverExecutor.execute(() -> player.sendMessage(messageProvider.get("verifyUnavailable")));
+            pendingVerification.remove(uuid);
+            return;
+        }
 
         CompletableFuture.supplyAsync(() -> {
-            LinkedPlayer linked = databaseAdapter.getLinkedPlayer(player.getUniqueId());
-            if (linked != null) player.setLinkedPlayer(linked);
-            boolean skip = !serverConfig.isForceLink() && linked == null;
-            if (!skip && current != null && serverConfig.isRememberSignInLocation()
-                && databaseAdapter.hasRecentSignInLocation(player.getUniqueId(), current.getIpAddress(), current.getVersion())) {
-                skip = true;
-            }
-            return new Object[]{ linked, skip, player };
-        }, dbExecutor).thenAcceptAsync(result -> {
-            boolean skip = (Boolean) ((Object[]) result)[1];
-            CommonPlayer p = (CommonPlayer) ((Object[]) result)[2];
-            pendingVerification.remove(p.getUniqueId());
+            boolean skip = computeShouldSkip(player, current, forceVerify);
+            return skip;
+        }, dbExecutor).thenAcceptAsync(skip -> {
+            if (!isCurrentSession(uuid, generation)) return;
+
+            pendingVerification.remove(uuid);
 
             if (skip) {
-                if (onSkippedVerification != null) onSkippedVerification.run();
+                if (onSkippedVerification != null && isCurrentSession(uuid, generation)) {
+                    onSkippedVerification.run();
+                }
                 return;
             }
 
-            p.setOnVerifiedCallback(() -> verifyingPlayers.remove(p.getUniqueId()));
-            verifyingPlayers.put(p.getUniqueId(), p);
+            enterVerificationRequired(player, generation, onVerificationRequired);
 
-            if (p.isLinked()) {
-                discordBot.attemptVerify(p.getLinkedPlayer(), p.getSigninLocation())
+            if (player.isLinked()) {
+                discordBot.attemptVerify(player.getLinkedPlayer(), player.getSigninLocation(), generation)
                         .thenAcceptAsync(verified -> {
+                            if (!isCurrentSession(uuid, generation)) return;
                             if (verified) {
-                                p.sendMessage(messageProvider.get("verifySuccess"));
-                                p.onVerified();
+                                player.sendMessage(messageProvider.get("verifySuccess"));
+                                player.onVerified();
                             } else {
-                                p.kick(messageProvider.get("verifyDenied"));
+                                player.kick(messageProvider.get("verifyDenied"));
                             }
                         }, serverExecutor);
             } else {
-                p.sendMessage(messageProvider.get("forceLink").replace("%player%", player.getName()));
+                player.sendMessage(messageProvider.get("forceLink").replace("%player%", player.getName()));
             }
         }, serverExecutor);
     }
 
+    private void enterVerificationRequired(CommonPlayer player, long generation, Runnable onVerificationRequired) {
+        player.setOnVerifiedCallback(() -> {
+            if (isCurrentSession(player.getUniqueId(), generation)) {
+                verifyingPlayers.remove(player.getUniqueId());
+            }
+        });
+        verifyingPlayers.put(player.getUniqueId(), player);
+        if (onVerificationRequired != null) {
+            onVerificationRequired.run();
+        }
+    }
+
     /** Overload for non-proxy platforms; no callback when skipped. */
     protected final void addPlayer(CommonPlayer player) {
-        addPlayer(player, null);
+        addPlayer(player, false, null, null);
+    }
+
+    protected final void addPlayer(CommonPlayer player, boolean forceVerify, Runnable onSkippedVerification) {
+        addPlayer(player, forceVerify, onSkippedVerification, null);
+    }
+
+    protected final void addPlayer(CommonPlayer player, Runnable onSkippedVerification) {
+        addPlayer(player, false, onSkippedVerification, null);
     }
 
     /**
@@ -260,9 +385,11 @@ public abstract class BaseServer {
         }
         long discordId = discordUser.get().getId();
         UUID playerUuid = player.getUniqueId();
+        long generation = sessionGeneration.getOrDefault(playerUuid, 0L);
         return CompletableFuture.runAsync(() -> {
             databaseAdapter.saveLinkedPlayer(new LinkedPlayer(playerUuid, discordId, Instant.now()));
         }, dbExecutor).thenApplyAsync(v -> {
+            if (!isCurrentSession(playerUuid, generation)) return true;
             LinkedPlayer linked = databaseAdapter.getLinkedPlayer(playerUuid);
             player.sendMessage(messageProvider.get("linkSuccess"));
             if (verifyingPlayers.remove(playerUuid) != null) {
@@ -391,4 +518,3 @@ public abstract class BaseServer {
         return lines;
     }
 }
-

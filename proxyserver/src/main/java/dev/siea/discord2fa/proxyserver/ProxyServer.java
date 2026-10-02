@@ -20,7 +20,7 @@ public final class ProxyServer extends BaseServer {
      * To be called by proxy platform modules (BungeeCord, Velocity) when a player joins the proxy.
      */
     public void handlePlayerJoin(CommonPlayer player) {
-        addPlayer(player, null);
+        handlePlayerJoin(player, false, null, null);
     }
 
     /**
@@ -29,8 +29,15 @@ public final class ProxyServer extends BaseServer {
      * post-verification server so they are not stuck on the verification server.
      */
     public void handlePlayerJoin(CommonPlayer player, Runnable onSkippedVerification) {
-        addPlayer(player, onSkippedVerification);
+        handlePlayerJoin(player, false, onSkippedVerification, null);
+    }
+
+    /**
+     * @param forceVerify when true (session takeover), remembered sign-in locations are ignored.
+     * @param onSkippedVerification callback when verification is skipped.
+     * @param onVerificationRequired callback when verification is required (e.g. send to verification server).
+     */
+    public void handlePlayerJoin(CommonPlayer player, boolean forceVerify, Runnable onSkippedVerification, Runnable onVerificationRequired) {
+        addPlayer(player, forceVerify, onSkippedVerification, onVerificationRequired);
     }
 }
-
-

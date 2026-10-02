@@ -3,19 +3,29 @@ package dev.siea.discord2fa.spigot.listener;
 import dev.siea.discord2fa.common.event.EventType;
 import dev.siea.discord2fa.gameserver.server.GameServer;
 import dev.siea.discord2fa.spigot.player.SpigotPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.entity.Projectile;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class Discord2FAEventListener implements Listener {
 
     private final GameServer server;
+    /** Login wrappers keyed by platform player handle so quit can match the correct session. */
+    private final Map<Player, SpigotPlayer> wrappersByHandle = new ConcurrentHashMap<>();
 
     public Discord2FAEventListener(GameServer server) {
         this.server = server;
@@ -23,7 +33,21 @@ public final class Discord2FAEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event) {
-        server.handlePlayerJoin(new SpigotPlayer(event.getPlayer()));
+        Player handle = event.getPlayer();
+        SpigotPlayer player = new SpigotPlayer(handle);
+        wrappersByHandle.put(handle, player);
+
+        boolean forceVerify = isSessionTakeover(handle);
+        server.handlePlayerJoin(player, forceVerify);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onQuit(PlayerQuitEvent event) {
+        Player handle = event.getPlayer();
+        SpigotPlayer wrapper = wrappersByHandle.remove(handle);
+        if (wrapper != null) {
+            server.endPlayerSession(handle.getUniqueId(), wrapper);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -69,6 +93,71 @@ public final class Discord2FAEventListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onSwapHands(PlayerSwapHandItemsEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INVENTORY)) event.setCancelled(true);
+    }
+
+    /** Not ignoreCancelled: clicks on air arrive pre-cancelled but still use the held item (pearls, potions, food). */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteract(PlayerInteractEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onInteractEntity(PlayerInteractEntityEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onArmorStand(PlayerArmorStandManipulateEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onBucketFill(PlayerBucketFillEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onConsume(PlayerItemConsumeEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.INTERACT)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onAttack(EntityDamageByEntityEvent event) {
+        Player attacker = null;
+        if (event.getDamager() instanceof Player) {
+            attacker = (Player) event.getDamager();
+        } else if (event.getDamager() instanceof Projectile
+                && ((Projectile) event.getDamager()).getShooter() instanceof Player) {
+            attacker = (Player) ((Projectile) event.getDamager()).getShooter();
+        }
+        if (attacker == null) return;
+        if (!server.onEvent(attacker.getUniqueId(), EventType.ATTACK)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPickup(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        if (!server.onEvent(event.getEntity().getUniqueId(), EventType.PICKUP)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPickupArrow(PlayerPickupArrowEvent event) {
+        if (!server.onEvent(event.getPlayer().getUniqueId(), EventType.PICKUP)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         org.bukkit.entity.Player player = event.getPlayer();
         String label = parseCommandLabel(event.getMessage());
@@ -77,6 +166,21 @@ public final class Discord2FAEventListener implements Listener {
             server.getCommandDeniedMessage(player.getUniqueId(), label)
                     .thenAccept(msg -> { if (msg != null) player.sendMessage(msg); });
         }
+    }
+
+    private boolean isSessionTakeover(Player newPlayer) {
+        UUID uuid = newPlayer.getUniqueId();
+        for (Map.Entry<Player, SpigotPlayer> entry : wrappersByHandle.entrySet()) {
+            if (entry.getKey().getUniqueId().equals(uuid) && entry.getKey() != newPlayer) {
+                return true;
+            }
+        }
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getUniqueId().equals(uuid) && online != newPlayer) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String parseCommandLabel(String message) {

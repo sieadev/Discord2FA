@@ -45,7 +45,7 @@ discord:
 allowedCommands: ["/link"]
 
 # Actions allowed before verifying
-# Possible values: BREAK, PLACE, CHAT, MOVE, DROP, INVENTORY
+# Possible values: BREAK, PLACE, CHAT, MOVE, DROP, INVENTORY, INTERACT, ATTACK, PICKUP
 allowedActions: ["CHAT"]
 
 # Force users to link their account before playing

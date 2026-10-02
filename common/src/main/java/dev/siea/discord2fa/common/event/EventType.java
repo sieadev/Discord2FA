@@ -7,5 +7,11 @@ public enum EventType {
     CHAT,
     DROP,
     INVENTORY,
+    /** Using blocks and items: buttons, levers, doors, buckets, flint and steel, eating, entity interaction. */
+    INTERACT,
+    /** Damaging another entity, directly or with a projectile. */
+    ATTACK,
+    /** Picking up items and arrows. */
+    PICKUP,
     COMMAND
 }
