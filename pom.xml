@@ -44,6 +44,11 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Platform APIs we compile against. Kept at the oldest supported version for backwards compatibility;
+             CI overrides these with -D to verify the code still compiles against the newest releases. -->
+        <spigot.api.version>1.16.5-R0.1-SNAPSHOT</spigot.api.version>
+        <velocity.api.version>3.3.0-SNAPSHOT</velocity.api.version>
+        <bungeecord.api.version>1.20-R0.1</bungeecord.api.version>
     </properties>
 
     <dependencyManagement>
@@ -66,19 +71,19 @@
             <dependency>
                 <groupId>org.spigotmc</groupId>
                 <artifactId>spigot-api</artifactId>
-                <version>1.16.5-R0.1-SNAPSHOT</version>
+                <version>${spigot.api.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.velocitypowered</groupId>
                 <artifactId>velocity-api</artifactId>
-                <version>3.3.0-SNAPSHOT</version>
+                <version>${velocity.api.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>net.md-5</groupId>
                 <artifactId>bungeecord-api</artifactId>
-                <version>1.20-R0.1</version>
+                <version>${bungeecord.api.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
