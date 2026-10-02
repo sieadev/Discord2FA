@@ -68,21 +68,33 @@ public abstract class BaseServer {
      * @param dataFolder     plugin data folder (where config.yml lives). When non-null, SQLite DB is stored here by default so no path need be set in config.
      */
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor, Path dataFolder) {
-        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
-        this.logger = logger;
-        this.databaseAdapter = new DatabaseAdapter(configProvider, dataFolder);
-        this.discordBot = new DiscordBot(configProvider, messageProvider, databaseAdapter, logger);
-        this.serverConfig = new ServerConfig(configProvider);
-        this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
+        this(configProvider, logger, messageProvider, serverExecutor, new DatabaseAdapter(configProvider, dataFolder));
         purgeOldSignInLocationsAsync();
         checkForUpdates();
+    }
+
+    private BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor, DatabaseAdapter databaseAdapter) {
+        this(new ServerConfig(configProvider), databaseAdapter,
+                new DiscordBot(configProvider, messageProvider, databaseAdapter, logger),
+                logger, messageProvider, serverExecutor);
+    }
+
+    /** Wires the server from already-built collaborators. Does not purge old locations or check for updates. */
+    BaseServer(ServerConfig serverConfig, DatabaseAdapter databaseAdapter, DiscordBot discordBot,
+               LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
+        this.messageProvider = messageProvider != null ? messageProvider : k -> k;
+        this.logger = logger;
+        this.databaseAdapter = databaseAdapter;
+        this.discordBot = discordBot;
+        this.serverConfig = serverConfig;
+        this.serverExecutor = serverExecutor != null ? serverExecutor : dbExecutor;
     }
 
     /**
      * @param serverExecutor optional executor for running player-facing callbacks on the server/main thread. If null, callbacks run on the internal DB thread.
      */
     public BaseServer(ConfigAdapter configProvider, LoggerAdapter logger, MessageProvider messageProvider, Executor serverExecutor) {
-        this(configProvider, logger, messageProvider, serverExecutor, null);
+        this(configProvider, logger, messageProvider, serverExecutor, (Path) null);
     }
 
     /**
