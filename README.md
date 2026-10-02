@@ -43,7 +43,8 @@ Use the JAR that matches your platform (e.g. `discord2fa-spigot-2.2.0.jar` for P
 5. Edit `config.yml`: set **database** (or leave SQLite default) and **Discord bot** (token, guild ID, channel ID).
 6. Restart the server.
 
-The Discord bot will only start when `discord.token`, `discord.guild`, and `discord.channel` are set. Until then, the plugin will run but log that the bot is not configured.
+The Discord bot will only start when `discord.token`, `discord.guild`, and `discord.channel` are set. Until then the plugin runs in **setup mode**: it logs that the bot is not configured and does not restrict anyone, so you can join and finish setting it up.
+Once the bot is configured, Discord2FA fails closed: if the bot cannot connect (bad token, Discord outage), players who would need to verify stay restricted instead of being let in.
 
 ---
 

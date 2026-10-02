@@ -80,6 +80,7 @@ class BaseServerTest {
     void setUp() {
         db = new DatabaseAdapter(new MapConfig(), dataFolder);
         bot = mock(DiscordBot.class);
+        when(bot.isConfigured()).thenReturn(true);
         when(bot.isConnected()).thenReturn(true);
         when(bot.attemptVerify(any(), any(), anyLong())).thenAnswer(inv -> {
             CompletableFuture<Boolean> f = new CompletableFuture<>();
@@ -210,6 +211,7 @@ class BaseServerTest {
     @Test
     void failedDiscordRequestCountsAsDenied() {
         reset(bot);
+        when(bot.isConfigured()).thenReturn(true);
         when(bot.isConnected()).thenReturn(true);
         when(bot.attemptVerify(any(), any(), anyLong())).thenReturn(CompletableFuture.completedFuture(false));
 
@@ -310,6 +312,7 @@ class BaseServerTest {
         // Block the DB thread: the first player's verify request is dispatched on it (serverExecutor is direct).
         CountDownLatch release = new CountDownLatch(1);
         reset(bot);
+        when(bot.isConfigured()).thenReturn(true);
         when(bot.isConnected()).thenReturn(true);
         when(bot.attemptVerify(any(), any(), anyLong())).thenAnswer(inv -> {
             release.await(5, TimeUnit.SECONDS);
@@ -336,7 +339,7 @@ class BaseServerTest {
     // ------------------------------------------------------------------ fail closed
 
     @Test
-    void discordOutageFailsClosed() {
+    void configuredButUnreachableBotFailsClosed() {
         when(bot.isConnected()).thenReturn(false);
         RecordingPlayer player = RecordingPlayer.at(UUID.randomUUID(), IP, VERSION); // even unlinked players
 
@@ -348,6 +351,44 @@ class BaseServerTest {
         assertRestricted(player);
         assertFalse(server.shouldSkipVerificationBlocking(player));
         verify(bot, never()).attemptVerify(any(), any(), anyLong());
+    }
+
+    @Test
+    void unconfiguredBotIsSetupModeAndRestrictsNobody() {
+        when(bot.isConfigured()).thenReturn(false);
+        when(bot.isConnected()).thenReturn(false);
+        newServer(defaultConfig().set("forceLink", true));
+        UUID uuid = UUID.randomUUID();
+        link(uuid);
+        RecordingPlayer linked = RecordingPlayer.at(uuid, IP, VERSION);
+        RecordingPlayer unlinked = RecordingPlayer.at(UUID.randomUUID(), IP, VERSION);
+
+        server.join(linked);
+        server.join(unlinked);
+
+        assertEquals(2, server.skipped.get());
+        assertEquals(0, server.required.get());
+        assertUnrestricted(linked);
+        assertUnrestricted(unlinked);
+        assertTrue(linked.messages.isEmpty());
+        assertTrue(server.shouldSkipVerificationBlocking(linked));
+        verify(bot, never()).attemptVerify(any(), any(), anyLong());
+    }
+
+    @Test
+    void configuringTheBotEndsSetupMode() {
+        when(bot.isConfigured()).thenReturn(false);
+        RecordingPlayer before = RecordingPlayer.at(UUID.randomUUID(), IP, VERSION);
+        server.join(before);
+        assertUnrestricted(before);
+
+        when(bot.isConfigured()).thenReturn(true);
+        when(bot.isConnected()).thenReturn(false); // configured, e.g. bad token or Discord outage
+        RecordingPlayer after = RecordingPlayer.at(UUID.randomUUID(), IP, VERSION);
+        server.join(after);
+
+        assertRestricted(after);
+        assertTrue(after.messages.contains("verifyUnavailable"));
     }
 
     @Test

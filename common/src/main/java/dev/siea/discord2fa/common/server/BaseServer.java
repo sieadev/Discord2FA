@@ -203,7 +203,8 @@ public abstract class BaseServer {
      * Runs the same "skip verification?" logic as addPlayer on the DB executor and blocks until done.
      * Returns true if the player should skip verification (e.g. not linked and forceLink off, or location remembered).
      * Proxy platforms use this to send the player directly to the post-verification server instead of the verification server.
-     * When the bot is not connected or the database is unavailable, returns false so the player stays restricted.
+     * Before the Discord bot has been configured (fresh install), returns true so admins can join and set it up.
+     * When the bot is configured but not connected, returns false so the player stays restricted.
      */
     public final boolean shouldSkipVerificationBlocking(CommonPlayer player) {
         return shouldSkipVerificationBlocking(player, false);
@@ -214,9 +215,18 @@ public abstract class BaseServer {
      */
     public final boolean shouldSkipVerificationBlocking(CommonPlayer player, boolean forceVerify) {
         if (player == null) return true;
+        if (isSetupMode()) return true;
         if (!isVerificationServiceAvailable()) return false;
         SignInLocation current = player.getSigninLocation();
         return CompletableFuture.supplyAsync(() -> computeShouldSkip(player, current, forceVerify), dbExecutor).join();
+    }
+
+    /**
+     * True until the Discord bot is configured (fresh install). 2FA cannot work without a bot, so nobody is
+     * restricted; once a bot is configured, an unreachable bot fails closed instead.
+     */
+    private boolean isSetupMode() {
+        return !discordBot.isConfigured();
     }
 
     private boolean isVerificationServiceAvailable() {
@@ -247,6 +257,11 @@ public abstract class BaseServer {
         UUID uuid = player.getUniqueId();
         long generation = beginPlayerSession(player);
         SignInLocation current = player.getSigninLocation();
+
+        if (isSetupMode()) {
+            if (onSkippedVerification != null) serverExecutor.execute(onSkippedVerification);
+            return;
+        }
 
         pendingVerification.add(uuid);
 
