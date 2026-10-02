@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, so a new Minecraft/proxy release that breaks the plugin shows up without a code change.
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      # Includes the PostgreSQL/MySQL/MariaDB tests via Testcontainers (Docker is available on ubuntu runners).
+      - name: Build and test
+        run: mvn -B verify
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: discord2fa-jars
+          path: |
+            spigot/target/discord2fa-spigot-*.jar
+            velocity/target/discord2fa-velocity-*.jar
+            bungeecord/target/discord2fa-bungeecord-*.jar
+          if-no-files-found: error
+
+  latest-apis:
+    name: Compile against latest platform APIs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          # Minecraft 26.x and Velocity 4 are built for Java 25
+          java-version: 25
+          cache: maven
+
+      - name: Resolve newest API versions
+        id: apis
+        run: |
+          latest() { curl -fsSL "$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -E "$2" | sort -V | tail -1; }
+          echo "spigot=$(latest https://hub.spigotmc.org/nexus/content/repositories/snapshots/org/spigotmc/spigot-api '^[0-9.]+-R[0-9.]+-SNAPSHOT$')" >> "$GITHUB_OUTPUT"
+          echo "velocity=$(latest https://repo.papermc.io/repository/maven-public/com/velocitypowered/velocity-api '^[0-9.]+$')" >> "$GITHUB_OUTPUT"
+          echo "bungeecord=$(latest https://repo.papermc.io/repository/maven-public/net/md-5/bungeecord-api '^[0-9.]+-R[0-9.]+(-SNAPSHOT)?$')" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - name: Compile and test against Spigot ${{ steps.apis.outputs.spigot }}, Velocity ${{ steps.apis.outputs.velocity }}, BungeeCord ${{ steps.apis.outputs.bungeecord }}
+        run: >
+          mvn -B verify
+          -Dspigot.api.version=${{ steps.apis.outputs.spigot }}
+          -Dvelocity.api.version=${{ steps.apis.outputs.velocity }}
+          -Dbungeecord.api.version=${{ steps.apis.outputs.bungeecord }}
